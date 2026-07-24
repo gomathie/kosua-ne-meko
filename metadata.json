@@ -1,0 +1,6 @@
+{
+  "name": "Kosua Ne Meko Hangout 2.0",
+  "description": "Official landing page for Kosua Ne Meko Hangout 2.0 event in Accra featuring event details, ticket RSVP, interactive pepper meter, schedule, and location guide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

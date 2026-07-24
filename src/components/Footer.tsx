@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
           <p className="flex items-center gap-1">
             <span>Made with</span>
             <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-            <span>by the Smooth Operators</span>
+            <span>by the Smooth Operators. v1.0.0</span>
           </p>
         </div>
 

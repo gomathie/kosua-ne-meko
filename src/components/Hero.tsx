@@ -163,14 +163,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
             <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
               
               {/* Giant Egg Location Pin Visual */}
-              <div className="relative w-64 h-80 sm:w-72 sm:h-96 flex flex-col items-center justify-center group cursor-pointer" onClick={onOpenTickets}>
+              <div className="relative w-44 h-56 sm:w-72 sm:h-96 flex flex-col items-center justify-center group cursor-pointer scale-90 sm:scale-100 transition-transform" onClick={onOpenTickets}>
                 
                 {/* Glow aura */}
                 <div className="absolute inset-0 bg-amber-400/40 rounded-full blur-3xl group-hover:bg-orange-500/50 transition-all animate-pulse" />
 
                 {/* SVG Egg Location Pin */}
-                <div className="relative z-10 filter drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-300">
-                  <svg width="240" height="310" viewBox="0 0 240 310" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div className="relative z-10 filter drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-300 w-36 h-48 sm:w-auto sm:h-auto flex items-center justify-center">
+                  <svg className="w-full h-full sm:w-[240px] sm:h-[310px]" viewBox="0 0 240 310" fill="none" xmlns="http://www.w3.org/2000/svg">
                     
                     {/* Pin Outer Shell (White Boiled Egg Shape) */}
                     <path 
@@ -206,8 +206,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
                 </div>
 
                 {/* Floating Peppers around egg pin */}
-                <span className="absolute -top-2 -left-4 text-3xl animate-bounce">🌶️</span>
-                <span className="absolute top-12 -right-6 text-4xl animate-pulse">🌶️</span>
+                <span className="absolute -top-2 -left-2 sm:-left-4 text-2xl sm:text-3xl animate-bounce">🌶️</span>
+                <span className="absolute top-8 sm:top-12 -right-3 sm:-right-6 text-3xl sm:text-4xl animate-pulse">🌶️</span>
               </div>
 
               {/* Location Badge (Recreating Flyer Orange Box) */}

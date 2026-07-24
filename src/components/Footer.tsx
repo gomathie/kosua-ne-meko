@@ -48,19 +48,19 @@ export const Footer: React.FC = () => {
 
           {/* Host Info & Back to Top */}
           <div className="md:col-span-4 space-y-4 flex flex-col justify-between">
-             <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800 space-y-1 text-xs">
-               <span className="text-amber-400 font-extrabold block text-[10px] uppercase">HOST & ORGANIZER</span>
-               <h5 className="font-black text-white text-sm font-display">EKOW SAM FARMS</h5>
-               <p className="text-stone-400">Cencor Avenue, North Dzorwulu, Greater Accra, Ghana</p>
-               <p className="text-stone-400">Email: events@ekowsamfarms.com</p>
-             </div>
+            <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800 space-y-1 text-xs">
+              <span className="text-amber-400 font-extrabold block text-[10px] uppercase">HOST & ORGANIZER</span>
+              <h5 className="font-black text-white text-sm font-display">EKOW SAM FARMS</h5>
+              <p className="text-stone-400">Cencor Avenue, North Dzorwulu, Greater Accra, Ghana</p>
+              <p className="text-stone-400">Email: events@ekowsamfarms.com</p>
+            </div>
 
-             <div className="bg-stone-900 p-4 rounded-2xl border border-orange-900/40 space-y-1 text-xs">
-               <span className="text-orange-400 font-extrabold block text-[10px] uppercase">COLLABORATION PARTNER</span>
-               <h5 className="font-black text-white text-sm font-display">PEBBLE</h5>
-               <p className="text-stone-400">Your Home of Authentic Local Content</p>
-               <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">trypebble.com →</a>
-             </div>
+            <div className="bg-stone-900 p-4 rounded-2xl border border-orange-900/40 space-y-1 text-xs">
+              <span className="text-orange-400 font-extrabold block text-[10px] uppercase">COLLABORATION PARTNER</span>
+              <h5 className="font-black text-white text-sm font-display">PEBBLE</h5>
+              <p className="text-stone-400">Your Home of Authentic Local Content</p>
+              <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">trypebble.com →</a>
+            </div>
 
             <button
               onClick={scrollToTop}
@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
           <p className="flex items-center gap-1">
             <span>Made with</span>
             <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-            <span>for Accra Street Food Culture & African Stories</span>
+            <span>by the Smooth Operators</span>
           </p>
         </div>
 

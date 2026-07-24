@@ -75,6 +75,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
               <span className="text-orange-700 font-extrabold">ACCRA, GHANA</span>
             </div>
 
+            {/* Pebble Collaboration Badge */}
+            <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
+              <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+              <span className="text-stone-300">In collaboration with</span>
+              <span className="text-orange-400 font-black">PEBBLE</span>
+            </a>
+
             {/* Countdown Box */}
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-stone-900/85 backdrop-blur text-white text-xs sm:text-sm font-mono border border-stone-700 shadow-lg">
               <Clock className="w-4 h-4 text-orange-400" />
@@ -239,7 +246,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
             </div>
 
             <div className="text-xs font-bold text-stone-800 bg-white/80 backdrop-blur px-3 py-1.5 rounded-lg border border-white">
-              #KosuaNeMekoHangout2 • #EkowSamFarms • #AccraStreetFood
+              {EVENT_DETAILS.hashtag} • #EkowSamFarms • #AccraStreetFood
             </div>
 
           </div>

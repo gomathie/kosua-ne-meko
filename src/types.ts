@@ -24,7 +24,7 @@ export interface UserTicket {
 export interface Vendor {
   id: string;
   name: string;
-  category: 'eggs-pepper' | 'drinks' | 'street-food' | 'farm-fresh';
+  category: 'eggs-pepper' | 'drinks' | 'street-food' | 'farm-fresh' | 'entertainment';
   description: string;
   specialty: string;
   imageUrl: string;
@@ -36,7 +36,7 @@ export interface ScheduleItem {
   title: string;
   description: string;
   location: string;
-  category: 'food' | 'competition' | 'music' | 'community';
+  category: 'food' | 'competition' | 'music' | 'community' | 'entertainment';
 }
 
 export interface PepperLevel {

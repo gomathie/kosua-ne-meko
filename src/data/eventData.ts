@@ -12,7 +12,10 @@ export const EVENT_DETAILS = {
   fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
   organizer: 'Ekow Sam Farms',
   organizerTagline: 'Farm-Fresh Eggs & Sustainable Ghanaian Poultry',
-  hashtag: '#KosuaNeMekoHangout2',
+  collaborator: 'Pebble',
+  collaboratorUrl: 'https://trypebble.com',
+  collaboratorTagline: 'Your Home of Authentic Local Content',
+  hashtag: '#KosuaNeMekoHangout2 • #TryPebble',
   mapCoordinates: {
     lat: 5.612,
     lng: -0.198,
@@ -139,6 +142,13 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
     category: 'music',
   },
   {
+    time: '07:00 PM',
+    title: 'Pebble Outdoor Cinema – African Short Film Screenings',
+    description: 'Grab a seat under the stars as Pebble presents a curated showcase of the best African short films, documentaries, and series premieres on the big screen.',
+    location: 'Pebble Lounge & Screen',
+    category: 'entertainment',
+  },
+  {
     time: '08:00 PM – 10:00 PM',
     title: 'Night Hangout & After-Party',
     description: 'Bonfire vibes, night market bites, chilled craft beers, and dancing under the stars.',
@@ -191,6 +201,15 @@ export const VENDORS: Vendor[] = [
     specialty: 'Farm Fresh Egg Crates & Asanka Kits',
     imageUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80',
   },
+  {
+    id: 'v6',
+    name: 'Pebble Entertainment Lounge',
+    category: 'entertainment',
+    description: 'Chill in the Pebble lounge with outdoor screenings of authentic African movies, short films, and documentaries — powered by trypebble.com.',
+    specialty: 'Outdoor Cinema & Content Premieres',
+    imageUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=800&q=80',
+    badge: 'Collaboration Partner',
+  },
 ];
 
 export const FAQS: FAQItem[] = [
@@ -213,5 +232,9 @@ export const FAQS: FAQItem[] = [
   {
     question: 'Can I buy tickets at the gate on Sept 5?',
     answer: 'Limited gate passes will be sold, but we strongly advise booking your RSVP pass online in advance as tickets for Hangout 1.0 sold out early.',
+  },
+  {
+    question: 'What is Pebble and why are they at the event?',
+    answer: 'Pebble (trypebble.com) is an African streaming platform — your home of authentic local content including movies, documentaries, short films, and series. They\'re our official entertainment collaboration partner for Hangout 2.0, bringing an outdoor cinema lounge with curated African film screenings and exclusive content previews!',
   },
 ];

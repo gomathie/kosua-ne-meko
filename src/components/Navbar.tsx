@@ -43,7 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
                 </span>
               </div>
               <p className="text-xs text-stone-500 font-medium flex items-center gap-1">
-                <span>By {EVENT_DETAILS.organizer}</span>
+                <span>By {EVENT_DETAILS.organizer} × <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 transition-colors">Pebble</a></span>
                 <span className="inline-block w-1 h-1 bg-orange-400 rounded-full"></span>
                 <span className="text-emerald-700 font-semibold">{EVENT_DETAILS.dateString}</span>
               </p>

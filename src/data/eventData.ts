@@ -189,7 +189,7 @@ export const VENDORS: Vendor[] = [
     category: 'farm-fresh',
     description: 'Take home fresh crate farm eggs, local spice blends, organic peppers, and artisan earthenware asanka bowls.',
     specialty: 'Farm Fresh Egg Crates & Asanka Kits',
-    imageUrl: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80',
   },
 ];
 

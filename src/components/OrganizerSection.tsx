@@ -16,8 +16,8 @@ export const OrganizerSection: React.FC = () => {
           <div className="lg:col-span-5 relative">
             <div className="relative rounded-3xl overflow-hidden border-4 border-amber-500/30 shadow-2xl group">
               <img
-                src="https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=1000&q=80"
-                alt="Ekow Sam Farms Fresh Eggs"
+                src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=1000&q=80"
+                alt="Ekow Sam Farms Free-Range Chickens"
                 referrerPolicy="no-referrer"
                 className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-500"
               />

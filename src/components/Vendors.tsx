@@ -48,13 +48,14 @@ export const Vendors: React.FC = () => {
           </div>
 
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             {[
               { id: 'all', label: 'All Stalls' },
               { id: 'eggs-pepper', label: 'Eggs & Pepper' },
               { id: 'street-food', label: 'Street Eats' },
               { id: 'drinks', label: 'Palm Wine & Sobolo' },
               { id: 'farm-fresh', label: 'Farm Take-Home' },
+              { id: 'entertainment', label: 'Pebble Cinema' },
             ].map((cat) => (
               <button
                 key={cat.id}

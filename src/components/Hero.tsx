@@ -67,26 +67,26 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
           />
 
           {/* Organizer Header Tag */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/90 backdrop-blur border border-amber-200 shadow-sm text-stone-800 text-xs sm:text-sm font-extrabold uppercase tracking-wider">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur border border-amber-200 shadow-sm text-stone-800 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-orange-600 animate-ping" />
               <span>OFFICIAL EVENT LANDING PAGE</span>
               <span className="text-stone-300">|</span>
-              <span className="text-orange-700 font-extrabold">ACCRA, GHANA</span>
+              <span className="text-orange-700 font-extrabold">ACCRA</span>
             </div>
 
             {/* Pebble Collaboration Badge */}
-            <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
+            <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
               <Sparkles className="w-3.5 h-3.5 text-orange-400" />
               <span className="text-stone-300">In collaboration with</span>
               <span className="text-orange-400 font-black">PEBBLE</span>
             </a>
 
             {/* Countdown Box */}
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-stone-900/85 backdrop-blur text-white text-xs sm:text-sm font-mono border border-stone-700 shadow-lg">
-              <Clock className="w-4 h-4 text-orange-400" />
+            <div className="inline-flex items-center gap-2 sm:gap-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-stone-900/85 backdrop-blur text-white text-xs sm:text-sm font-mono border border-stone-700 shadow-lg">
+              <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-400" />
               <span className="text-stone-300 font-sans font-medium text-xs hidden sm:inline">COUNTDOWN:</span>
-              <div className="flex items-center gap-1.5 font-black text-amber-400">
+              <div className="flex items-center gap-1 font-black text-amber-400 text-xs sm:text-sm">
                 <span>{timeLeft.days}d</span>:
                 <span>{String(timeLeft.hours).padStart(2, '0')}h</span>:
                 <span>{String(timeLeft.minutes).padStart(2, '0')}m</span>:
@@ -103,14 +103,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
               
               {/* Event Main Typography */}
               <div className="space-y-1">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-orange-600 font-display drop-shadow-[0_4px_12px_rgba(234,88,12,0.3)] uppercase leading-none">
+                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-orange-600 font-display drop-shadow-[0_4px_12px_rgba(234,88,12,0.3)] uppercase leading-tight sm:leading-none">
                   KOSUA <span className="text-orange-500">NE MEKO</span>
                 </h1>
-                <div className="flex items-center gap-3 pt-2">
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-black text-emerald-800 tracking-tight font-display uppercase drop-shadow-sm">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
+                  <span className="text-2xl sm:text-4xl md:text-5xl font-black text-emerald-800 tracking-tight font-display uppercase drop-shadow-sm">
                     HANGOUT 2.0
                   </span>
-                  <span className="bg-orange-600 text-white text-xs sm:text-sm font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow-md">
+                  <span className="bg-orange-600 text-white text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-lg uppercase tracking-widest shadow-md">
                     EDITION 2
                   </span>
                 </div>
@@ -138,19 +138,19 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
               </p>
 
               {/* Call to Actions */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                 <button
                   onClick={onOpenTickets}
-                  className="px-8 py-4 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-black text-base sm:text-lg shadow-xl shadow-orange-600/40 hover:shadow-orange-600/60 transition-all hover:-translate-y-0.5 flex items-center gap-3 group"
+                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-black text-base sm:text-lg shadow-xl shadow-orange-600/40 hover:shadow-orange-600/60 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3 group"
                 >
-                  <Ticket className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+                  <Ticket className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-12 transition-transform" />
                   <span>RESERVE PASS / TICKET</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 
                 <a
                   href="#location"
-                  className="px-6 py-4 rounded-2xl bg-white/90 hover:bg-white text-emerald-900 font-extrabold text-sm sm:text-base border border-emerald-700/20 shadow-md transition-all flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-2xl bg-white/90 hover:bg-white text-emerald-900 font-extrabold text-sm sm:text-base border border-emerald-700/20 shadow-md transition-all flex items-center justify-center gap-2"
                 >
                   <MapPin className="w-5 h-5 text-emerald-700" />
                   <span>GET LOCATION MAP</span>

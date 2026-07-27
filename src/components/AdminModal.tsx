@@ -86,8 +86,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [newSponsor, setNewSponsor] = useState({
     name: '',
     tier: 'Gold' as Sponsor['tier'],
-    logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://',
+    logoUrl: '',
+    websiteUrl: '',
   });
 
   // New Gallery Photo Form State
@@ -159,13 +159,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateSponsor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSponsor.name) return;
-    onAddSponsor(newSponsor);
+    if (!newSponsor.name.trim()) return;
+    onAddSponsor({
+      name: newSponsor.name.trim(),
+      tier: newSponsor.tier,
+      logoUrl: newSponsor.logoUrl.trim() || 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
+      websiteUrl: newSponsor.websiteUrl.trim() || undefined,
+    });
     setNewSponsor({
       name: '',
       tier: 'Gold',
-      logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
-      websiteUrl: 'https://',
+      logoUrl: '',
+      websiteUrl: '',
     });
   };
 
@@ -613,7 +618,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. MTN Ghana"
+                        placeholder="e.g. Industrial Coatings Africa"
                         value={newSponsor.name}
                         onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -621,11 +626,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Sponsorship Tier</label>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Sponsorship Tier *</label>
                       <select
                         value={newSponsor.tier}
                         onChange={(e) => setNewSponsor({ ...newSponsor, tier: e.target.value as Sponsor['tier'] })}
-                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white font-bold"
                       >
                         <option value="Headline">Headline Sponsor</option>
                         <option value="Gold">Gold Sponsor</option>
@@ -635,8 +640,32 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Logo URL (Optional)</label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={newSponsor.logoUrl}
+                        onChange={(e) => setNewSponsor({ ...newSponsor, logoUrl: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Website URL (Optional)</label>
+                      <input
+                        type="url"
+                        placeholder="https://..."
+                        value={newSponsor.websiteUrl}
+                        onChange={(e) => setNewSponsor({ ...newSponsor, websiteUrl: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex justify-end">
-                    <button type="submit" className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase flex items-center gap-1">
+                    <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase flex items-center gap-1.5 shadow-md">
                       <Plus className="w-4 h-4" /> Add Sponsor
                     </button>
                   </div>
@@ -648,9 +677,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <h5 className="text-xs font-black text-stone-400 uppercase">COLLABORATORS ({collaborators.length})</h5>
                     {collaborators.map((c) => (
                       <div key={c.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-bold text-white block">{c.name}</span>
-                          <span className="text-[10px] text-stone-400">{c.tagline}</span>
+                        <div className="flex items-center gap-2.5">
+                          {c.logoUrl && <img src={c.logoUrl} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />}
+                          <div>
+                            <span className="text-xs font-bold text-white block">{c.name}</span>
+                            <span className="text-[10px] text-stone-400">{c.tagline}</span>
+                          </div>
                         </div>
                         <button onClick={() => onDeleteCollaborator(c.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
                           <Trash2 className="w-3.5 h-3.5" />
@@ -660,11 +692,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <h5 className="text-xs font-black text-stone-400 uppercase">SPONSORS ({sponsors.length})</h5>
+                    <h5 className="text-xs font-black text-stone-400 uppercase">ACTIVE SPONSORS ({sponsors.length})</h5>
                     {sponsors.map((s) => (
                       <div key={s.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-bold text-white block">{s.name} ({s.tier})</span>
+                        <div className="flex items-center gap-2.5">
+                          {s.logoUrl && <img src={s.logoUrl} alt={s.name} className="w-8 h-8 rounded-lg object-cover" />}
+                          <div>
+                            <span className="text-xs font-bold text-white block">{s.name}</span>
+                            <span className="text-[10px] text-amber-400 font-extrabold uppercase">{s.tier} Sponsor</span>
+                          </div>
                         </div>
                         <button onClick={() => onDeleteSponsor(s.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
                           <Trash2 className="w-3.5 h-3.5" />

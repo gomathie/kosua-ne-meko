@@ -29,12 +29,16 @@ export default function App() {
     addAdminUser,
     deleteAdminUser,
     addVendor,
+    updateVendor,
     deleteVendor,
     addScheduleItem,
+    updateScheduleItem,
     deleteScheduleItem,
     addCollaborator,
+    updateCollaborator,
     deleteCollaborator,
     addSponsor,
+    updateSponsor,
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,
@@ -181,12 +185,16 @@ export default function App() {
         onAddAdminUser={addAdminUser}
         onDeleteAdminUser={deleteAdminUser}
         onAddVendor={addVendor}
+        onUpdateVendor={updateVendor}
         onDeleteVendor={deleteVendor}
         onAddScheduleItem={addScheduleItem}
+        onUpdateScheduleItem={updateScheduleItem}
         onDeleteScheduleItem={deleteScheduleItem}
         onAddCollaborator={addCollaborator}
+        onUpdateCollaborator={updateCollaborator}
         onDeleteCollaborator={deleteCollaborator}
         onAddSponsor={addSponsor}
+        onUpdateSponsor={updateSponsor}
         onDeleteSponsor={deleteSponsor}
         onAddGalleryItem={addGalleryItem}
         onDeleteGalleryItem={deleteGalleryItem}

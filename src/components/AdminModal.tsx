@@ -20,12 +20,16 @@ interface AdminModalProps {
   onAddAdminUser: (user: Omit<AdminUser, 'id' | 'createdDate'>) => void;
   onDeleteAdminUser: (id: string) => void;
   onAddVendor: (vendor: Omit<Vendor, 'id'>) => void;
+  onUpdateVendor: (vendor: Vendor) => void;
   onDeleteVendor: (id: string) => void;
   onAddScheduleItem: (item: ScheduleItem) => void;
+  onUpdateScheduleItem: (index: number, item: ScheduleItem) => void;
   onDeleteScheduleItem: (index: number) => void;
   onAddCollaborator: (collaborator: Omit<Collaborator, 'id'>) => void;
+  onUpdateCollaborator: (collaborator: Collaborator) => void;
   onDeleteCollaborator: (id: string) => void;
   onAddSponsor: (sponsor: Omit<Sponsor, 'id'>) => void;
+  onUpdateSponsor: (sponsor: Sponsor) => void;
   onDeleteSponsor: (id: string) => void;
   onAddGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   onDeleteGalleryItem: (id: string) => void;
@@ -50,12 +54,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onAddAdminUser,
   onDeleteAdminUser,
   onAddVendor,
+  onUpdateVendor,
   onDeleteVendor,
   onAddScheduleItem,
+  onUpdateScheduleItem,
   onDeleteScheduleItem,
   onAddCollaborator,
+  onUpdateCollaborator,
   onDeleteCollaborator,
   onAddSponsor,
+  onUpdateSponsor,
   onDeleteSponsor,
   onAddGalleryItem,
   onDeleteGalleryItem,
@@ -128,6 +136,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     logoUrl: '',
     websiteUrl: '',
   });
+
+  // Editing States
+  const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState<number | null>(null);
+  const [editingScheduleItem, setEditingScheduleItem] = useState<ScheduleItem | null>(null);
+  const [editingCollaborator, setEditingCollaborator] = useState<Collaborator | null>(null);
+  const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
 
   // New Gallery Photo Form State
   const [newGallery, setNewGallery] = useState({
@@ -894,18 +909,78 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">ACTIVE VENDORS ({vendors.length})</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {vendors.map((v) => (
-                      <div key={v.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between gap-3">
-                        <div>
-                          <span className="text-xs font-extrabold text-white block">{v.name}</span>
-                          <span className="text-[10px] text-amber-400 font-semibold">{v.specialty}</span>
-                        </div>
-                        <button
-                          onClick={() => onDeleteVendor(v.id)}
-                          className="p-2 rounded-lg bg-red-900/40 hover:bg-red-800 text-red-300 transition-colors"
-                          title="Delete Vendor"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div key={v.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 space-y-2">
+                        {editingVendor?.id === v.id ? (
+                          <div className="space-y-2 p-2 bg-stone-900 rounded-lg border border-orange-500/40">
+                            <h5 className="text-[11px] font-black uppercase text-orange-400">EDIT VENDOR</h5>
+                            <input
+                              type="text"
+                              value={editingVendor.name}
+                              onChange={(e) => setEditingVendor({ ...editingVendor, name: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
+                              placeholder="Vendor Name"
+                            />
+                            <input
+                              type="text"
+                              value={editingVendor.specialty}
+                              onChange={(e) => setEditingVendor({ ...editingVendor, specialty: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-amber-400 rounded font-semibold"
+                              placeholder="Specialty (e.g. Asanka Meko & Fried Eggs)"
+                            />
+                            <input
+                              type="text"
+                              value={editingVendor.description}
+                              onChange={(e) => setEditingVendor({ ...editingVendor, description: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded"
+                              placeholder="Description"
+                            />
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setEditingVendor(null)}
+                                className="px-2 py-1 rounded bg-stone-700 text-[10px] font-bold text-stone-300"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onUpdateVendor(editingVendor);
+                                  setEditingVendor(null);
+                                }}
+                                className="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-[10px] font-black text-white uppercase"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              {v.imageUrl && <img src={v.imageUrl} alt={v.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />}
+                              <div className="overflow-hidden">
+                                <span className="text-xs font-extrabold text-white block truncate">{v.name}</span>
+                                <span className="text-[10px] text-amber-400 font-semibold truncate block">{v.specialty}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                onClick={() => setEditingVendor(v)}
+                                className="p-1.5 rounded-lg bg-stone-700 hover:bg-stone-600 text-stone-200"
+                                title="Edit Vendor"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => onDeleteVendor(v.id)}
+                                className="p-1.5 rounded-lg bg-red-900/40 hover:bg-red-800 text-red-300"
+                                title="Delete Vendor"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1030,17 +1105,48 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <div className="space-y-2">
                     <h5 className="text-xs font-black text-stone-400 uppercase">COLLABORATORS ({collaborators.length})</h5>
                     {collaborators.map((c) => (
-                      <div key={c.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          {c.logoUrl && <img src={c.logoUrl} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />}
-                          <div>
-                            <span className="text-xs font-bold text-white block">{c.name}</span>
-                            <span className="text-[10px] text-stone-400">{c.tagline}</span>
+                      <div key={c.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700">
+                        {editingCollaborator?.id === c.id ? (
+                          <div className="space-y-2 p-2 bg-stone-900 rounded-lg border border-orange-500/40">
+                            <h5 className="text-[11px] font-black uppercase text-orange-400">EDIT COLLABORATOR</h5>
+                            <input
+                              type="text"
+                              value={editingCollaborator.name}
+                              onChange={(e) => setEditingCollaborator({ ...editingCollaborator, name: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
+                              placeholder="Name"
+                            />
+                            <input
+                              type="text"
+                              value={editingCollaborator.tagline}
+                              onChange={(e) => setEditingCollaborator({ ...editingCollaborator, tagline: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded"
+                              placeholder="Tagline"
+                            />
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button onClick={() => setEditingCollaborator(null)} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
+                              <button onClick={() => { onUpdateCollaborator(editingCollaborator); setEditingCollaborator(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
+                            </div>
                           </div>
-                        </div>
-                        <button onClick={() => onDeleteCollaborator(c.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              {c.logoUrl && <img src={c.logoUrl} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />}
+                              <div>
+                                <span className="text-xs font-bold text-white block">{c.name}</span>
+                                <span className="text-[10px] text-stone-400">{c.tagline}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => setEditingCollaborator(c)} className="p-1.5 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded" title="Edit">
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => onDeleteCollaborator(c.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded" title="Delete">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1048,17 +1154,51 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <div className="space-y-2">
                     <h5 className="text-xs font-black text-stone-400 uppercase">ACTIVE SPONSORS ({sponsors.length})</h5>
                     {sponsors.map((s) => (
-                      <div key={s.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          {s.logoUrl && <img src={s.logoUrl} alt={s.name} className="w-8 h-8 rounded-lg object-cover" />}
-                          <div>
-                            <span className="text-xs font-bold text-white block">{s.name}</span>
-                            <span className="text-[10px] text-amber-400 font-extrabold uppercase">{s.tier} Sponsor</span>
+                      <div key={s.id} className="p-3 bg-stone-800 rounded-xl border border-stone-700">
+                        {editingSponsor?.id === s.id ? (
+                          <div className="space-y-2 p-2 bg-stone-900 rounded-lg border border-amber-500/40">
+                            <h5 className="text-[11px] font-black uppercase text-amber-400">EDIT SPONSOR</h5>
+                            <input
+                              type="text"
+                              value={editingSponsor.name}
+                              onChange={(e) => setEditingSponsor({ ...editingSponsor, name: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
+                              placeholder="Sponsor Name"
+                            />
+                            <select
+                              value={editingSponsor.tier}
+                              onChange={(e) => setEditingSponsor({ ...editingSponsor, tier: e.target.value as Sponsor['tier'] })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-amber-400 font-bold rounded"
+                            >
+                              <option value="Headline">Headline Sponsor</option>
+                              <option value="Gold">Gold Sponsor</option>
+                              <option value="Silver">Silver Sponsor</option>
+                              <option value="Partner">Official Partner</option>
+                            </select>
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button onClick={() => setEditingSponsor(null)} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
+                              <button onClick={() => { onUpdateSponsor(editingSponsor); setEditingSponsor(null); }} className="px-3 py-1 bg-amber-600 text-[10px] text-white font-bold rounded">Save</button>
+                            </div>
                           </div>
-                        </div>
-                        <button onClick={() => onDeleteSponsor(s.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                              {s.logoUrl && <img src={s.logoUrl} alt={s.name} className="w-8 h-8 rounded-lg object-cover" />}
+                              <div>
+                                <span className="text-xs font-bold text-white block">{s.name}</span>
+                                <span className="text-[10px] text-amber-400 font-extrabold uppercase">{s.tier} Sponsor</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => setEditingSponsor(s)} className="p-1.5 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded" title="Edit">
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => onDeleteSponsor(s.id)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded" title="Delete">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1133,15 +1273,55 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">DAY TIMELINE ACTIVITIES ({schedule.length})</h4>
                   <div className="space-y-2">
                     {schedule.map((item, idx) => (
-                      <div key={idx} className="p-3 bg-stone-800 rounded-xl border border-stone-700 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-black text-amber-400 mr-2">{item.time}</span>
-                          <span className="text-xs font-bold text-white">{item.title}</span>
-                          <span className="text-[10px] text-stone-400 block">{item.location} • {item.description}</span>
-                        </div>
-                        <button onClick={() => onDeleteScheduleItem(idx)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div key={idx} className="p-3 bg-stone-800 rounded-xl border border-stone-700">
+                        {editingScheduleIndex === idx && editingScheduleItem ? (
+                          <div className="space-y-2 p-2 bg-stone-900 rounded-lg border border-orange-500/40">
+                            <h5 className="text-[11px] font-black uppercase text-orange-400">EDIT ACTIVITY</h5>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="text"
+                                value={editingScheduleItem.time}
+                                onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, time: e.target.value })}
+                                className="px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-amber-400 font-bold rounded"
+                                placeholder="Time"
+                              />
+                              <input
+                                type="text"
+                                value={editingScheduleItem.title}
+                                onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, title: e.target.value })}
+                                className="px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white font-bold rounded"
+                                placeholder="Activity Title"
+                              />
+                            </div>
+                            <input
+                              type="text"
+                              value={editingScheduleItem.description}
+                              onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, description: e.target.value })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded"
+                              placeholder="Description"
+                            />
+                            <div className="flex justify-end gap-2 pt-1">
+                              <button onClick={() => { setEditingScheduleIndex(null); setEditingScheduleItem(null); }} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
+                              <button onClick={() => { onUpdateScheduleItem(idx, editingScheduleItem); setEditingScheduleIndex(null); setEditingScheduleItem(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-xs font-black text-amber-400 mr-2">{item.time}</span>
+                              <span className="text-xs font-bold text-white">{item.title}</span>
+                              <span className="text-[10px] text-stone-400 block">{item.location} • {item.description}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => { setEditingScheduleIndex(idx); setEditingScheduleItem(item); }} className="p-1.5 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded" title="Edit">
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => onDeleteScheduleItem(idx)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded" title="Delete">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

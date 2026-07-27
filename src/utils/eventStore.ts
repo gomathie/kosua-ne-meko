@@ -67,6 +67,7 @@ export function useEventData(): {
   data: FullEventData;
   updateEventDetails: (details: Partial<EventDetails>) => void;
   addEventItem: (event: Omit<EventItem, 'id'>) => void;
+  updateEventItem: (eventItem: EventItem) => void;
   setActiveEvent: (id: string) => void;
   deleteEventItem: (id: string) => void;
   addAdminUser: (user: Omit<AdminUser, 'id' | 'createdDate'>) => void;
@@ -75,10 +76,13 @@ export function useEventData(): {
   updateVendor: (vendor: Vendor) => void;
   deleteVendor: (id: string) => void;
   addScheduleItem: (item: ScheduleItem) => void;
+  updateScheduleItem: (index: number, item: ScheduleItem) => void;
   deleteScheduleItem: (index: number) => void;
   addCollaborator: (collaborator: Omit<Collaborator, 'id'>) => void;
+  updateCollaborator: (collaborator: Collaborator) => void;
   deleteCollaborator: (id: string) => void;
   addSponsor: (sponsor: Omit<Sponsor, 'id'>) => void;
+  updateSponsor: (sponsor: Sponsor) => void;
   deleteSponsor: (id: string) => void;
   addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   deleteGalleryItem: (id: string) => void;
@@ -247,6 +251,59 @@ export function useEventData(): {
     saveStoredEventData(updated);
   };
 
+  const updateEventItem = (eventItem: EventItem) => {
+    const updatedList = data.eventsList.map((e) => (e.id === eventItem.id ? eventItem : e));
+    let updatedDetails = { ...data.eventDetails };
+    if (eventItem.status === 'active') {
+      updatedDetails = {
+        ...updatedDetails,
+        title: eventItem.title,
+        shortTitle: eventItem.shortTitle,
+        tagline: eventItem.tagline,
+        dateString: eventItem.dateString,
+        targetDateISO: eventItem.targetDateISO,
+        time: eventItem.time,
+        locationName: eventItem.locationName,
+        city: eventItem.city,
+        fullAddress: eventItem.fullAddress,
+        organizer: eventItem.organizer,
+        hashtag: eventItem.hashtag,
+      };
+    }
+    const updated: FullEventData = {
+      ...data,
+      eventsList: updatedList,
+      eventDetails: updatedDetails,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const updateScheduleItem = (index: number, item: ScheduleItem) => {
+    const updatedSchedule = [...data.schedule];
+    updatedSchedule[index] = item;
+    const updated: FullEventData = {
+      ...data,
+      schedule: updatedSchedule,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const updateCollaborator = (collaborator: Collaborator) => {
+    const updated: FullEventData = {
+      ...data,
+      collaborators: data.collaborators.map((c) => (c.id === collaborator.id ? collaborator : c)),
+    };
+    saveStoredEventData(updated);
+  };
+
+  const updateSponsor = (sponsor: Sponsor) => {
+    const updated: FullEventData = {
+      ...data,
+      sponsors: data.sponsors.map((s) => (s.id === sponsor.id ? sponsor : s)),
+    };
+    saveStoredEventData(updated);
+  };
+
   const deleteVendor = (id: string) => {
     const updated: FullEventData = {
       ...data,
@@ -339,6 +396,7 @@ export function useEventData(): {
     data,
     updateEventDetails,
     addEventItem,
+    updateEventItem,
     setActiveEvent,
     deleteEventItem,
     addAdminUser,
@@ -347,10 +405,13 @@ export function useEventData(): {
     updateVendor,
     deleteVendor,
     addScheduleItem,
+    updateScheduleItem,
     deleteScheduleItem,
     addCollaborator,
+    updateCollaborator,
     deleteCollaborator,
     addSponsor,
+    updateSponsor,
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,

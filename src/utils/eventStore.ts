@@ -19,12 +19,19 @@ export function getStoredEventData(): FullEventData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultData;
     const parsed = JSON.parse(raw);
+    
+    // Merge initial sponsors missing from stored array
+    const storedSponsors: Sponsor[] = parsed.sponsors || [];
+    const missingInitialSponsors = INITIAL_SPONSORS.filter(
+      (initSpon) => !storedSponsors.some((s) => s.id === initSpon.id || s.name === initSpon.name)
+    );
+
     return {
       eventDetails: { ...defaultData.eventDetails, ...(parsed.eventDetails || {}) },
       vendors: parsed.vendors || defaultData.vendors,
       schedule: parsed.schedule || defaultData.schedule,
       collaborators: parsed.collaborators || defaultData.collaborators,
-      sponsors: parsed.sponsors || defaultData.sponsors,
+      sponsors: [...storedSponsors, ...missingInitialSponsors],
       gallery: parsed.gallery || defaultData.gallery,
     };
   } catch (err) {

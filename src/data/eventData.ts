@@ -62,6 +62,13 @@ export const INITIAL_SPONSORS: Sponsor[] = [
     logoUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=400&q=80',
     websiteUrl: 'https://example.com',
   },
+  {
+    id: 'spon-5',
+    name: 'Industrial Coatings Africa',
+    tier: 'Gold',
+    logoUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80',
+    websiteUrl: 'https://example.com',
+  },
 ];
 
 export const INITIAL_GALLERY: GalleryItem[] = [

@@ -6,7 +6,6 @@ interface NavbarProps {
   eventDetails: EventDetails;
   onOpenTickets: () => void;
   onOpenMyTickets: () => void;
-  onOpenAdmin: () => void;
   ticketCount: number;
 }
 
@@ -14,7 +13,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   eventDetails,
   onOpenTickets,
   onOpenMyTickets,
-  onOpenAdmin,
   ticketCount,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -112,15 +110,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Action CTAs */}
           <div className="hidden md:flex items-center gap-2.5">
-            <button
-              onClick={onOpenAdmin}
-              className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors border border-stone-200 flex items-center gap-1 text-xs font-bold"
-              title="Admin Portal Login"
-            >
-              <Lock className="w-3.5 h-3.5 text-stone-600" />
-              <span className="hidden xl:inline">Admin</span>
-            </button>
-
             {ticketCount > 0 && (
               <button
                 onClick={onOpenMyTickets}
@@ -145,14 +134,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={onOpenAdmin}
-              className="p-2 rounded-xl bg-stone-100 text-stone-700 font-bold text-xs flex items-center gap-1 border border-stone-200"
-              title="Admin Portal"
-            >
-              <Lock className="w-4 h-4" />
-            </button>
-
             {ticketCount > 0 && (
               <button
                 onClick={onOpenMyTickets}

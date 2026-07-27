@@ -88,7 +88,6 @@ export default function App() {
         eventDetails={data.eventDetails}
         onOpenTickets={() => setIsTicketModalOpen(true)}
         onOpenMyTickets={() => setIsMyTicketsOpen(true)}
-        onOpenAdmin={() => setIsAdminModalOpen(true)}
         ticketCount={tickets.length}
       />
 

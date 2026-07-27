@@ -123,6 +123,12 @@ export interface AdminUser {
   createdDate: string;
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+  category?: string;
+}
+
 export interface FullEventData {
   eventDetails: EventDetails;
   eventsList: EventItem[];
@@ -132,7 +138,9 @@ export interface FullEventData {
   collaborators: Collaborator[];
   sponsors: Sponsor[];
   gallery: GalleryItem[];
+  faqs?: FAQItem[];
 }
+
 
 
 

@@ -142,10 +142,14 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                 <button
                   onClick={onOpenTickets}
-                  className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-black text-base sm:text-lg shadow-xl shadow-orange-600/40 hover:shadow-orange-600/60 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-3 group"
+                  className={`w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-base sm:text-lg shadow-xl transition-all flex items-center justify-center gap-3 group ${
+                    eventDetails.isBookingOpen === false
+                      ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 shadow-stone-900/40'
+                      : 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-600/40 hover:shadow-orange-600/60 hover:-translate-y-0.5'
+                  }`}
                 >
                   <Ticket className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-12 transition-transform" />
-                  <span>FREE RSVP — REGISTER NOW</span>
+                  <span>{eventDetails.isBookingOpen === false ? '🔴 RSVP COMING SOON' : 'FREE RSVP — REGISTER NOW'}</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 

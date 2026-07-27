@@ -86,6 +86,7 @@ export interface EventDetails {
     lat: number;
     lng: number;
   };
+  isBookingOpen?: boolean;
 }
 
 export interface GalleryItem {
@@ -110,6 +111,7 @@ export interface EventItem {
   organizer: string;
   hashtag: string;
   status: 'active' | 'upcoming' | 'past';
+  allowPrebooking?: boolean;
 }
 
 export interface AdminUser {

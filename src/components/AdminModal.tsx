@@ -15,6 +15,7 @@ interface AdminModalProps {
   gallery: GalleryItem[];
   onUpdateEventDetails: (details: Partial<EventDetails>) => void;
   onAddEventItem: (event: Omit<EventItem, 'id'>) => void;
+  onUpdateEventItem: (eventItem: EventItem) => void;
   onSetActiveEvent: (id: string) => void;
   onDeleteEventItem: (id: string) => void;
   onAddAdminUser: (user: Omit<AdminUser, 'id' | 'createdDate'>) => void;
@@ -49,6 +50,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   gallery,
   onUpdateEventDetails,
   onAddEventItem,
+  onUpdateEventItem,
   onSetActiveEvent,
   onDeleteEventItem,
   onAddAdminUser,
@@ -562,6 +564,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </div>
                 </div>
 
+                <div className="p-4 bg-stone-800/80 rounded-2xl border border-stone-700 space-y-2">
+                  <label className="text-xs font-black text-amber-400 uppercase tracking-wider block">
+                    RSVP & PRE-BOOKING STATUS FOR THIS EVENT
+                  </label>
+                  <select
+                    value={formData.isBookingOpen !== false ? 'open' : 'closed'}
+                    onChange={(e) => setFormData({ ...formData, isBookingOpen: e.target.value === 'open' })}
+                    className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-extrabold text-white"
+                  >
+                    <option value="open">🟢 PRE-BOOKING OPEN (Visitors can register RSVP & download passes)</option>
+                    <option value="closed">🔴 PRE-BOOKING INACTIVE / COMING SOON (Pre-booking disabled / Tickets inactive)</option>
+                  </select>
+                </div>
+
                 <div className="pt-4 flex justify-end">
                   <button
                     type="submit"
@@ -660,14 +676,15 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-stone-300 block mb-1">Tagline</label>
-                      <input
-                        type="text"
-                        placeholder="Grand End of Year Festival"
-                        value={newEvent.tagline}
-                        onChange={(e) => setNewEvent({ ...newEvent, tagline: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
-                      />
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Pre-Booking RSVP Status</label>
+                      <select
+                        value={newEvent.allowPrebooking ? 'yes' : 'no'}
+                        onChange={(e) => setNewEvent({ ...newEvent, allowPrebooking: e.target.value === 'yes' })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      >
+                        <option value="no">🔴 RSVP Disabled / Coming Soon (Inactive)</option>
+                        <option value="yes">🟢 RSVP Pre-Booking Open (Ready)</option>
+                      </select>
                     </div>
                   </div>
 
@@ -698,17 +715,29 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             )}
                           </div>
                           <p className="text-xs text-stone-400 font-semibold">{ev.dateString} • {ev.locationName}</p>
-                          <p className="text-[11px] text-stone-500">{ev.tagline}</p>
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${ev.allowPrebooking ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-red-950 text-red-300 border border-red-800'}`}>
+                              {ev.allowPrebooking ? '🟢 RSVP Open' : '🔴 RSVP Closed / Coming Soon'}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => onUpdateEventItem({ ...ev, allowPrebooking: !ev.allowPrebooking })}
+                            className="px-2.5 py-1.5 rounded-xl bg-stone-700 hover:bg-stone-600 text-white font-bold text-[11px]"
+                            title="Toggle RSVP Pre-booking status"
+                          >
+                            {ev.allowPrebooking ? 'Disable RSVP' : 'Enable RSVP'}
+                          </button>
+
                           {ev.status !== 'active' && (
                             <button
                               onClick={() => onSetActiveEvent(ev.id)}
                               className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1 shadow"
                             >
                               <CheckCircle className="w-3.5 h-3.5" />
-                              <span>Set as Active Website Event</span>
+                              <span>Set Active</span>
                             </button>
                           )}
                           <button

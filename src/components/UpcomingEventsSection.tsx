@@ -66,11 +66,16 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({ ev
 
               <div className="mt-6 pt-4 border-t border-stone-800/80">
                 <button
-                  onClick={onOpenTickets}
-                  className="w-full py-3 rounded-2xl bg-stone-800 hover:bg-orange-600 text-white font-extrabold text-xs uppercase transition-all flex items-center justify-center gap-2 group-hover:shadow-lg group-hover:shadow-orange-600/20"
+                  onClick={event.allowPrebooking ? onOpenTickets : undefined}
+                  disabled={!event.allowPrebooking}
+                  className={`w-full py-3 rounded-2xl font-extrabold text-xs uppercase transition-all flex items-center justify-center gap-2 ${
+                    event.allowPrebooking
+                      ? 'bg-stone-800 hover:bg-orange-600 text-white cursor-pointer group-hover:shadow-lg group-hover:shadow-orange-600/20'
+                      : 'bg-stone-900 text-stone-500 border border-stone-800 cursor-not-allowed'
+                  }`}
                 >
-                  <span>Pre-Register / Get Pass</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{event.allowPrebooking ? 'Pre-Register / Get Pass' : '🔴 RSVP Opening Soon'}</span>
+                  {event.allowPrebooking && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
             </div>

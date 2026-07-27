@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { X, Ticket, Check, Sparkles, Flame, User, Mail, Phone, ShoppingCart, QrCode, Download, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
-import { TicketPass, UserTicket } from '../types';
+import { EventDetails, TicketPass, UserTicket } from '../types';
 import { downloadTicketImage } from '../utils/downloadTicket';
 
 interface TicketModalProps {
   isOpen: boolean;
   onClose: () => void;
   onTicketBooked: (newTicket: UserTicket) => void;
+  eventDetails?: EventDetails;
 }
 
-export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTicketBooked }) => {
+export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTicketBooked, eventDetails }) => {
   const [selectedPass, setSelectedPass] = useState<TicketPass>(TICKET_PASSES[1]); // Default VIP
   const [quantity, setQuantity] = useState<number>(1);
   const [customerName, setCustomerName] = useState('');
@@ -21,6 +22,8 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   const [bookedTicket, setBookedTicket] = useState<UserTicket | null>(null);
 
   if (!isOpen) return null;
+
+  const isBookingClosed = eventDetails?.isBookingOpen === false;
 
   const totalGHS = selectedPass.priceGHS * quantity;
 
@@ -236,6 +239,13 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               </div>
             </div>
 
+            {isBookingClosed && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-center space-y-1">
+                <p className="text-xs font-black uppercase">🔴 PRE-BOOKING CURRENTLY INACTIVE</p>
+                <p className="text-[11px] font-semibold text-stone-700">RSVP & pre-booking for this event edition is not active yet. Check back soon!</p>
+              </div>
+            )}
+
             {/* Total Footer */}
             <div className="pt-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -247,10 +257,15 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
               <button
                 type="submit"
-                className="px-8 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-sm shadow-lg shadow-orange-600/30 transition-all flex items-center gap-2"
+                disabled={isBookingClosed}
+                className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg transition-all flex items-center gap-2 ${
+                  isBookingClosed
+                    ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
+                    : 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-600/30'
+                }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>CONFIRM FREE RSVP</span>
+                <span>{isBookingClosed ? 'PRE-BOOKING INACTIVE' : 'CONFIRM FREE RSVP'}</span>
               </button>
             </div>
 

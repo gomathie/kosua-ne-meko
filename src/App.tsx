@@ -158,6 +158,7 @@ export default function App() {
         isOpen={isTicketModalOpen}
         onClose={() => setIsTicketModalOpen(false)}
         onTicketBooked={handleTicketBooked}
+        eventDetails={data.eventDetails}
       />
 
       <MyTicketsModal

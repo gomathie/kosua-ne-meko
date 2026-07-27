@@ -20,6 +20,7 @@ export const EVENT_DETAILS: EventDetails = {
     lat: 5.612,
     lng: -0.198,
   },
+  isBookingOpen: true,
 };
 
 export const INITIAL_EVENTS_LIST: EventItem[] = [
@@ -37,6 +38,7 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
     organizer: 'Ekow Sam Farms',
     hashtag: '#KosuaNeMekoHangout2',
     status: 'active',
+    allowPrebooking: true,
   },
   {
     id: 'event-3',
@@ -52,6 +54,7 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
     organizer: 'Ekow Sam Farms',
     hashtag: '#KosuaNeMeko3',
     status: 'upcoming',
+    allowPrebooking: false,
   },
 ];
 

@@ -189,7 +189,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl bg-stone-900 text-white rounded-3xl shadow-2xl border border-stone-800 overflow-hidden my-8">
-        
+
         {/* Header */}
         <div className="bg-stone-950 p-6 text-white flex items-center justify-between border-b border-stone-800">
           <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               <input
                 type="password"
                 required
-                placeholder="Enter passcode (default: admin123)"
+                placeholder="Enter passcode (example: abenkwan123)"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -251,15 +251,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         ) : (
           /* Admin Dashboard */
           <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
-            
+
             {/* Top Navigation Tabs */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-800 pb-4">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button
                   onClick={() => setActiveTab('event')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                    activeTab === 'event' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'event' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
                 >
                   <Building2 className="w-4 h-4" />
                   <span>Event & Venue</span>
@@ -267,9 +266,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   onClick={() => setActiveTab('vendors')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                    activeTab === 'vendors' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'vendors' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
                 >
                   <Store className="w-4 h-4" />
                   <span>Vendors ({vendors.length})</span>
@@ -277,9 +275,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   onClick={() => setActiveTab('partners')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                    activeTab === 'partners' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'partners' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
                 >
                   <Users className="w-4 h-4" />
                   <span>Sponsors ({collaborators.length + sponsors.length})</span>
@@ -287,9 +284,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   onClick={() => setActiveTab('schedule')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                    activeTab === 'schedule' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'schedule' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
                 >
                   <Clock className="w-4 h-4" />
                   <span>Activities ({schedule.length})</span>
@@ -297,9 +293,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <button
                   onClick={() => setActiveTab('gallery')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
-                    activeTab === 'gallery' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'gallery' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
                 >
                   <Camera className="w-4 h-4" />
                   <span>Gallery Photos ({gallery.length})</span>

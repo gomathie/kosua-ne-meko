@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
                 className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs transition-all border border-stone-200"
               >
                 <UserCheck className="w-4 h-4 text-emerald-600" />
-                <span>My Tickets</span>
+                <span>My Passes</span>
                 <span className="bg-emerald-600 text-white rounded-full w-5 h-5 text-[11px] flex items-center justify-center font-bold">
                   {ticketCount}
                 </span>
@@ -193,7 +193,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
               className="w-full py-3 rounded-xl bg-orange-600 text-white font-extrabold flex items-center justify-center gap-2 shadow-md shadow-orange-600/30"
             >
               <Ticket className="w-5 h-5" />
-              <span>Get Your Pass Now</span>
+              <span>Free RSVP — Register Now</span>
             </button>
           </div>
         </div>

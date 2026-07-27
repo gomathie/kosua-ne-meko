@@ -88,11 +88,21 @@ export interface EventDetails {
   };
 }
 
+export interface GalleryItem {
+  id: string;
+  title: string;
+  imageUrl: string;
+  category: 'food' | 'vibes' | 'stage' | 'community';
+  caption?: string;
+}
+
 export interface FullEventData {
   eventDetails: EventDetails;
   vendors: Vendor[];
   schedule: ScheduleItem[];
   collaborators: Collaborator[];
   sponsors: Sponsor[];
+  gallery: GalleryItem[];
 }
+
 

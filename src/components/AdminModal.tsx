@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock } from 'lucide-react';
-import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor } from '../types';
+import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera } from 'lucide-react';
+import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem } from '../types';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -10,6 +10,7 @@ interface AdminModalProps {
   schedule: ScheduleItem[];
   collaborators: Collaborator[];
   sponsors: Sponsor[];
+  gallery: GalleryItem[];
   onUpdateEventDetails: (details: Partial<EventDetails>) => void;
   onAddVendor: (vendor: Omit<Vendor, 'id'>) => void;
   onDeleteVendor: (id: string) => void;
@@ -19,6 +20,8 @@ interface AdminModalProps {
   onDeleteCollaborator: (id: string) => void;
   onAddSponsor: (sponsor: Omit<Sponsor, 'id'>) => void;
   onDeleteSponsor: (id: string) => void;
+  onAddGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
+  onDeleteGalleryItem: (id: string) => void;
   onResetAll: () => void;
 }
 
@@ -29,7 +32,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   vendors,
   schedule,
   collaborators,
-  sponsors,
+  gallery,
   onUpdateEventDetails,
   onAddVendor,
   onDeleteVendor,
@@ -39,12 +42,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onDeleteCollaborator,
   onAddSponsor,
   onDeleteSponsor,
+  onAddGalleryItem,
+  onDeleteGalleryItem,
   onResetAll,
 }) => {
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'event' | 'vendors' | 'partners' | 'schedule'>('event');
+  const [activeTab, setActiveTab] = useState<'event' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
 
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
@@ -83,6 +88,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     tier: 'Gold' as Sponsor['tier'],
     logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
     websiteUrl: 'https://',
+  });
+
+  // New Gallery Photo Form State
+  const [newGallery, setNewGallery] = useState({
+    title: '',
+    imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
+    category: 'food' as GalleryItem['category'],
+    caption: '',
   });
 
   if (!isOpen) return null;
@@ -153,6 +166,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       tier: 'Gold',
       logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
       websiteUrl: 'https://',
+    });
+  };
+
+  const handleCreateGallery = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGallery.title || !newGallery.imageUrl) return;
+    onAddGalleryItem(newGallery);
+    setNewGallery({
+      title: '',
+      imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
+      category: 'food',
+      caption: '',
     });
   };
 
@@ -263,6 +288,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 >
                   <Clock className="w-4 h-4" />
                   <span>Activities ({schedule.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('gallery')}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${
+                    activeTab === 'gallery' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                  }`}
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>Gallery Photos ({gallery.length})</span>
                 </button>
               </div>
 
@@ -716,6 +751,94 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         </div>
                         <button onClick={() => onDeleteScheduleItem(idx)} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded">
                           <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 5: Gallery & Photos */}
+            {activeTab === 'gallery' && (
+              <div className="space-y-6">
+                {/* Form to Add Gallery Photo */}
+                <form onSubmit={handleCreateGallery} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-3">
+                  <h4 className="text-xs font-black uppercase text-amber-400 tracking-wider">ADD EVENT GALLERY PHOTO</h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Photo Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Asanka Meko Grinding Live"
+                        value={newGallery.title}
+                        onChange={(e) => setNewGallery({ ...newGallery, title: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Category</label>
+                      <select
+                        value={newGallery.category}
+                        onChange={(e) => setNewGallery({ ...newGallery, category: e.target.value as GalleryItem['category'] })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      >
+                        <option value="food">Kosua & Meko</option>
+                        <option value="vibes">Crowd & Vibes</option>
+                        <option value="stage">Stage & Cinema</option>
+                        <option value="community">Games & Tournaments</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-stone-300 block mb-1">Image URL *</label>
+                    <input
+                      type="url"
+                      required
+                      placeholder="https://images.unsplash.com/..."
+                      value={newGallery.imageUrl}
+                      onChange={(e) => setNewGallery({ ...newGallery, imageUrl: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-stone-300 block mb-1">Caption / Description</label>
+                    <input
+                      type="text"
+                      placeholder="Moments from the live street food market..."
+                      value={newGallery.caption}
+                      onChange={(e) => setNewGallery({ ...newGallery, caption: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button type="submit" className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs uppercase flex items-center gap-1">
+                      <Plus className="w-4 h-4" /> Add Photo to Gallery
+                    </button>
+                  </div>
+                </form>
+
+                {/* List Gallery Photos */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">GALLERY PHOTOS ({gallery.length})</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {gallery.map((g) => (
+                      <div key={g.id} className="bg-stone-800 rounded-xl overflow-hidden border border-stone-700 p-2 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <img src={g.imageUrl} alt={g.title} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                          <div className="overflow-hidden">
+                            <span className="text-xs font-bold text-white block truncate">{g.title}</span>
+                            <span className="text-[9px] font-black uppercase text-orange-400">{g.category}</span>
+                          </div>
+                        </div>
+                        <button onClick={() => onDeleteGalleryItem(g.id)} className="p-2 bg-red-900/40 hover:bg-red-800 text-red-300 rounded-lg shrink-0">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     ))}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Egg, MapPin, Calendar, Ticket, Menu, X, Flame, UserCheck, Lock } from 'lucide-react';
+import { Egg, MapPin, Calendar, Ticket, Menu, X, Flame, UserCheck, Lock, Camera } from 'lucide-react';
 import { EventDetails } from '../types';
 
 interface NavbarProps {
@@ -87,6 +87,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
               Partners
+            </button>
+            <button
+              onClick={() => scrollToSection('gallery')}
+              className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
+            >
+              <Camera className="w-4 h-4 text-amber-600" />
+              Gallery
             </button>
             <button
               onClick={() => scrollToSection('location')}
@@ -204,6 +211,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">★</span>
             <span>Partners & Sponsors</span>
+          </button>
+          <button
+            onClick={() => scrollToSection('gallery')}
+            className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
+          >
+            <Camera className="w-5 h-5 text-amber-600" />
+            <span>Photo Gallery</span>
           </button>
           <button
             onClick={() => scrollToSection('location')}

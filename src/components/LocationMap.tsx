@@ -46,17 +46,17 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
                   VENUE ADDRESS
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black font-display text-white">
-                  {EVENT_DETAILS.locationName}
+                  {eventDetails.locationName}
                 </h3>
                 <p className="text-emerald-400 font-extrabold text-sm sm:text-base">
-                  {EVENT_DETAILS.city}
+                  {eventDetails.city}
                 </p>
               </div>
 
               {/* Copyable Address box */}
               <div className="bg-stone-800 p-4 rounded-2xl border border-stone-700 flex items-center justify-between gap-3">
                 <div className="text-xs font-mono text-stone-300">
-                  {EVENT_DETAILS.fullAddress}
+                  {eventDetails.fullAddress}
                 </div>
                 <button
                   onClick={handleCopyAddress}

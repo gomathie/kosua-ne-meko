@@ -6,6 +6,7 @@ import { EventHighlights } from './components/EventHighlights';
 import { PepperMeter } from './components/PepperMeter';
 import { Schedule } from './components/Schedule';
 import { Vendors } from './components/Vendors';
+import { GallerySection } from './components/GallerySection';
 import { SponsorsSection } from './components/SponsorsSection';
 import { LocationMap } from './components/LocationMap';
 import { OrganizerSection } from './components/OrganizerSection';
@@ -29,6 +30,8 @@ export default function App() {
     deleteCollaborator,
     addSponsor,
     deleteSponsor,
+    addGalleryItem,
+    deleteGalleryItem,
     resetAll,
   } = useEventData();
 
@@ -96,6 +99,7 @@ export default function App() {
         <PepperMeter />
         <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} />
         <Vendors vendors={data.vendors} />
+        <GallerySection gallery={data.gallery} />
         <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
         <LocationMap eventDetails={data.eventDetails} />
         <OrganizerSection />
@@ -161,6 +165,7 @@ export default function App() {
         schedule={data.schedule}
         collaborators={data.collaborators}
         sponsors={data.sponsors}
+        gallery={data.gallery}
         onUpdateEventDetails={updateEventDetails}
         onAddVendor={addVendor}
         onDeleteVendor={deleteVendor}
@@ -170,6 +175,8 @@ export default function App() {
         onDeleteCollaborator={deleteCollaborator}
         onAddSponsor={addSponsor}
         onDeleteSponsor={deleteSponsor}
+        onAddGalleryItem={addGalleryItem}
+        onDeleteGalleryItem={deleteGalleryItem}
         onResetAll={resetAll}
       />
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor } from '../types';
-import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS } from '../data/eventData';
+import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem } from '../types';
+import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY } from '../data/eventData';
 
 const STORAGE_KEY = 'kosua_event_data_v2';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
@@ -11,6 +11,7 @@ const defaultData: FullEventData = {
   schedule: SCHEDULE_ITEMS,
   collaborators: INITIAL_COLLABORATORS,
   sponsors: INITIAL_SPONSORS,
+  gallery: INITIAL_GALLERY,
 };
 
 export function getStoredEventData(): FullEventData {
@@ -24,6 +25,7 @@ export function getStoredEventData(): FullEventData {
       schedule: parsed.schedule || defaultData.schedule,
       collaborators: parsed.collaborators || defaultData.collaborators,
       sponsors: parsed.sponsors || defaultData.sponsors,
+      gallery: parsed.gallery || defaultData.gallery,
     };
   } catch (err) {
     console.error('Failed to load event data from storage', err);
@@ -62,6 +64,8 @@ export function useEventData(): {
   deleteCollaborator: (id: string) => void;
   addSponsor: (sponsor: Omit<Sponsor, 'id'>) => void;
   deleteSponsor: (id: string) => void;
+  addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
+  deleteGalleryItem: (id: string) => void;
   resetAll: () => void;
 } {
   const [data, setData] = useState<FullEventData>(getStoredEventData());
@@ -170,6 +174,26 @@ export function useEventData(): {
     saveStoredEventData(updated);
   };
 
+  const addGalleryItem = (item: Omit<GalleryItem, 'id'>) => {
+    const newItem: GalleryItem = {
+      ...item,
+      id: 'gal-' + Date.now(),
+    };
+    const updated: FullEventData = {
+      ...data,
+      gallery: [newItem, ...data.gallery],
+    };
+    saveStoredEventData(updated);
+  };
+
+  const deleteGalleryItem = (id: string) => {
+    const updated: FullEventData = {
+      ...data,
+      gallery: data.gallery.filter((g) => g.id !== id),
+    };
+    saveStoredEventData(updated);
+  };
+
   const resetAll = () => {
     resetEventDataToDefault();
   };
@@ -186,6 +210,9 @@ export function useEventData(): {
     deleteCollaborator,
     addSponsor,
     deleteSponsor,
+    addGalleryItem,
+    deleteGalleryItem,
     resetAll,
   };
 }
+

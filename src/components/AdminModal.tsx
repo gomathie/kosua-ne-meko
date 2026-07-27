@@ -76,10 +76,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   // New Collaborator Form State
   const [newCollab, setNewCollab] = useState({
     name: '',
-    url: 'https://',
+    url: '',
     tagline: '',
-    badge: 'Official Media Partner',
-    logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+    badge: 'Official Partner',
+    logoUrl: '',
   });
 
   // New Sponsor Form State
@@ -146,14 +146,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateCollaborator = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCollab.name) return;
-    onAddCollaborator(newCollab);
+    if (!newCollab.name.trim()) return;
+    onAddCollaborator({
+      name: newCollab.name.trim(),
+      url: newCollab.url.trim() || 'https://trypebble.com',
+      tagline: newCollab.tagline.trim() || 'Official Event Partner',
+      badge: newCollab.badge.trim() || 'Official Partner',
+      logoUrl: newCollab.logoUrl.trim() || 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+    });
     setNewCollab({
       name: '',
-      url: 'https://',
+      url: '',
       tagline: '',
       badge: 'Official Media Partner',
-      logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+      logoUrl: '',
     });
   };
 

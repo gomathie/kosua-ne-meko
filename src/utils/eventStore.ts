@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem } from '../types';
-import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY } from '../data/eventData';
+import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
+import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
 
-const STORAGE_KEY = 'kosua_event_data_v2';
+const STORAGE_KEY = 'kosua_event_data_v3';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {
   eventDetails: EVENT_DETAILS,
+  eventsList: INITIAL_EVENTS_LIST,
+  adminUsers: INITIAL_ADMIN_USERS,
   vendors: VENDORS,
   schedule: SCHEDULE_ITEMS,
   collaborators: INITIAL_COLLABORATORS,
@@ -28,6 +30,8 @@ export function getStoredEventData(): FullEventData {
 
     return {
       eventDetails: { ...defaultData.eventDetails, ...(parsed.eventDetails || {}) },
+      eventsList: parsed.eventsList || defaultData.eventsList,
+      adminUsers: parsed.adminUsers || defaultData.adminUsers,
       vendors: parsed.vendors || defaultData.vendors,
       schedule: parsed.schedule || defaultData.schedule,
       collaborators: parsed.collaborators || defaultData.collaborators,
@@ -62,6 +66,11 @@ export function resetEventDataToDefault(): FullEventData {
 export function useEventData(): {
   data: FullEventData;
   updateEventDetails: (details: Partial<EventDetails>) => void;
+  addEventItem: (event: Omit<EventItem, 'id'>) => void;
+  setActiveEvent: (id: string) => void;
+  deleteEventItem: (id: string) => void;
+  addAdminUser: (user: Omit<AdminUser, 'id' | 'createdDate'>) => void;
+  deleteAdminUser: (id: string) => void;
   addVendor: (vendor: Omit<Vendor, 'id'>) => void;
   updateVendor: (vendor: Vendor) => void;
   deleteVendor: (id: string) => void;
@@ -90,9 +99,130 @@ export function useEventData(): {
   }, []);
 
   const updateEventDetails = (newDetails: Partial<EventDetails>) => {
+    const updatedDetails = { ...data.eventDetails, ...newDetails };
+    // also sync active event in eventsList
+    const updatedList = data.eventsList.map((e) => {
+      if (e.status === 'active') {
+        return {
+          ...e,
+          title: updatedDetails.title,
+          shortTitle: updatedDetails.shortTitle,
+          tagline: updatedDetails.tagline,
+          dateString: updatedDetails.dateString,
+          targetDateISO: updatedDetails.targetDateISO,
+          time: updatedDetails.time,
+          locationName: updatedDetails.locationName,
+          city: updatedDetails.city,
+          fullAddress: updatedDetails.fullAddress,
+          organizer: updatedDetails.organizer,
+          hashtag: updatedDetails.hashtag,
+        };
+      }
+      return e;
+    });
+
     const updated: FullEventData = {
       ...data,
-      eventDetails: { ...data.eventDetails, ...newDetails },
+      eventDetails: updatedDetails,
+      eventsList: updatedList,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const addEventItem = (event: Omit<EventItem, 'id'>) => {
+    const newId = 'event-' + Date.now();
+    const newEventItem: EventItem = { ...event, id: newId };
+    
+    let updatedList = [...data.eventsList];
+    let updatedDetails = { ...data.eventDetails };
+
+    if (event.status === 'active') {
+      // mark others as upcoming
+      updatedList = updatedList.map((e) => ({ ...e, status: 'upcoming' as const }));
+      updatedDetails = {
+        ...updatedDetails,
+        title: event.title,
+        shortTitle: event.shortTitle,
+        tagline: event.tagline,
+        dateString: event.dateString,
+        targetDateISO: event.targetDateISO,
+        time: event.time,
+        locationName: event.locationName,
+        city: event.city,
+        fullAddress: event.fullAddress,
+        organizer: event.organizer,
+        hashtag: event.hashtag,
+      };
+    }
+
+    updatedList.unshift(newEventItem);
+
+    const updated: FullEventData = {
+      ...data,
+      eventDetails: updatedDetails,
+      eventsList: updatedList,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const setActiveEvent = (id: string) => {
+    const targetEvent = data.eventsList.find((e) => e.id === id);
+    if (!targetEvent) return;
+
+    const updatedList = data.eventsList.map((e) => ({
+      ...e,
+      status: (e.id === id ? 'active' : 'upcoming') as 'active' | 'upcoming',
+    }));
+
+    const updatedDetails: EventDetails = {
+      ...data.eventDetails,
+      title: targetEvent.title,
+      shortTitle: targetEvent.shortTitle,
+      tagline: targetEvent.tagline,
+      dateString: targetEvent.dateString,
+      targetDateISO: targetEvent.targetDateISO,
+      time: targetEvent.time,
+      locationName: targetEvent.locationName,
+      city: targetEvent.city,
+      fullAddress: targetEvent.fullAddress,
+      organizer: targetEvent.organizer,
+      hashtag: targetEvent.hashtag,
+    };
+
+    const updated: FullEventData = {
+      ...data,
+      eventDetails: updatedDetails,
+      eventsList: updatedList,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const deleteEventItem = (id: string) => {
+    const updatedList = data.eventsList.filter((e) => e.id !== id);
+    const updated: FullEventData = {
+      ...data,
+      eventsList: updatedList,
+    };
+    saveStoredEventData(updated);
+  };
+
+  const addAdminUser = (user: Omit<AdminUser, 'id' | 'createdDate'>) => {
+    const newUser: AdminUser = {
+      ...user,
+      id: 'admin-' + Date.now(),
+      createdDate: new Date().toISOString().split('T')[0],
+    };
+    const updated: FullEventData = {
+      ...data,
+      adminUsers: [newUser, ...data.adminUsers],
+    };
+    saveStoredEventData(updated);
+  };
+
+  const deleteAdminUser = (id: string) => {
+    const updated: FullEventData = {
+      ...data,
+      adminUsers: data.adminUsers.filter((u) => u.id !== id),
     };
     saveStoredEventData(updated);
   };
@@ -208,6 +338,11 @@ export function useEventData(): {
   return {
     data,
     updateEventDetails,
+    addEventItem,
+    setActiveEvent,
+    deleteEventItem,
+    addAdminUser,
+    deleteAdminUser,
     addVendor,
     updateVendor,
     deleteVendor,
@@ -222,4 +357,3 @@ export function useEventData(): {
     resetAll,
   };
 }
-

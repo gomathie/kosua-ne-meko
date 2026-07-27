@@ -1,4 +1,4 @@
-import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem, Collaborator, Sponsor, EventDetails, GalleryItem } from '../types';
+import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem, Collaborator, Sponsor, EventDetails, GalleryItem, EventItem, AdminUser } from '../types';
 
 export const EVENT_DETAILS: EventDetails = {
   title: 'KOSUA NE MEKO HANGOUT 2.0',
@@ -21,6 +21,58 @@ export const EVENT_DETAILS: EventDetails = {
     lng: -0.198,
   },
 };
+
+export const INITIAL_EVENTS_LIST: EventItem[] = [
+  {
+    id: 'event-2',
+    title: 'KOSUA NE MEKO HANGOUT 2.0',
+    shortTitle: 'Kosua Ne Meko 2.0',
+    tagline: 'Accra’s Premier Street Food & Cultural Festival',
+    dateString: 'SAT. 5TH SEPT. 2026',
+    targetDateISO: '2026-09-05T10:00:00',
+    time: '10:00 AM – 10:00 PM GMT',
+    locationName: 'Cencor Avenue, North Dzorwulu',
+    city: 'Accra, Ghana',
+    fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
+    organizer: 'Ekow Sam Farms',
+    hashtag: '#KosuaNeMekoHangout2',
+    status: 'active',
+  },
+  {
+    id: 'event-3',
+    title: 'KOSUA NE MEKO HANGOUT 3.0 (DECEMBER EDITION)',
+    shortTitle: 'Kosua Ne Meko 3.0',
+    tagline: 'Grand End of Year Street Food & Music Extravaganza',
+    dateString: 'SAT. 12TH DEC. 2026',
+    targetDateISO: '2026-12-12T10:00:00',
+    time: '10:00 AM – 11:30 PM GMT',
+    locationName: 'Independence Square Lawn',
+    city: 'Accra, Ghana',
+    fullAddress: 'Independence Square, Osu, Accra',
+    organizer: 'Ekow Sam Farms',
+    hashtag: '#KosuaNeMeko3',
+    status: 'upcoming',
+  },
+];
+
+export const INITIAL_ADMIN_USERS: AdminUser[] = [
+  {
+    id: 'admin-1',
+    name: 'Super Admin',
+    email: 'admin@ekowsamfarms.com',
+    passcode: 'admin123',
+    role: 'Super Admin',
+    createdDate: '2026-01-01',
+  },
+  {
+    id: 'admin-2',
+    name: 'Goma Admin',
+    email: 'goma@trypebble.com',
+    passcode: 'abenkwan123',
+    role: 'Event Manager',
+    createdDate: '2026-07-27',
+  },
+];
 
 export const INITIAL_COLLABORATORS: Collaborator[] = [
   {

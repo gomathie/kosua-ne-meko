@@ -96,13 +96,41 @@ export interface GalleryItem {
   caption?: string;
 }
 
+export interface EventItem {
+  id: string;
+  title: string;
+  shortTitle: string;
+  tagline: string;
+  dateString: string;
+  targetDateISO: string;
+  time: string;
+  locationName: string;
+  city: string;
+  fullAddress: string;
+  organizer: string;
+  hashtag: string;
+  status: 'active' | 'upcoming' | 'past';
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email?: string;
+  passcode: string;
+  role: 'Super Admin' | 'Event Manager' | 'Staff';
+  createdDate: string;
+}
+
 export interface FullEventData {
   eventDetails: EventDetails;
+  eventsList: EventItem[];
+  adminUsers: AdminUser[];
   vendors: Vendor[];
   schedule: ScheduleItem[];
   collaborators: Collaborator[];
   sponsors: Sponsor[];
   gallery: GalleryItem[];
 }
+
 
 

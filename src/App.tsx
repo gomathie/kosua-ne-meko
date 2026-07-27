@@ -8,6 +8,7 @@ import { Schedule } from './components/Schedule';
 import { Vendors } from './components/Vendors';
 import { GallerySection } from './components/GallerySection';
 import { SponsorsSection } from './components/SponsorsSection';
+import { UpcomingEventsSection } from './components/UpcomingEventsSection';
 import { LocationMap } from './components/LocationMap';
 import { OrganizerSection } from './components/OrganizerSection';
 import { FaqSection } from './components/FaqSection';
@@ -22,6 +23,11 @@ export default function App() {
   const {
     data,
     updateEventDetails,
+    addEventItem,
+    setActiveEvent,
+    deleteEventItem,
+    addAdminUser,
+    deleteAdminUser,
     addVendor,
     deleteVendor,
     addScheduleItem,
@@ -99,6 +105,7 @@ export default function App() {
         <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} />
         <Vendors vendors={data.vendors} />
         <GallerySection gallery={data.gallery} />
+        <UpcomingEventsSection events={data.eventsList} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
         <LocationMap eventDetails={data.eventDetails} />
         <OrganizerSection />
@@ -160,12 +167,19 @@ export default function App() {
         isOpen={isAdminModalOpen}
         onClose={() => setIsAdminModalOpen(false)}
         eventDetails={data.eventDetails}
+        eventsList={data.eventsList}
+        adminUsers={data.adminUsers}
         vendors={data.vendors}
         schedule={data.schedule}
         collaborators={data.collaborators}
         sponsors={data.sponsors}
         gallery={data.gallery}
         onUpdateEventDetails={updateEventDetails}
+        onAddEventItem={addEventItem}
+        onSetActiveEvent={setActiveEvent}
+        onDeleteEventItem={deleteEventItem}
+        onAddAdminUser={addAdminUser}
+        onDeleteAdminUser={deleteAdminUser}
         onAddVendor={addVendor}
         onDeleteVendor={deleteVendor}
         onAddScheduleItem={addScheduleItem}

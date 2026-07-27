@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera } from 'lucide-react';
-import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem } from '../types';
+import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles } from 'lucide-react';
+import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
 
 interface AdminModalProps {
   isOpen: boolean;
   onClose: () => void;
   eventDetails: EventDetails;
+  eventsList: EventItem[];
+  adminUsers: AdminUser[];
   vendors: Vendor[];
   schedule: ScheduleItem[];
   collaborators: Collaborator[];
   sponsors: Sponsor[];
   gallery: GalleryItem[];
   onUpdateEventDetails: (details: Partial<EventDetails>) => void;
+  onAddEventItem: (event: Omit<EventItem, 'id'>) => void;
+  onSetActiveEvent: (id: string) => void;
+  onDeleteEventItem: (id: string) => void;
+  onAddAdminUser: (user: Omit<AdminUser, 'id' | 'createdDate'>) => void;
+  onDeleteAdminUser: (id: string) => void;
   onAddVendor: (vendor: Omit<Vendor, 'id'>) => void;
   onDeleteVendor: (id: string) => void;
   onAddScheduleItem: (item: ScheduleItem) => void;
@@ -29,11 +36,19 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   isOpen,
   onClose,
   eventDetails,
+  eventsList,
+  adminUsers,
   vendors,
   schedule,
   collaborators,
+  sponsors,
   gallery,
   onUpdateEventDetails,
+  onAddEventItem,
+  onSetActiveEvent,
+  onDeleteEventItem,
+  onAddAdminUser,
+  onDeleteAdminUser,
   onAddVendor,
   onDeleteVendor,
   onAddScheduleItem,
@@ -49,10 +64,34 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'event' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
+  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
 
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
+
+  // New Event Form State
+  const [newEvent, setNewEvent] = useState<Omit<EventItem, 'id'>>({
+    title: 'KOSUA NE MEKO HANGOUT 3.0',
+    shortTitle: 'Kosua Ne Meko 3.0',
+    tagline: 'Ghana’s Biggest Street Food & Music Carnival',
+    dateString: 'SAT. 12TH DEC. 2026',
+    targetDateISO: '2026-12-12T10:00:00',
+    time: '10:00 AM – 11:30 PM GMT',
+    locationName: 'Independence Square Lawn',
+    city: 'Accra, Ghana',
+    fullAddress: 'Independence Square, Osu, Accra',
+    organizer: 'Ekow Sam Farms',
+    hashtag: '#KosuaNeMeko3',
+    status: 'upcoming',
+  });
+
+  // New Admin User Form State
+  const [newAdmin, setNewAdmin] = useState({
+    name: '',
+    email: '',
+    passcode: '',
+    role: 'Event Manager' as AdminUser['role'],
+  });
 
   // New Vendor Form State
   const [newVendor, setNewVendor] = useState({
@@ -102,12 +141,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === 'admin123' || passcode === 'admin') {
+    const cleanPass = passcode.trim();
+    // Validate against stored admin users or fallbacks admin123 / admin / abenkwan123
+    const isValidAdmin =
+      adminUsers.some((u) => u.passcode === cleanPass) ||
+      cleanPass === 'admin123' ||
+      cleanPass === 'admin' ||
+      cleanPass === 'abenkwan123';
+
+    if (isValidAdmin) {
       setIsAuthenticated(true);
       setAuthError('');
       setFormData(eventDetails);
     } else {
-      setAuthError('Incorrect passcode. Please try "admin123"');
+      setAuthError('Incorrect passcode. Try "admin123" or an assigned admin passcode.');
     }
   };
 
@@ -115,6 +162,45 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     e.preventDefault();
     onUpdateEventDetails(formData);
     alert('Event & Venue details saved successfully!');
+  };
+
+  const handleCreateEventItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEvent.title.trim() || !newEvent.dateString.trim()) return;
+    onAddEventItem(newEvent);
+    alert(`New event "${newEvent.shortTitle}" created successfully!`);
+    setNewEvent({
+      title: '',
+      shortTitle: '',
+      tagline: '',
+      dateString: '',
+      targetDateISO: new Date().toISOString(),
+      time: '10:00 AM – 10:00 PM GMT',
+      locationName: 'Accra Event Grounds',
+      city: 'Accra, Ghana',
+      fullAddress: 'Accra, Ghana',
+      organizer: 'Ekow Sam Farms',
+      hashtag: '#KosuaNeMeko',
+      status: 'upcoming',
+    });
+  };
+
+  const handleCreateAdminUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdmin.name.trim() || !newAdmin.passcode.trim()) return;
+    onAddAdminUser({
+      name: newAdmin.name.trim(),
+      email: newAdmin.email.trim() || undefined,
+      passcode: newAdmin.passcode.trim(),
+      role: newAdmin.role,
+    });
+    alert(`Admin user "${newAdmin.name}" added with passcode "${newAdmin.passcode}"!`);
+    setNewAdmin({
+      name: '',
+      email: '',
+      passcode: '',
+      role: 'Event Manager',
+    });
   };
 
   const handleCreateVendor = (e: React.FormEvent) => {
@@ -267,7 +353,25 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     }`}
                 >
                   <Building2 className="w-4 h-4" />
-                  <span>Event & Venue</span>
+                  <span>Current Event Details</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('eventsList')}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'eventsList' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                >
+                  <Calendar className="w-4 h-4 text-amber-400" />
+                  <span>Multi-Event Manager ({eventsList.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('admins')}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'admins' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                >
+                  <UserPlus className="w-4 h-4 text-emerald-400" />
+                  <span>Admin Users ({adminUsers.length})</span>
                 </button>
 
                 <button
@@ -453,6 +557,255 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   </button>
                 </div>
               </form>
+            )}
+
+            {/* TAB 1.5: Multi-Event Manager & Upcoming Events */}
+            {activeTab === 'eventsList' && (
+              <div className="space-y-6">
+                {/* Form to Create New / Upcoming Event */}
+                <form onSubmit={handleCreateEventItem} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-4">
+                  <h4 className="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>CREATE NEW EVENT / UPCOMING EDITION</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Full Event Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="KOSUA NE MEKO HANGOUT 3.0"
+                        value={newEvent.title}
+                        onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Short Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Kosua Ne Meko 3.0"
+                        value={newEvent.shortTitle}
+                        onChange={(e) => setNewEvent({ ...newEvent, shortTitle: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Date Display String *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="SAT. 12TH DEC. 2026"
+                        value={newEvent.dateString}
+                        onChange={(e) => setNewEvent({ ...newEvent, dateString: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Target ISO Date (Countdown)</label>
+                      <input
+                        type="datetime-local"
+                        value={newEvent.targetDateISO ? newEvent.targetDateISO.slice(0, 16) : ''}
+                        onChange={(e) => setNewEvent({ ...newEvent, targetDateISO: e.target.value ? new Date(e.target.value).toISOString() : newEvent.targetDateISO })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Event Status</label>
+                      <select
+                        value={newEvent.status}
+                        onChange={(e) => setNewEvent({ ...newEvent, status: e.target.value as EventItem['status'] })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      >
+                        <option value="upcoming">Upcoming Event</option>
+                        <option value="active">Active Current Event</option>
+                        <option value="past">Past Edition</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Venue / Location Name</label>
+                      <input
+                        type="text"
+                        placeholder="Independence Square Lawn"
+                        value={newEvent.locationName}
+                        onChange={(e) => setNewEvent({ ...newEvent, locationName: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Tagline</label>
+                      <input
+                        type="text"
+                        placeholder="Grand End of Year Festival"
+                        value={newEvent.tagline}
+                        onChange={(e) => setNewEvent({ ...newEvent, tagline: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button type="submit" className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase flex items-center gap-1.5 shadow-md">
+                      <Plus className="w-4 h-4" /> Add Event Edition
+                    </button>
+                  </div>
+                </form>
+
+                {/* List All Events */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">ALL CREATED EVENTS ({eventsList.length})</h4>
+                  <div className="space-y-3">
+                    {eventsList.map((ev) => (
+                      <div key={ev.id} className="p-4 bg-stone-800 rounded-2xl border border-stone-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-white">{ev.title}</span>
+                            {ev.status === 'active' ? (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase border border-emerald-500/30 flex items-center gap-1">
+                                <CheckCircle className="w-3 h-3" /> ACTIVE LIVE EVENT
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase border border-amber-500/30">
+                                UPCOMING
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-stone-400 font-semibold">{ev.dateString} • {ev.locationName}</p>
+                          <p className="text-[11px] text-stone-500">{ev.tagline}</p>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {ev.status !== 'active' && (
+                            <button
+                              onClick={() => onSetActiveEvent(ev.id)}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1 shadow"
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              <span>Set as Active Website Event</span>
+                            </button>
+                          )}
+                          <button
+                            onClick={() => onDeleteEventItem(ev.id)}
+                            className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300"
+                            title="Delete Event"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 1.8: Admin Users & Passcodes */}
+            {activeTab === 'admins' && (
+              <div className="space-y-6">
+                {/* Form to Add Admin User */}
+                <form onSubmit={handleCreateAdminUser} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-4">
+                  <h4 className="text-xs font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    <span>ADD ANOTHER ADMIN USER / PASSCODE</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Kwame Mensah"
+                        value={newAdmin.name}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Email (Optional)</label>
+                      <input
+                        type="email"
+                        placeholder="kwame@ekowsamfarms.com"
+                        value={newAdmin.email}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Custom Passcode *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. abenkwan123"
+                        value={newAdmin.passcode}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, passcode: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-mono font-bold text-amber-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Role</label>
+                      <select
+                        value={newAdmin.role}
+                        onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value as AdminUser['role'] })}
+                        className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
+                      >
+                        <option value="Event Manager">Event Manager</option>
+                        <option value="Super Admin">Super Admin</option>
+                        <option value="Staff">Staff Member</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button type="submit" className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase flex items-center gap-1.5 shadow-md">
+                      <UserPlus className="w-4 h-4" /> Add Admin User
+                    </button>
+                  </div>
+                </form>
+
+                {/* List Active Admin Users */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">AUTHORIZED ADMIN USERS ({adminUsers.length})</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {adminUsers.map((user) => (
+                      <div key={user.id} className="p-4 bg-stone-800 rounded-2xl border border-stone-700 flex items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-white">{user.name}</span>
+                            <span className="px-2 py-0.5 rounded-md bg-stone-900 text-emerald-400 text-[9px] font-black uppercase">{user.role}</span>
+                          </div>
+                          {user.email && <span className="text-[10px] text-stone-400 block">{user.email}</span>}
+                          <span className="text-[10px] font-mono text-amber-400 font-bold block mt-1">Passcode: {user.passcode}</span>
+                        </div>
+                        <button
+                          onClick={() => onDeleteAdminUser(user.id)}
+                          className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300"
+                          title="Remove Admin"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* TAB 2: Vendors Management */}

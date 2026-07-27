@@ -26,8 +26,8 @@ export const TICKET_PASSES: TicketPass[] = [
   {
     id: 'standard-kosua',
     name: 'Standard Kosua Pass',
-    priceGHS: 50,
-    description: 'General entry pass to Hangout 2.0 with complimentary boiled eggs & fresh meko sampler.',
+    priceGHS: 0,
+    description: 'Free general entry pass to Hangout 2.0 with complimentary boiled eggs & fresh meko sampler.',
     perks: [
       'Entry to full event area',
       '2x Fresh Ekow Sam Farm Boiled Eggs',
@@ -39,9 +39,9 @@ export const TICKET_PASSES: TicketPass[] = [
   {
     id: 'vip-meko',
     name: 'VIP Meko Deluxe Pass',
-    priceGHS: 120,
+    priceGHS: 0,
     popular: true,
-    description: 'Ultimate pepper lover pass with VIP lounge access, unlimited eggs & artisan meko flight.',
+    description: 'Free ultimate pepper lover pass with VIP lounge access, unlimited eggs & artisan meko flight.',
     perks: [
       'Fast-track VIP Lounge & Seating',
       'Unlimited Boiled & Deviled Farm Eggs',
@@ -54,8 +54,8 @@ export const TICKET_PASSES: TicketPass[] = [
   {
     id: 'squad-pack',
     name: 'Squad Hangout Pack (5 Passes)',
-    priceGHS: 220,
-    description: 'Bring the squad! Discounted group admission for 5 people with a shared food & drink bucket.',
+    priceGHS: 0,
+    description: 'Bring the squad! Free group admission for 5 people with a shared food & drink bucket.',
     perks: [
       'Entry for 5 Friends',
       '10x Ekow Sam Farm Fresh Eggs',
@@ -218,8 +218,8 @@ export const FAQS: FAQItem[] = [
     answer: 'The event takes place at Cencor Avenue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
   },
   {
-    question: 'What is included in the Kosua Ne Meko ticket?',
-    answer: 'Every standard ticket includes admission to all stages and activity zones, plus 2 complimentary farm-fresh boiled eggs with fresh meko pepper salsa. VIP passes include unlimited eggs, VIP lounge, and free drinks!',
+    question: 'What is included in the free Kosua Ne Meko pass?',
+    answer: 'The event is completely FREE! Every standard pass includes admission to all stages and activity zones, plus 2 complimentary farm-fresh boiled eggs with fresh meko pepper salsa. VIP passes include unlimited eggs, VIP lounge, and free drinks!',
   },
   {
     question: 'Is parking available at Cencor Avenue?',
@@ -230,8 +230,8 @@ export const FAQS: FAQItem[] = [
     answer: 'Absolutely! Kosua Ne Meko Hangout 2.0 is a family-friendly cultural celebration with games, bouncy castles, non-spicy egg options for kids, and seating areas.',
   },
   {
-    question: 'Can I buy tickets at the gate on Sept 5?',
-    answer: 'Limited gate passes will be sold, but we strongly advise booking your RSVP pass online in advance as tickets for Hangout 1.0 sold out early.',
+    question: 'Do I need to register in advance?',
+    answer: 'The event is free, but we strongly recommend registering your RSVP pass online in advance to guarantee your spot — Hangout 1.0 reached full capacity early!',
   },
   {
     question: 'What is Pebble and why are they at the event?',

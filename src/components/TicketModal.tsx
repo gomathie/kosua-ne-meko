@@ -3,6 +3,7 @@ import { X, Ticket, Check, Sparkles, Flame, User, Mail, Phone, ShoppingCart, QrC
 import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
 import { TicketPass, UserTicket } from '../types';
+import { downloadTicketImage } from '../utils/downloadTicket';
 
 interface TicketModalProps {
   isOpen: boolean;
@@ -75,7 +76,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
             </div>
             <div>
               <h3 className="text-xl font-black font-display tracking-tight uppercase">
-                RSVP & TICKET PASS
+                RSVP — FREE ENTRY
               </h3>
               <p className="text-xs text-amber-400 font-semibold">
                 {EVENT_DETAILS.title} • {EVENT_DETAILS.dateString}
@@ -122,7 +123,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                           {pass.name}
                         </h4>
                         <div className="text-lg font-black text-orange-600 font-display mt-1">
-                          GHS {pass.priceGHS}
+                          {pass.priceGHS === 0 ? 'FREE' : `GHS ${pass.priceGHS}`}
                         </div>
                       </div>
                       <p className="text-[11px] text-stone-500 mt-2 line-clamp-2">
@@ -238,9 +239,9 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
             {/* Total Footer */}
             <div className="pt-4 border-t border-stone-200 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <span className="text-xs font-bold text-stone-500 block uppercase">TOTAL AMOUNT</span>
-                <span className="text-2xl font-black text-orange-600 font-display">
-                  GHS {totalGHS}
+                <span className="text-xs font-bold text-stone-500 block uppercase">ADMISSION</span>
+                <span className="text-2xl font-black text-emerald-600 font-display">
+                  🎉 FREE
                 </span>
               </div>
 
@@ -249,7 +250,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 className="px-8 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-sm shadow-lg shadow-orange-600/30 transition-all flex items-center gap-2"
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>CONFIRM & BOOK PASS</span>
+                <span>CONFIRM FREE RSVP</span>
               </button>
             </div>
 
@@ -282,7 +283,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   </h4>
                 </div>
                 <div className="bg-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {bookedTicket.quantity} x Ticket
+                  {bookedTicket.quantity} x Pass
                 </div>
               </div>
 
@@ -328,16 +329,23 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
               <div className="pt-2 border-t border-stone-800 text-[10px] text-stone-400 flex justify-between">
                 <span>Organized by Ekow Sam Farms</span>
-                <span>Paid GHS {bookedTicket.totalGHS}</span>
+                <span>FREE ENTRY</span>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => downloadTicketImage(bookedTicket)}
+                className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-sm shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                <Download className="w-5 h-5" />
+                DOWNLOAD TICKET
+              </button>
               <button
                 onClick={handleReset}
-                className="w-full py-3 rounded-xl bg-stone-900 text-white font-extrabold text-xs hover:bg-stone-800 transition-colors"
+                className="flex-1 py-3.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-extrabold text-sm transition-colors"
               >
-                CLOSE & RETURN TO HOME
+                CLOSE & RETURN
               </button>
             </div>
 

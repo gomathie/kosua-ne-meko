@@ -1,7 +1,8 @@
 import React from 'react';
-import { X, Ticket, QrCode, Trash2, MapPin, Calendar } from 'lucide-react';
+import { X, Ticket, QrCode, Trash2, MapPin, Calendar, Download } from 'lucide-react';
 import { UserTicket } from '../types';
 import { EVENT_DETAILS } from '../data/eventData';
+import { downloadTicketImage } from '../utils/downloadTicket';
 
 interface MyTicketsModalProps {
   isOpen: boolean;
@@ -108,6 +109,14 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
                       </span>
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => downloadTicketImage(t)}
+                    className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    <Download className="w-4 h-4" />
+                    DOWNLOAD TICKET
+                  </button>
                 </div>
               ))}
 

@@ -3,6 +3,18 @@ import { Flame, Sparkles, Check, Info, Share2, Award } from 'lucide-react';
 import { PEPPER_LEVELS } from '../data/eventData';
 import { PepperLevel } from '../types';
 
+import chiliPepperSvg from '../assets/peppers/chili-pepper.svg';
+import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
+import greenPepperSvg from '../assets/peppers/green-pepper-svgrepo-com.svg';
+import chiliPepperFancySvg from '../assets/peppers/chilipepper-svgrepo-com.svg';
+
+const PEPPER_SVG_MAP: Record<string, string> = {
+  mild: greenPepperSvg,
+  classic: chiliPepperSnSvg,
+  fiery: chiliPepperSvg,
+  inferno: chiliPepperFancySvg,
+};
+
 export const PepperMeter: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<PepperLevel>(PEPPER_LEVELS[1]);
   const [activeTab, setActiveTab] = useState<'explorer' | 'quiz'>('explorer');
@@ -93,7 +105,9 @@ export const PepperMeter: React.FC = () => {
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-3xl sm:text-4xl">{level.emoji}</div>
+                      <div className="w-10 h-10 flex items-center justify-center shrink-0 bg-stone-800/60 p-1.5 rounded-xl border border-stone-700">
+                        <img src={PEPPER_SVG_MAP[level.id] || greenPepperSvg} alt={level.name} className="w-8 h-8 object-contain group-hover:scale-110 transition-transform" />
+                      </div>
                       <div>
                         <h3 className="font-extrabold text-base sm:text-lg text-white group-hover:text-orange-400 transition-colors">
                           {level.name}
@@ -123,8 +137,10 @@ export const PepperMeter: React.FC = () => {
                 }}
               >
                 <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-5xl">{selectedLevel.emoji}</span>
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center shrink-0 bg-stone-800/80 p-2.5 rounded-2xl border border-stone-700 shadow-md">
+                      <img src={PEPPER_SVG_MAP[selectedLevel.id]} alt={selectedLevel.name} className="w-full h-full object-contain animate-pulse" />
+                    </div>
                     <div>
                       <span className="text-xs font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-stone-800 text-orange-400 border border-stone-700">
                         {selectedLevel.scoville}

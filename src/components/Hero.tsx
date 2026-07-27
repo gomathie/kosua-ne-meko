@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Ticket, ChevronRight, Compass, Sparkles, Flame, Clock } from 'lucide-react';
 import { EVENT_DETAILS } from '../data/eventData';
 
+import chiliPepperSvg from '../assets/peppers/chili-pepper.svg';
+import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
+import greenPepperSvg from '../assets/peppers/green-pepper-svgrepo-com.svg';
+import chiliPepperFancySvg from '../assets/peppers/chilipepper-svgrepo-com.svg';
+
 interface HeroProps {
   onOpenTickets: () => void;
 }
@@ -46,11 +51,11 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:24px_24px]"></div>
       
       {/* Flying Birds & Floating Chili Decor */}
-      <div className="absolute top-10 right-10 md:right-24 z-10 pointer-events-none opacity-80 animate-pulse">
-        <div className="text-4xl transform rotate-12">🌶️</div>
+      <div className="absolute top-10 right-10 md:right-24 z-10 pointer-events-none opacity-90 animate-pulse">
+        <img src={chiliPepperFancySvg} alt="Chili Pepper" className="w-12 h-12 sm:w-16 sm:h-16 transform rotate-12 drop-shadow-xl" />
       </div>
       <div className="absolute top-28 right-6 md:right-16 z-10 pointer-events-none opacity-90 animate-bounce duration-1000">
-        <div className="text-5xl transform -rotate-12">🌶️</div>
+        <img src={chiliPepperSvg} alt="Chili Pepper" className="w-10 h-10 sm:w-14 sm:h-14 transform -rotate-12 drop-shadow-xl" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -206,8 +211,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
                 </div>
 
                 {/* Floating Peppers around egg pin */}
-                <span className="absolute -top-2 -left-2 sm:-left-4 text-2xl sm:text-3xl animate-bounce">🌶️</span>
-                <span className="absolute top-8 sm:top-12 -right-3 sm:-right-6 text-3xl sm:text-4xl animate-pulse">🌶️</span>
+                <img src={chiliPepperSnSvg} alt="Red Chili" className="absolute -top-3 -left-3 sm:-left-6 w-10 h-10 sm:w-12 sm:h-12 animate-bounce drop-shadow-xl" />
+                <img src={greenPepperSvg} alt="Green Pepper" className="absolute top-8 sm:top-12 -right-4 sm:-right-8 w-11 h-11 sm:w-14 sm:h-14 animate-pulse drop-shadow-xl" />
               </div>
 
               {/* Location Badge (Recreating Flyer Orange Box) */}

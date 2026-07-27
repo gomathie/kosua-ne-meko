@@ -1,5 +1,6 @@
 import React from 'react';
 import { Egg, Flame, Music, Gamepad2, Users, ShoppingBag } from 'lucide-react';
+import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
 
 export const EventHighlights: React.FC = () => {
   const highlights = [
@@ -10,7 +11,7 @@ export const EventHighlights: React.FC = () => {
       bgColor: 'bg-amber-50 border-amber-200',
     },
     {
-      icon: <Flame className="w-8 h-8 text-orange-600" />,
+      icon: <img src={chiliPepperSnSvg} alt="Fresh Meko Pepper" className="w-8 h-8 object-contain" />,
       title: 'Artisanal Fresh Meko Salsa',
       description: 'Crushed live in traditional earthenware asanka bowls with scotch bonnet, onions, ginger, and secret spices.',
       bgColor: 'bg-orange-50 border-orange-200',

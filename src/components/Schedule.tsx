@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { Clock, MapPin, Calendar, Flame, Music, Gamepad2, Utensils } from 'lucide-react';
-import { SCHEDULE_ITEMS } from '../data/eventData';
+import { ScheduleItem } from '../types';
 
-export const Schedule: React.FC = () => {
+interface ScheduleProps {
+  schedule: ScheduleItem[];
+  dateString?: string;
+  locationName?: string;
+}
+
+export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locationName }) => {
   const [filter, setFilter] = useState<string>('all');
 
   const filteredItems = filter === 'all' 
-    ? SCHEDULE_ITEMS 
-    : SCHEDULE_ITEMS.filter((item) => item.category === filter);
+    ? schedule 
+    : schedule.filter((item) => item.category === filter);
 
   const getCategoryBadge = (category: string) => {
     switch (category) {

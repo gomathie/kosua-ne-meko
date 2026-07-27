@@ -1,11 +1,20 @@
 import React from 'react';
-import { Egg, ArrowUp, Heart } from 'lucide-react';
-import { EVENT_DETAILS } from '../data/eventData';
+import { Egg, ArrowUp, Heart, Lock } from 'lucide-react';
+import { EventDetails } from '../types';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  eventDetails?: EventDetails;
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const title = eventDetails?.title || 'KOSUA NE MEKO HANGOUT 2.0';
+  const dateStr = eventDetails?.dateString || 'SAT. 5TH SEPT. 2026';
+  const hashtag = eventDetails?.hashtag || '#KosuaNeMekoHangout';
 
   return (
     <footer className="bg-stone-950 text-stone-300 pt-16 pb-12 border-t-4 border-orange-600">
@@ -19,15 +28,15 @@ export const Footer: React.FC = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white">
                 <Egg className="w-6 h-6 fill-amber-100" />
               </div>
-              <span className="font-extrabold text-2xl tracking-tight text-white font-display">
-                KOSUA <span className="text-orange-500">NE MEKO</span> HANGOUT 2.0
+              <span className="font-extrabold text-2xl tracking-tight text-white font-display uppercase">
+                {title}
               </span>
             </div>
             <p className="text-xs text-stone-400 max-w-sm leading-relaxed">
-              Celebrating Ghana's favorite street food staple. Organically farmed boiled eggs, stone-ground meko pepper salsa, local music, board games, and community culture in Accra.
+              Celebrating Ghana's favorite street food staple. Organically farmed boiled eggs, stone-ground meko pepper salsa, local music, board games, and community culture.
             </p>
             <div className="text-xs font-mono text-orange-400">
-              {EVENT_DETAILS.hashtag} • {EVENT_DETAILS.dateString}
+              {hashtag} • {dateStr}
             </div>
           </div>
 
@@ -73,14 +82,25 @@ export const Footer: React.FC = () => {
 
         </div>
 
-        {/* Copyright */}
+        {/* Copyright & Admin Portal Link */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
-          <p>© 2026 Kosua Ne Meko Hangout 2.0. Organized by Ekow Sam Farms × <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 transition-colors">Pebble</a>.</p>
-          <p className="flex items-center gap-1">
-            <span>Made with</span>
-            <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-            <span>by the Smooth Operators. v1.0.0</span>
-          </p>
+          <p>© 2026 {title}. Organized by {eventDetails?.organizer || 'Ekow Sam Farms'}.</p>
+          <div className="flex items-center gap-4">
+            {onOpenAdmin && (
+              <button
+                onClick={onOpenAdmin}
+                className="text-stone-400 hover:text-orange-400 flex items-center gap-1 font-bold transition-colors"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Admin Portal</span>
+              </button>
+            )}
+            <p className="flex items-center gap-1">
+              <span>Made with</span>
+              <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
+              <span>v2.0</span>
+            </p>
+          </div>
         </div>
 
       </div>

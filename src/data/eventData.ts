@@ -1,6 +1,6 @@
-import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem } from '../types';
+import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem, Collaborator, Sponsor, EventDetails } from '../types';
 
-export const EVENT_DETAILS = {
+export const EVENT_DETAILS: EventDetails = {
   title: 'KOSUA NE MEKO HANGOUT 2.0',
   shortTitle: 'Kosua Ne Meko 2.0',
   tagline: 'Accra’s Premier Street Food & Cultural Festival',
@@ -21,6 +21,48 @@ export const EVENT_DETAILS = {
     lng: -0.198,
   },
 };
+
+export const INITIAL_COLLABORATORS: Collaborator[] = [
+  {
+    id: 'collab-1',
+    name: 'Pebble',
+    url: 'https://trypebble.com',
+    tagline: 'Your Home of Authentic Local Content & Outdoor Cinema Partner',
+    badge: 'Official Media & Cinema Partner',
+    logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+  },
+];
+
+export const INITIAL_SPONSORS: Sponsor[] = [
+  {
+    id: 'spon-1',
+    name: 'Ekow Sam Farms',
+    tier: 'Headline',
+    logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
+    websiteUrl: 'https://ekowsamfarms.com',
+  },
+  {
+    id: 'spon-2',
+    name: 'Pebble Stream',
+    tier: 'Headline',
+    logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+    websiteUrl: 'https://trypebble.com',
+  },
+  {
+    id: 'spon-3',
+    name: 'Accra Craft Brewery',
+    tier: 'Gold',
+    logoUrl: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&q=80',
+    websiteUrl: 'https://example.com',
+  },
+  {
+    id: 'spon-4',
+    name: 'Dzorwulu Community Sports Hub',
+    tier: 'Silver',
+    logoUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=400&q=80',
+    websiteUrl: 'https://example.com',
+  },
+];
 
 export const TICKET_PASSES: TicketPass[] = [
   {

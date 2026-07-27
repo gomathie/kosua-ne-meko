@@ -6,21 +6,38 @@ import { EventHighlights } from './components/EventHighlights';
 import { PepperMeter } from './components/PepperMeter';
 import { Schedule } from './components/Schedule';
 import { Vendors } from './components/Vendors';
+import { SponsorsSection } from './components/SponsorsSection';
 import { LocationMap } from './components/LocationMap';
 import { OrganizerSection } from './components/OrganizerSection';
 import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { TicketModal } from './components/TicketModal';
 import { MyTicketsModal } from './components/MyTicketsModal';
+import { AdminModal } from './components/AdminModal';
 import { UserTicket } from './types';
-import { EVENT_DETAILS } from './data/eventData';
+import { useEventData } from './utils/eventStore';
 
 export default function App() {
+  const {
+    data,
+    updateEventDetails,
+    addVendor,
+    deleteVendor,
+    addScheduleItem,
+    deleteScheduleItem,
+    addCollaborator,
+    deleteCollaborator,
+    addSponsor,
+    deleteSponsor,
+    resetAll,
+  } = useEventData();
+
   const [tickets, setTickets] = useState<UserTicket[]>([]);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  // Load saved tickets from localStorage
+  // Load saved tickets & check for #admin URL hash
   useEffect(() => {
     try {
       const saved = localStorage.getItem('kosua_tickets');
@@ -30,6 +47,15 @@ export default function App() {
     } catch (err) {
       console.error('Failed to load tickets from storage', err);
     }
+
+    const checkAdminUrl = () => {
+      if (window.location.hash === '#admin' || window.location.search.includes('admin')) {
+        setIsAdminModalOpen(true);
+      }
+    };
+    checkAdminUrl();
+    window.addEventListener('hashchange', checkAdminUrl);
+    return () => window.removeEventListener('hashchange', checkAdminUrl);
   }, []);
 
   const handleTicketBooked = (newTicket: UserTicket) => {
@@ -56,25 +82,28 @@ export default function App() {
       
       {/* Navigation Bar */}
       <Navbar
+        eventDetails={data.eventDetails}
         onOpenTickets={() => setIsTicketModalOpen(true)}
         onOpenMyTickets={() => setIsMyTicketsOpen(true)}
+        onOpenAdmin={() => setIsAdminModalOpen(true)}
         ticketCount={tickets.length}
       />
 
       {/* Main Sections */}
       <main className="pb-20 md:pb-0">
-        <Hero onOpenTickets={() => setIsTicketModalOpen(true)} />
+        <Hero eventDetails={data.eventDetails} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <EventHighlights />
         <PepperMeter />
-        <Schedule />
-        <Vendors />
-        <LocationMap />
+        <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} />
+        <Vendors vendors={data.vendors} />
+        <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
+        <LocationMap eventDetails={data.eventDetails} />
         <OrganizerSection />
         <FaqSection />
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer eventDetails={data.eventDetails} onOpenAdmin={() => setIsAdminModalOpen(true)} />
 
       {/* Floating Sticky Mobile Quick Action Bar */}
       <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-stone-900/95 backdrop-blur-lg border-t border-stone-800 p-3 shadow-2xl flex items-center justify-between gap-2 text-white">
@@ -83,8 +112,8 @@ export default function App() {
             <Calendar className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[11px] font-black text-white block uppercase tracking-wide">SAT. 5TH SEPT.</span>
-            <span className="text-[9px] font-semibold text-stone-400 block">Dzorwulu, Accra</span>
+            <span className="text-[11px] font-black text-white block uppercase tracking-wide">{data.eventDetails.dateString}</span>
+            <span className="text-[9px] font-semibold text-stone-400 block">{data.eventDetails.city}</span>
           </div>
         </div>
 
@@ -124,7 +153,28 @@ export default function App() {
         onClearTickets={handleClearTickets}
       />
 
+      <AdminModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        eventDetails={data.eventDetails}
+        vendors={data.vendors}
+        schedule={data.schedule}
+        collaborators={data.collaborators}
+        sponsors={data.sponsors}
+        onUpdateEventDetails={updateEventDetails}
+        onAddVendor={addVendor}
+        onDeleteVendor={deleteVendor}
+        onAddScheduleItem={addScheduleItem}
+        onDeleteScheduleItem={deleteScheduleItem}
+        onAddCollaborator={addCollaborator}
+        onDeleteCollaborator={deleteCollaborator}
+        onAddSponsor={addSponsor}
+        onDeleteSponsor={deleteSponsor}
+        onResetAll={resetAll}
+      />
+
     </div>
   );
 }
+
 

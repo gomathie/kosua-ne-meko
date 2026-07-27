@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Utensils, Search, Award } from 'lucide-react';
-import { VENDORS } from '../data/eventData';
+import { Vendor } from '../types';
 
-export const Vendors: React.FC = () => {
+interface VendorsProps {
+  vendors: Vendor[];
+}
+
+export const Vendors: React.FC<VendorsProps> = ({ vendors }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const filteredVendors = VENDORS.filter((v) => {
+  const filteredVendors = vendors.filter((v) => {
     const matchesCat = activeCategory === 'all' || v.category === activeCategory;
     const matchesSearch = v.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           v.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

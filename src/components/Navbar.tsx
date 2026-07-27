@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
-import { Egg, MapPin, Calendar, Ticket, Menu, X, Flame, UserCheck } from 'lucide-react';
-import { EVENT_DETAILS } from '../data/eventData';
+import { Egg, MapPin, Calendar, Ticket, Menu, X, Flame, UserCheck, Lock } from 'lucide-react';
+import { EventDetails } from '../types';
 
 interface NavbarProps {
+  eventDetails: EventDetails;
   onOpenTickets: () => void;
   onOpenMyTickets: () => void;
+  onOpenAdmin: () => void;
   ticketCount: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, ticketCount }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  eventDetails,
+  onOpenTickets,
+  onOpenMyTickets,
+  onOpenAdmin,
+  ticketCount,
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
@@ -30,28 +38,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
               <Egg className="w-7 h-7 text-white fill-amber-100" />
               <span className="absolute -top-1 -right-1 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 border border-white text-[9px] font-black text-white items-center justify-center">2.0</span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 border border-white text-[9px] font-black text-white items-center justify-center">★</span>
               </span>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-900 font-display">
-                  KOSUA <span className="text-orange-600">NE MEKO</span>
-                </span>
-                <span className="bg-emerald-800 text-emerald-100 text-[10px] font-extrabold px-2 py-0.5 rounded-md tracking-wider uppercase">
-                  2.0
+                  {eventDetails.shortTitle || eventDetails.title}
                 </span>
               </div>
               <p className="text-[10px] sm:text-xs text-stone-500 font-medium flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-                <span>By {EVENT_DETAILS.organizer} × <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 hover:text-orange-700 font-semibold transition-colors">Pebble</a></span>
+                <span>By {eventDetails.organizer} {eventDetails.collaborator && `× ${eventDetails.collaborator}`}</span>
                 <span className="hidden sm:inline-block w-1 h-1 bg-orange-400 rounded-full"></span>
-                <span className="text-emerald-700 font-semibold">{EVENT_DETAILS.dateString}</span>
+                <span className="text-emerald-700 font-semibold">{eventDetails.dateString}</span>
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-6">
             <button
               onClick={() => scrollToSection('highlights')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
@@ -78,11 +83,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
               Vendors
             </button>
             <button
+              onClick={() => scrollToSection('sponsors')}
+              className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
+            >
+              Partners
+            </button>
+            <button
               onClick={() => scrollToSection('location')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
             >
               <MapPin className="w-4 h-4 text-emerald-700" />
-              Accra Map
+              Map
             </button>
             <button
               onClick={() => scrollToSection('faq')}
@@ -93,7 +104,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
           </div>
 
           {/* Action CTAs */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2.5">
+            <button
+              onClick={onOpenAdmin}
+              className="p-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition-colors border border-stone-200 flex items-center gap-1 text-xs font-bold"
+              title="Admin Portal Login"
+            >
+              <Lock className="w-3.5 h-3.5 text-stone-600" />
+              <span className="hidden xl:inline">Admin</span>
+            </button>
+
             {ticketCount > 0 && (
               <button
                 onClick={onOpenMyTickets}
@@ -109,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
 
             <button
               onClick={onOpenTickets}
-              className="relative inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-extrabold text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-md shadow-orange-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="relative inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-md shadow-orange-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Ticket className="w-4 h-4" />
               <span>Get RSVP Pass</span>
@@ -118,6 +138,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
 
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={onOpenAdmin}
+              className="p-2 rounded-xl bg-stone-100 text-stone-700 font-bold text-xs flex items-center gap-1 border border-stone-200"
+              title="Admin Portal"
+            >
+              <Lock className="w-4 h-4" />
+            </button>
+
             {ticketCount > 0 && (
               <button
                 onClick={onOpenMyTickets}
@@ -127,6 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
                 <span>{ticketCount}</span>
               </button>
             )}
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors"
@@ -170,11 +199,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
             <span>Food & Drinks Lineup</span>
           </button>
           <button
+            onClick={() => scrollToSection('sponsors')}
+            className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
+          >
+            <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">★</span>
+            <span>Partners & Sponsors</span>
+          </button>
+          <button
             onClick={() => scrollToSection('location')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
             <MapPin className="w-5 h-5 text-red-600" />
-            <span>Location & Map (Accra)</span>
+            <span>Location & Map ({eventDetails.city})</span>
           </button>
           <button
             onClick={() => scrollToSection('faq')}
@@ -201,3 +237,4 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenTickets, onOpenMyTickets, 
     </nav>
   );
 };
+

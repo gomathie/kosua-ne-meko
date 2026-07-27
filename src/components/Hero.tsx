@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Ticket, ChevronRight, Compass, Sparkles, Flame, Clock } from 'lucide-react';
-import { EVENT_DETAILS } from '../data/eventData';
+import { EventDetails } from '../types';
 
 import chiliPepperSvg from '../assets/peppers/chili-pepper.svg';
 import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
@@ -8,11 +8,12 @@ import greenPepperSvg from '../assets/peppers/green-pepper-svgrepo-com.svg';
 import chiliPepperFancySvg from '../assets/peppers/chilipepper-svgrepo-com.svg';
 
 interface HeroProps {
+  eventDetails: EventDetails;
   onOpenTickets: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
-  // Live Countdown Timer logic for SAT. 5TH SEPT. 2026
+export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
+  // Live Countdown Timer logic
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -21,7 +22,8 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
   });
 
   useEffect(() => {
-    const target = new Date(EVENT_DETAILS.targetDateISO).getTime();
+    const targetIso = eventDetails.targetDateISO || '2026-12-12T10:00:00';
+    const target = new Date(targetIso).getTime();
 
     const updateTimer = () => {
       const now = new Date().getTime();
@@ -42,7 +44,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [eventDetails.targetDateISO]);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-emerald-900/10 pt-8 pb-16 lg:py-20">
@@ -80,12 +82,14 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
               <span className="text-orange-700 font-extrabold">ACCRA</span>
             </div>
 
-            {/* Pebble Collaboration Badge */}
-            <a href={EVENT_DETAILS.collaboratorUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
-              <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-              <span className="text-stone-300">In collaboration with</span>
-              <span className="text-orange-400 font-black">PEBBLE</span>
-            </a>
+            {/* Collaboration Badge */}
+            {eventDetails.collaborator && (
+              <a href={eventDetails.collaboratorUrl || '#'} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
+                <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                <span className="text-stone-300">In collaboration with</span>
+                <span className="text-orange-400 font-black">{eventDetails.collaborator.toUpperCase()}</span>
+              </a>
+            )}
 
             {/* Countdown Box */}
             <div className="inline-flex items-center gap-2 sm:gap-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-stone-900/85 backdrop-blur text-white text-xs sm:text-sm font-mono border border-stone-700 shadow-lg">
@@ -109,30 +113,22 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
               {/* Event Main Typography */}
               <div className="space-y-1">
                 <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight text-orange-600 font-display drop-shadow-[0_4px_12px_rgba(234,88,12,0.3)] uppercase leading-tight sm:leading-none">
-                  KOSUA <span className="text-orange-500">NE MEKO</span>
+                  {eventDetails.title || 'KOSUA NE MEKO HANGOUT'}
                 </h1>
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
-                  <span className="text-2xl sm:text-4xl md:text-5xl font-black text-emerald-800 tracking-tight font-display uppercase drop-shadow-sm">
-                    HANGOUT 2.0
-                  </span>
-                  <span className="bg-orange-600 text-white text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-lg uppercase tracking-widest shadow-md">
-                    EDITION 2
-                  </span>
-                </div>
+                <p className="text-stone-800 text-base sm:text-lg font-semibold max-w-xl leading-relaxed bg-white/70 backdrop-blur-sm p-3 rounded-xl border border-white/60">
+                  {eventDetails.tagline || 'Accra’s Premier Street Food & Cultural Festival'}
+                </p>
               </div>
 
-              {/* Date Badge (Recreating Left Flyer Card) */}
+              {/* Date Badge */}
               <div className="inline-block transform -rotate-1 hover:rotate-0 transition-transform">
                 <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-stone-200 text-emerald-800 max-w-xs">
                   <div className="flex items-center gap-2 text-xs font-black uppercase text-orange-600 tracking-widest mb-1">
                     <Calendar className="w-4 h-4 text-orange-600" />
                     <span>EVENT DATE</span>
                   </div>
-                  <div className="text-2xl sm:text-3xl font-black tracking-tight text-emerald-900 leading-none">
-                    SAT. 5<span className="text-sm align-top">TH</span> SEPT.
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black tracking-widest text-emerald-800">
-                    2026
+                  <div className="text-xl sm:text-2xl font-black tracking-tight text-emerald-900 leading-tight uppercase">
+                    {eventDetails.dateString}
                   </div>
                 </div>
               </div>
@@ -215,7 +211,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
                 <img src={greenPepperSvg} alt="Green Pepper" className="absolute top-8 sm:top-12 -right-4 sm:-right-8 w-11 h-11 sm:w-14 sm:h-14 animate-pulse drop-shadow-xl" />
               </div>
 
-              {/* Location Badge (Recreating Flyer Orange Box) */}
+              {/* Location Badge */}
               <div className="w-full max-w-sm mt-4 transform hover:scale-102 transition-transform">
                 <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-3xl p-5 shadow-xl border-2 border-white/80 text-center space-y-1">
                   <div className="flex items-center justify-center gap-1.5 text-amber-200 text-xs font-black uppercase tracking-widest">
@@ -223,10 +219,10 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
                     <span>VENUE LOCATION</span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-black tracking-wide font-display uppercase leading-tight">
-                    CENCOR AVENUE
+                    {eventDetails.locationName}
                   </h3>
                   <p className="text-sm sm:text-base font-extrabold text-amber-100 uppercase tracking-wider">
-                    NORTH DZORWULU, ACCRA
+                    {eventDetails.city}
                   </p>
                 </div>
               </div>
@@ -235,7 +231,7 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
 
           </div>
 
-          {/* Footer Logo Badge (Recreating Flyer Bottom Right Logo "EKOW SAM FARMS") */}
+          {/* Footer Logo Badge */}
           <div className="relative z-10 mt-8 pt-6 border-t border-white/30 flex flex-wrap items-center justify-between gap-4">
             
             <div className="flex items-center gap-3">
@@ -245,13 +241,13 @@ export const Hero: React.FC<HeroProps> = ({ onOpenTickets }) => {
                 </div>
                 <div>
                   <span className="text-xs font-extrabold uppercase tracking-wider block text-amber-400">ORGANIZED BY</span>
-                  <span className="text-sm font-black tracking-tight text-white uppercase font-display">EKOW SAM FARMS</span>
+                  <span className="text-sm font-black tracking-tight text-white uppercase font-display">{eventDetails.organizer}</span>
                 </div>
               </div>
             </div>
 
             <div className="text-xs font-bold text-stone-800 bg-white/80 backdrop-blur px-3 py-1.5 rounded-lg border border-white">
-              {EVENT_DETAILS.hashtag} • #EkowSamFarms • #AccraStreetFood
+              {eventDetails.hashtag} • #{eventDetails.organizer.replace(/\s+/g, '')}
             </div>
 
           </div>

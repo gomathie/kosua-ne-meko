@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { MapPin, Navigation, Car, ShieldCheck, ExternalLink, Copy, Check } from 'lucide-react';
-import { EVENT_DETAILS } from '../data/eventData';
+import { EventDetails } from '../types';
+import { EVENT_DETAILS as DEFAULT_EVENT_DETAILS } from '../data/eventData';
 
-export const LocationMap: React.FC = () => {
+interface LocationMapProps {
+  eventDetails?: EventDetails;
+}
+
+export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT_EVENT_DETAILS }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(EVENT_DETAILS.fullAddress);
+    navigator.clipboard.writeText(eventDetails.fullAddress);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(EVENT_DETAILS.fullAddress)}`;
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventDetails.fullAddress)}`;
 
   return (
     <section id="location" className="py-16 bg-white border-t border-stone-200">

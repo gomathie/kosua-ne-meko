@@ -49,7 +49,50 @@ export interface PepperLevel {
   emoji: string;
 }
 
-export interface FAQItem {
-  question: string;
-  answer: string;
+export interface Sponsor {
+  id: string;
+  name: string;
+  tier: 'Headline' | 'Gold' | 'Silver' | 'Partner';
+  logoUrl: string;
+  websiteUrl?: string;
 }
+
+export interface Collaborator {
+  id: string;
+  name: string;
+  url: string;
+  tagline: string;
+  badge?: string;
+  logoUrl?: string;
+}
+
+export interface EventDetails {
+  title: string;
+  shortTitle: string;
+  tagline: string;
+  dateString: string;
+  targetDateISO: string;
+  time: string;
+  locationName: string;
+  city: string;
+  fullAddress: string;
+  organizer: string;
+  organizerTagline: string;
+  collaborator: string;
+  collaboratorUrl: string;
+  collaboratorTagline: string;
+  hashtag: string;
+  mapCoordinates: {
+    lat: number;
+    lng: number;
+  };
+}
+
+export interface FullEventData {
+  eventDetails: EventDetails;
+  vendors: Vendor[];
+  schedule: ScheduleItem[];
+  collaborators: Collaborator[];
+  sponsors: Sponsor[];
+}
+

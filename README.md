@@ -105,19 +105,40 @@ To access the administrative dashboard:
    (`http://localhost:3000/#adm`). The footer also has a discreet "Admin Portal" link.
    > The `/adm` path requires SPA history fallback on your host — if your deploy
    > returns a 404 there, use the `#adm` hash form instead, which works anywhere.
-2. Sign in with the **email and password** of an account in the admin list
-   (`INITIAL_ADMIN_USERS` in `src/data/eventData.ts`). Both must match the same account.
+2. Sign in with the **email and password** from your `.env` file
+   (`VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`). Copy `.env.example` to `.env` and fill
+   them in — without them no admin account exists and the login screen says so.
 
 The admin list is the only authority — there are no hardcoded fallbacks, so removing
 an admin in the portal revokes their access immediately. The last remaining admin
 cannot be deleted, to prevent locking yourself out.
 
-> **Security note:** this is a convenience gate, not a security boundary. Passwords
-> live in client-side code and `localStorage` in plain text, so anyone can read them
-> from the JS bundle or devtools. Changing a password requires a redeploy **and** a
+> **Security note:** this is a convenience gate, not a security boundary. Moving the
+> password to `.env` keeps it out of git, but Vite inlines `VITE_*` values into the
+> production bundle at build time — so it still ships to the browser and anyone can
+> read it from the JS or devtools. Changing a password requires a rebuild **and** a
 > `STORAGE_KEY` bump in `src/utils/eventStore.ts` (otherwise browsers keep
 > authenticating against the admin list already saved in their storage). Move auth
 > to a server before treating the portal as protected.
+
+---
+
+## ✉️ Email (SMTP)
+
+SMTP settings live in `.env` as `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
+`SMTP_PASSWORD`, `SMTP_FROM` and `SMTP_NOTIFY_TO` — see `.env.example`.
+
+These are intentionally **not** prefixed with `VITE_`. Vite only exposes `VITE_*`
+variables to the browser, so the missing prefix is what keeps the mail password
+server-side. Never rename them to `VITE_SMTP_*`.
+
+> **Not wired up yet.** A browser cannot open an SMTP connection, so these values are
+> only useful to a Node or serverless endpoint, which this project does not have.
+> Sending RSVP confirmations still needs: a small server (`express` and `dotenv` are
+> already dependencies) or a serverless function, a mail library such as `nodemailer`,
+> a `POST /api/rsvp` route that sends the mail, and a call to it from
+> `handleSubmit` in `src/components/TicketModal.tsx`. RSVPs are currently saved to
+> `localStorage` only.
 
 ---
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
 import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
+import { sanitizeFullEventData } from './sanitize';
 
 const STORAGE_KEY = 'kosua_event_data_v3';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
@@ -16,31 +17,26 @@ const defaultData: FullEventData = {
   gallery: INITIAL_GALLERY,
 };
 
+/**
+ * Anything in localStorage is untrusted — it survives across deploys and can be
+ * hand-edited from the console — so everything read back gets re-sanitized
+ * before it reaches a component.
+ */
 export function getStoredEventData(): FullEventData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultData;
-    const parsed = JSON.parse(raw);
-
-    return {
-      eventDetails: { ...defaultData.eventDetails, ...(parsed.eventDetails || {}) },
-      eventsList: parsed.eventsList || defaultData.eventsList,
-      adminUsers: parsed.adminUsers || defaultData.adminUsers,
-      vendors: parsed.vendors || defaultData.vendors,
-      schedule: parsed.schedule || defaultData.schedule,
-      collaborators: parsed.collaborators || defaultData.collaborators,
-      sponsors: parsed.sponsors || defaultData.sponsors,
-      gallery: parsed.gallery || defaultData.gallery,
-    };
+    return sanitizeFullEventData(JSON.parse(raw), defaultData);
   } catch (err) {
     console.error('Failed to load event data from storage', err);
     return defaultData;
   }
 }
 
+/** Every mutation funnels through here, so this is where writes get scrubbed. */
 export function saveStoredEventData(data: FullEventData): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizeFullEventData(data, defaultData)));
     window.dispatchEvent(new Event(EVENT_CHANGE_NOTIFICATION));
   } catch (err) {
     console.error('Failed to save event data to storage', err);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Camera, X, Maximize2, Sparkles } from 'lucide-react';
 import { GalleryItem } from '../types';
+import { sanitizeImageUrl } from '../utils/sanitize';
 
 interface GallerySectionProps {
   gallery: GalleryItem[];
@@ -64,7 +65,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
               className="group relative h-64 rounded-3xl overflow-hidden cursor-pointer border border-stone-800 shadow-xl bg-stone-950 transform transition-all duration-300 hover:-translate-y-1 hover:border-orange-500/60"
             >
               <img
-                src={item.imageUrl}
+                src={sanitizeImageUrl(item.imageUrl)}
                 alt={item.title}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
@@ -105,7 +106,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
 
               <div className="max-h-[75vh] overflow-hidden bg-black flex items-center justify-center">
                 <img
-                  src={activeImage.imageUrl}
+                  src={sanitizeImageUrl(activeImage.imageUrl)}
                   alt={activeImage.title}
                   referrerPolicy="no-referrer"
                   className="max-h-[75vh] w-auto max-w-full object-contain"

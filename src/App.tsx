@@ -18,12 +18,14 @@ import { MyTicketsModal } from './components/MyTicketsModal';
 import { AdminModal } from './components/AdminModal';
 import { UserTicket } from './types';
 import { useEventData } from './utils/eventStore';
+import { sanitizeUserTickets } from './utils/sanitize';
 
 export default function App() {
   const {
     data,
     updateEventDetails,
     addEventItem,
+    updateEventItem,
     setActiveEvent,
     deleteEventItem,
     addAdminUser,
@@ -55,7 +57,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem('kosua_tickets');
       if (saved) {
-        setTickets(JSON.parse(saved));
+        setTickets(sanitizeUserTickets(JSON.parse(saved)));
       }
     } catch (err) {
       console.error('Failed to load tickets from storage', err);
@@ -181,6 +183,7 @@ export default function App() {
         gallery={data.gallery}
         onUpdateEventDetails={updateEventDetails}
         onAddEventItem={addEventItem}
+        onUpdateEventItem={updateEventItem}
         onSetActiveEvent={setActiveEvent}
         onDeleteEventItem={deleteEventItem}
         onAddAdminUser={addAdminUser}

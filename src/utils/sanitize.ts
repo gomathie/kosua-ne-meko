@@ -1,4 +1,4 @@
-import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails, EventItem, AdminUser, FullEventData } from '../types';
+import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails, EventItem, AdminUser, UserTicket, FullEventData } from '../types';
 
 /**
  * Central input sanitization for every untrusted string that enters the app:
@@ -335,6 +335,31 @@ export function sanitizeEventItemInput(input: Omit<EventItem, 'id'>): Omit<Event
 
 export function sanitizeEventItem(input: EventItem): EventItem {
   return { ...sanitizeEventItemInput(input), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+/**
+ * Tickets live in localStorage on the attendee's own device, so they get the
+ * same treatment as event data before being rendered back onto a pass.
+ */
+export function sanitizeUserTicket(input: UserTicket): UserTicket {
+  return {
+    id: sanitizeText(input.id, LIMITS.id),
+    passId: sanitizeText(input.passId, LIMITS.id),
+    passName: sanitizeText(input.passName, LIMITS.title),
+    customerName: sanitizeText(input.customerName, LIMITS.name),
+    email: sanitizeEmail(input.email),
+    phone: sanitizePhone(input.phone),
+    quantity: sanitizeInt(input.quantity, 1, 10, 1),
+    totalGHS: sanitizeNumber(input.totalGHS, 0, 1_000_000, 0),
+    mekoLevel: sanitizeText(input.mekoLevel, LIMITS.shortText),
+    purchaseDate: sanitizeText(input.purchaseDate, 40),
+    qrCodeUrl: sanitizeImageUrl(input.qrCodeUrl, ''),
+  };
+}
+
+export function sanitizeUserTickets(parsed: unknown): UserTicket[] {
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter(isRecord).map((item) => sanitizeUserTicket(item as unknown as UserTicket));
 }
 
 /**

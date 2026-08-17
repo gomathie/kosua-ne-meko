@@ -19,7 +19,7 @@ const NUL = String.fromCharCode(0x00);
 const cases: [string, unknown, unknown][] = [
   ['text: strips newlines/tabs', sanitizeText('Kwame\n\tMensah'), 'Kwame Mensah'],
   ['text: strips zero-width + BOM', sanitizeText('Kwa' + ZWSP + 'me' + BOM), 'Kwame'],
-  ['text: neutralizes bidi override', sanitizeText('abc' + RLO + 'def'), 'abc def'],
+  ['text: deletes bidi override', sanitizeText('abc' + RLO + 'def'), 'abcdef'],
   ['text: caps length', sanitizeText('x'.repeat(500), 10), 'x'.repeat(10)],
   ['text: non-string', sanitizeText(null), ''],
   ['text: trims after slice', sanitizeText('abcde fghij', 6), 'abcde'],

@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
 import { EventDetails, TicketPass, UserTicket } from '../types';
 import { downloadTicketImage } from '../utils/downloadTicket';
+import { LIMITS, sanitizeText, sanitizeEmail, sanitizePhone, sanitizeInt, isValidEmail, isValidPhone } from '../utils/sanitize';
 
 interface TicketModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   const [phone, setPhone] = useState('');
   const [mekoPreference, setMekoPreference] = useState('Classic Accra Red Meko');
   const [bookedTicket, setBookedTicket] = useState<UserTicket | null>(null);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
 
   if (!isOpen) return null;
 
@@ -29,7 +31,27 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !email || !phone) return;
+
+    // Clean first, then validate what is left — a field of nothing but spaces or
+    // zero-width characters must not count as "filled in".
+    const cleanName = sanitizeText(customerName, LIMITS.name);
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPhone = sanitizePhone(phone);
+    const cleanQuantity = sanitizeInt(quantity, 1, 10, 1);
+    const cleanMeko = sanitizeText(mekoPreference, LIMITS.shortText);
+
+    const nextErrors: typeof errors = {};
+    if (cleanName.length < 2) nextErrors.name = 'Please enter your full name.';
+    if (!isValidEmail(email)) nextErrors.email = 'Please enter a valid email address.';
+    if (!isValidPhone(phone)) nextErrors.phone = 'Enter a valid Ghana number, e.g. 024 123 4567.';
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    // Reflect the cleaned values back so the attendee sees exactly what was saved.
+    setCustomerName(cleanName);
+    setEmail(cleanEmail);
+    setPhone(cleanPhone);
 
     // Trigger celebratory confetti
     confetti({
@@ -44,14 +66,14 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
       id: ticketId,
       passId: selectedPass.id,
       passName: selectedPass.name,
-      customerName,
-      email,
-      phone,
-      quantity,
-      totalGHS,
-      mekoLevel: mekoPreference,
+      customerName: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      quantity: cleanQuantity,
+      totalGHS: selectedPass.priceGHS * cleanQuantity,
+      mekoLevel: cleanMeko,
       purchaseDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketId + '-' + customerName)}`,
+      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketId + '-' + cleanName)}`,
     };
 
     setBookedTicket(newTicket);
@@ -63,8 +85,16 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     setCustomerName('');
     setEmail('');
     setPhone('');
+    setErrors({});
     onClose();
   };
+
+  const fieldClasses = (hasError: boolean) =>
+    `w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 ${
+      hasError
+        ? 'border-red-400 bg-red-50 focus:ring-red-500'
+        : 'border-stone-300 focus:ring-orange-500'
+    }`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
@@ -167,12 +197,19 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.name}
+                      autoComplete="name"
+                      aria-invalid={Boolean(errors.name)}
                       placeholder="e.g. Kwame Mensah"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        if (errors.name) setErrors({ ...errors, name: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.name))}
                     />
                   </div>
+                  {errors.name && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.name}</p>}
                 </div>
 
                 <div>
@@ -182,12 +219,19 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="email"
                       required
+                      maxLength={LIMITS.email}
+                      autoComplete="email"
+                      aria-invalid={Boolean(errors.email)}
                       placeholder="kwame@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors({ ...errors, email: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.email))}
                     />
                   </div>
+                  {errors.email && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
@@ -197,19 +241,27 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="tel"
                       required
+                      maxLength={LIMITS.phone}
+                      autoComplete="tel"
+                      inputMode="tel"
+                      aria-invalid={Boolean(errors.phone)}
                       placeholder="+233 24 123 4567"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (errors.phone) setErrors({ ...errors, phone: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.phone))}
                     />
                   </div>
+                  {errors.phone && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.phone}</p>}
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-stone-700 block mb-1">Quantity</label>
                   <select
                     value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, 10, 1))}
                     className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (

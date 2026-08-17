@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Utensils, Search, Award } from 'lucide-react';
 import { Vendor } from '../types';
+import { sanitizeImageUrl } from '../utils/sanitize';
 
 interface VendorsProps {
   vendors: Vendor[];
@@ -86,7 +87,7 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors }) => {
               {/* Image Banner */}
               <div className="relative h-48 overflow-hidden bg-stone-800">
                 <img
-                  src={vendor.imageUrl}
+                  src={sanitizeImageUrl(vendor.imageUrl)}
                   alt={vendor.name}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

@@ -3,10 +3,10 @@ import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponso
 import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
 import { sanitizeFullEventData } from './sanitize';
 
-// Bumped on every admin-credential change: a browser holding an older blob would
-// otherwise keep authenticating against the admin list saved inside it.
-// v4 retired the seeded passcodes; v5 moved sign-in to email + password;
-// v6 removed the second admin and moved credentials to .env.
+// Bump only when the *shape* of the stored data changes. Admin credentials no
+// longer need a bump — see applyEnvAdmins below, which re-applies the .env admin
+// on every read. v4 retired the seeded passcodes; v5 moved sign-in to
+// email + password; v6 removed the second admin and moved credentials to .env.
 const STORAGE_KEY = 'kosua_event_data_v6';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
@@ -22,6 +22,23 @@ const defaultData: FullEventData = {
 };
 
 /**
+ * The .env-configured admin is authoritative: its stored copy is replaced on
+ * every read, so rotating VITE_ADMIN_PASSWORD takes effect as soon as the new
+ * build loads. Without this, a browser would keep authenticating against the
+ * admin list frozen in its localStorage and the new password would be rejected.
+ *
+ * Admins added through the portal are kept alongside it.
+ */
+function applyEnvAdmins(data: FullEventData): FullEventData {
+  if (INITIAL_ADMIN_USERS.length === 0) return data;
+  const envIds = new Set(INITIAL_ADMIN_USERS.map((admin) => admin.id));
+  return {
+    ...data,
+    adminUsers: [...INITIAL_ADMIN_USERS, ...data.adminUsers.filter((user) => !envIds.has(user.id))],
+  };
+}
+
+/**
  * Anything in localStorage is untrusted — it survives across deploys and can be
  * hand-edited from the console — so everything read back gets re-sanitized
  * before it reaches a component.
@@ -30,7 +47,7 @@ export function getStoredEventData(): FullEventData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultData;
-    return sanitizeFullEventData(JSON.parse(raw), defaultData);
+    return applyEnvAdmins(sanitizeFullEventData(JSON.parse(raw), defaultData));
   } catch (err) {
     console.error('Failed to load event data from storage', err);
     return defaultData;

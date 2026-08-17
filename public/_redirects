@@ -1,0 +1,8 @@
+# Cloudflare Pages SPA history fallback.
+#
+# Pages already falls back to index.html automatically when a project has no
+# top-level 404.html — but that is implicit, and adding a 404.html later would
+# silently start 404ing client-side routes like /adm. This makes it explicit.
+#
+# Vite copies public/ into dist/, which is where Pages expects _redirects.
+/*    /index.html   200

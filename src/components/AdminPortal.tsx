@@ -587,7 +587,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
       {/* Header — sticky so the tab bar and exit stay reachable on long tabs. */}
       <header className="sticky top-0 z-20 bg-stone-950/95 backdrop-blur border-b border-stone-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+        {/* Full viewport width — an admin console should use the screen it has.
+            The cap only stops line lengths becoming absurd on ultrawide displays. */}
+        <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="p-2.5 rounded-2xl bg-orange-600 text-white font-black shrink-0">
               <Lock className="w-6 h-6" />
@@ -611,7 +613,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         </div>
       </header>
 
-      <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex-1 w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
 
         {/* Content Body */}
         {!isAuthenticated ? (

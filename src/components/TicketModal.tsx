@@ -22,7 +22,10 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   const [mekoPreference, setMekoPreference] = useState('Classic Accra Red Meko');
   const [bookedTicket, setBookedTicket] = useState<UserTicket | null>(null);
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
-  const [smsStatus, setSmsStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  type ChannelResult = 'sent' | 'failed' | 'skipped';
+  const [confirmStatus, setConfirmStatus] = useState<
+    { state: 'idle' | 'sending' | 'error' } | { state: 'done'; sms: ChannelResult; email: ChannelResult }
+  >({ state: 'idle' });
 
   if (!isOpen) return null;
 
@@ -80,24 +83,36 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     setBookedTicket(newTicket);
     onTicketBooked(newTicket);
 
-    // The pass is already saved locally and valid — the SMS is a courtesy, so a
-    // failure here is reported but never blocks the RSVP.
-    setSmsStatus('sending');
+    // The pass is already saved locally and valid — the confirmations are a
+    // courtesy, so a failure here is reported but never blocks the RSVP.
+    setConfirmStatus({ state: 'sending' });
     fetch('/api/rsvp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         customerName: cleanName,
         phone: cleanPhone,
+        email: cleanEmail,
         ticketId,
         passName: selectedPass.name,
         quantity: cleanQuantity,
+        mekoLevel: cleanMeko,
+        eventTitle: eventDetails?.title ?? '',
         eventDate: eventDetails?.dateString ?? '',
         venue: eventDetails?.locationName ?? '',
       }),
     })
-      .then((res) => setSmsStatus(res.ok ? 'sent' : 'failed'))
-      .catch(() => setSmsStatus('failed'));
+      .then(async (res) => {
+        const body = (await res.json().catch(() => null)) as
+          | { sms?: ChannelResult; email?: ChannelResult }
+          | null;
+        if (!res.ok || !body) {
+          setConfirmStatus({ state: 'error' });
+          return;
+        }
+        setConfirmStatus({ state: 'done', sms: body.sms ?? 'skipped', email: body.email ?? 'skipped' });
+      })
+      .catch(() => setConfirmStatus({ state: 'error' }));
   };
 
   const handleReset = () => {
@@ -106,7 +121,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     setEmail('');
     setPhone('');
     setErrors({});
-    setSmsStatus('idle');
+    setConfirmStatus({ state: 'idle' });
     onClose();
   };
 
@@ -357,17 +372,21 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 Your ticket for Kosua Ne Meko Hangout 2.0 is saved! Present this QR code pass at the entrance on Sept 5.
               </p>
 
-              {smsStatus === 'sending' && (
-                <p className="text-[11px] font-semibold text-stone-500">Sending confirmation SMS…</p>
+              {confirmStatus.state === 'sending' && (
+                <p className="text-[11px] font-semibold text-stone-500">Sending your confirmation…</p>
               )}
-              {smsStatus === 'sent' && (
+              {confirmStatus.state === 'done' && (confirmStatus.sms === 'sent' || confirmStatus.email === 'sent') && (
                 <p className="text-[11px] font-bold text-emerald-600">
-                  Confirmation SMS sent to {bookedTicket.phone}.
+                  Confirmation sent
+                  {confirmStatus.sms === 'sent' && ` by SMS to ${bookedTicket.phone}`}
+                  {confirmStatus.sms === 'sent' && confirmStatus.email === 'sent' && ' and'}
+                  {confirmStatus.email === 'sent' && ` by email to ${bookedTicket.email}`}.
                 </p>
               )}
-              {smsStatus === 'failed' && (
+              {(confirmStatus.state === 'error' ||
+                (confirmStatus.state === 'done' && confirmStatus.sms !== 'sent' && confirmStatus.email !== 'sent')) && (
                 <p className="text-[11px] font-semibold text-amber-700">
-                  We couldn’t send the confirmation SMS — your pass is still valid, so save or download it.
+                  We couldn’t send your confirmation — your pass is still valid, so save or download it.
                 </p>
               )}
             </div>

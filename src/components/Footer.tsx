@@ -98,7 +98,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
             <p className="flex items-center gap-1">
               <span>Made with</span>
               <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-              <span>v2.0</span>
+              <span>v2.0</span> by <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">Pebble</a>
             </p>
           </div>
         </div>

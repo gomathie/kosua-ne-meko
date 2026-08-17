@@ -132,13 +132,40 @@ These are intentionally **not** prefixed with `VITE_`. Vite only exposes `VITE_*
 variables to the browser, so the missing prefix is what keeps the mail password
 server-side. Never rename them to `VITE_SMTP_*`.
 
-> **Not wired up yet.** A browser cannot open an SMTP connection, so these values are
-> only useful to a Node or serverless endpoint, which this project does not have.
-> Sending RSVP confirmations still needs: a small server (`express` and `dotenv` are
-> already dependencies) or a serverless function, a mail library such as `nodemailer`,
-> a `POST /api/rsvp` route that sends the mail, and a call to it from
-> `handleSubmit` in `src/components/TicketModal.tsx`. RSVPs are currently saved to
-> `localStorage` only.
+> **Not wired up, and SMTP will not work on Cloudflare.** Workers and Pages Functions
+> cannot open raw SMTP connections, so `nodemailer` and friends are unusable there.
+> To send email from a Cloudflare deployment, use an HTTP email API (Resend, Mailgun,
+> SendGrid) and swap these variables for that provider's API key. The SMTP variables
+> above are only useful if you run the site on a Node host instead.
+
+---
+
+## 📱 SMS (mNotify)
+
+RSVP confirmations are sent by SMS through [mNotify](https://readthedocs.mnotify.com/),
+via the Cloudflare Pages Function at `functions/api/rsvp.ts` (`POST /api/rsvp`).
+
+**Flow:** `handleSubmit` in `src/components/TicketModal.tsx` saves the pass locally,
+then posts the booking to `/api/rsvp`. The Function re-validates the input, builds the
+message from a fixed server-side template, and calls mNotify's quick-SMS endpoint.
+SMS failure never blocks an RSVP — the pass is already saved and the UI says so.
+
+**Configuration** (`MNOTIFY_API_KEY`, `MNOTIFY_SENDER_ID`, `MNOTIFY_NOTIFY_TO`):
+
+| Where | How |
+|---|---|
+| Cloudflare | Settings → Variables and Secrets → add as **Secrets** (encrypted) |
+| Local dev | `.dev.vars` (copy `.dev.vars.example`), run `npx wrangler pages dev dist` |
+
+No `VITE_` prefix — that is what keeps the SMS key server-side. The sender ID must be
+registered with mNotify and is limited to 11 alphanumeric characters.
+
+> **⚠️ The endpoint is unauthenticated and costs money per call.** Anyone can POST to
+> `/api/rsvp` and make it send an SMS, which is how SMS-pumping fraud drains prepaid
+> credit. Mitigations already in place: one recipient per request, a fixed message
+> template (no client text is echoed), strict length caps, and Ghana-number validation.
+> Before promoting real traffic you should add **Cloudflare Turnstile** on the RSVP
+> form plus a **KV- or Durable-Object-backed rate limit** per IP and per phone number.
 
 ---
 

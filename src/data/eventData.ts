@@ -1,4 +1,4 @@
-import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem, Collaborator, Sponsor, EventDetails, GalleryItem, EventItem, AdminUser } from '../types';
+import { TicketPass, Vendor, ScheduleItem, PepperLevel, FAQItem, Collaborator, Sponsor, EventDetails, GalleryItem, EventItem, AdminUser, EventCategories } from '../types';
 
 export const EVENT_DETAILS: EventDetails = {
   title: 'KOSUA NE MEKO HANGOUT 2.0',
@@ -92,6 +92,16 @@ export const INITIAL_ADMIN_USERS: AdminUser[] =
         },
       ]
     : [];
+
+/**
+ * Starting categories. Admins add to these through the portal, so nothing here
+ * is a closed set — code must treat unknown categories as valid.
+ */
+export const INITIAL_CATEGORIES: EventCategories = {
+  vendors: ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment'],
+  schedule: ['food', 'competition', 'music', 'community', 'entertainment'],
+  gallery: ['food', 'vibes', 'stage', 'community'],
+};
 
 export const INITIAL_COLLABORATORS: Collaborator[] = [
   {

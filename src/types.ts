@@ -24,7 +24,8 @@ export interface UserTicket {
 export interface Vendor {
   id: string;
   name: string;
-  category: 'eggs-pepper' | 'drinks' | 'street-food' | 'farm-fresh' | 'entertainment';
+  /** Category slug. Free-form so admins can add their own — see EventCategories. */
+  category: string;
   description: string;
   specialty: string;
   imageUrl: string;
@@ -36,7 +37,7 @@ export interface ScheduleItem {
   title: string;
   description: string;
   location: string;
-  category: 'food' | 'competition' | 'music' | 'community' | 'entertainment';
+  category: string;
 }
 
 export interface PepperLevel {
@@ -93,7 +94,7 @@ export interface GalleryItem {
   id: string;
   title: string;
   imageUrl: string;
-  category: 'food' | 'vibes' | 'stage' | 'community';
+  category: string;
   caption?: string;
 }
 
@@ -131,7 +132,21 @@ export interface FAQItem {
   category?: string;
 }
 
+/**
+ * Admin-managed category lists. Stored as slugs (`street-food`) and rendered as
+ * titles (`Street Food`), so new ones need no code change.
+ */
+export interface EventCategories {
+  vendors: string[];
+  schedule: string[];
+  gallery: string[];
+}
+
+/** The three things categories can be attached to. */
+export type CategoryKind = keyof EventCategories;
+
 export interface FullEventData {
+  categories: EventCategories;
   eventDetails: EventDetails;
   eventsList: EventItem[];
   adminUsers: AdminUser[];

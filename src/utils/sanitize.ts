@@ -165,6 +165,41 @@ export function sanitizeImageUrl(value: unknown, fallback: string = ''): string 
   return /^https?:/i.test(url) || url.startsWith('/') ? url : fallback;
 }
 
+/**
+ * Categories are admin-defined, so they cannot be pinned to a fixed list the way
+ * `tier` or `status` are — doing so would silently discard every category an
+ * admin adds. Instead the value is normalised to a slug: lowercase, spaces and
+ * separators collapsed to single hyphens, and anything outside [a-z0-9-] dropped.
+ * That keeps it safe to use in class names, URLs and comparisons.
+ */
+export function sanitizeCategory(value: unknown, fallback: string = ''): string {
+  const slug = sanitizeText(value, 48)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || fallback;
+}
+
+/** Turns a slug back into a display label: `street-food` -> `Street Food`. */
+export function formatCategoryLabel(value: string): string {
+  return value
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/** Normalises a list of categories: slugged, de-duplicated, order preserved. */
+export function sanitizeCategoryList(value: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(value)) return fallback;
+  const seen = new Set<string>();
+  for (const entry of value) {
+    const slug = sanitizeCategory(entry);
+    if (slug) seen.add(slug);
+  }
+  return seen.size > 0 ? [...seen] : fallback;
+}
+
 /** Pins a value to one of `allowed`, falling back when it is anything else. */
 export function sanitizeEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   return typeof value === 'string' && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;

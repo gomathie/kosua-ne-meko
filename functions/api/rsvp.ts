@@ -1,5 +1,7 @@
 import { WorkerMailer } from 'worker-mailer';
 import { sanitizeText, sanitizePhone, sanitizeEmail, sanitizeInt, isValidPhone, isValidEmail, LIMITS } from '../../src/utils/sanitize';
+import type { D1Database } from '../_shared/d1';
+import { verifyTurnstile, findExceededLimit, recordRateLimitHits, RATE_LIMITS } from '../_shared/guards';
 
 /**
  * Cloudflare Pages Function: POST /api/rsvp
@@ -17,16 +19,11 @@ import { sanitizeText, sanitizePhone, sanitizeEmail, sanitizeInt, isValidPhone, 
  * supplies short, sanitized values. Never echo raw client text into a message.
  */
 
-/** Minimal shape of the D1 binding we use — avoids pulling in workers-types. */
-interface D1Database {
-  prepare(query: string): {
-    bind(...values: unknown[]): { run(): Promise<unknown> };
-  };
-}
-
 interface Env {
   /** D1 binding declared in wrangler.jsonc. Undefined until the DB is created. */
   DB?: D1Database;
+  /** Turnstile secret. When unset the endpoint refuses to send — fail closed. */
+  TURNSTILE_SECRET_KEY?: string;
   MNOTIFY_API_KEY?: string;
   MNOTIFY_SENDER_ID?: string;
   /** Optional organiser number that gets a copy of each new RSVP. */
@@ -55,6 +52,8 @@ interface RsvpPayload {
   eventTitle?: unknown;
   eventDate?: unknown;
   venue?: unknown;
+  /** Turnstile token from the widget in the RSVP form. */
+  turnstileToken?: unknown;
 }
 
 /** Per-channel outcome reported back to the UI. */
@@ -191,6 +190,40 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
   if (!name || !ticketId || (!isValidPhone(phone) && !isValidEmail(email))) {
     return json({ ok: false, error: 'A name, ticket ID and at least one valid phone or email are required.' }, 400);
+  }
+
+  // --- Abuse guards: everything below this point spends money --------------
+
+  // Fail closed. An unconfigured Turnstile secret must not leave the endpoint
+  // wide open — that is precisely the state an attacker would hope to find.
+  if (!env.TURNSTILE_SECRET_KEY) {
+    console.error('[rsvp] TURNSTILE_SECRET_KEY is not configured — refusing to send');
+    return json({ ok: false, error: 'Confirmations are not configured on this deployment.' }, 503);
+  }
+
+  const clientIp = request.headers.get('CF-Connecting-IP');
+  const turnstile = await verifyTurnstile(
+    env.TURNSTILE_SECRET_KEY,
+    typeof payload.turnstileToken === 'string' ? payload.turnstileToken : '',
+    clientIp,
+  );
+  if (!turnstile.ok) {
+    console.warn('[rsvp] Turnstile rejected:', turnstile.detail);
+    return json({ ok: false, error: 'Verification failed. Please reload the page and try again.' }, 403);
+  }
+
+  const buckets = [
+    ...(clientIp ? [{ key: `ip:${clientIp}`, ...RATE_LIMITS.ip }] : []),
+    ...(phone ? [{ key: `phone:${phone}`, ...RATE_LIMITS.phone }] : []),
+  ];
+
+  if (env.DB && buckets.length > 0) {
+    const exceeded = await findExceededLimit(env.DB, buckets);
+    if (exceeded) {
+      console.warn('[rsvp] rate limit hit for', exceeded);
+      return json({ ok: false, error: 'Too many RSVP attempts. Please try again later.' }, 429);
+    }
+    await recordRateLimitHits(env.DB, buckets.map((bucket) => bucket.key));
   }
 
   const whereWhen = [eventDate, venue].filter(Boolean).join(', ');

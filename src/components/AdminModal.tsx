@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles } from 'lucide-react';
+import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
 import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
 import {
   LIMITS,
@@ -19,6 +19,19 @@ import {
   sanitizeGalleryInput,
   sanitizeImageUrl,
 } from '../utils/sanitize';
+
+/** One row of the D1 `rsvps` table, as returned by GET /api/rsvps. */
+interface RsvpRow {
+  ticket_id: string;
+  customer_name: string;
+  phone: string;
+  email: string;
+  pass_name: string;
+  quantity: number;
+  sms_status: string;
+  email_status: string;
+  created_at: string;
+}
 
 /** Stand-in artwork used when an admin leaves an image field blank. */
 const FALLBACK_VENDOR_IMAGE = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80';
@@ -98,9 +111,17 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  /**
+   * Server-issued session token. Only present when POST /api/admin/login
+   * succeeded — it is what unlocks the RSVP list, since the portal's own
+   * password ships in the JS bundle and cannot protect data.
+   */
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [rsvps, setRsvps] = useState<RsvpRow[]>([]);
+  const [rsvpState, setRsvpState] = useState<'idle' | 'loading' | 'error'>('idle');
   const [revealedPasscodeId, setRevealedPasscodeId] = useState<string | null>(null);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
+  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'rsvps'>('event');
 
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
@@ -182,7 +203,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     // Must use the same normalization the "add admin" form uses, or a credential
     // created with stray whitespace could never be typed back in.
@@ -194,8 +215,36 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return;
     }
 
-    // Both must match the same account, and the admin list is the only authority —
-    // no hardcoded fallbacks, so removing an admin really does revoke their access.
+    // Try the server first. When it is configured it is the real authority, and
+    // only it can hand back the token needed to read attendee data.
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password: cleanPass }),
+      });
+
+      if (response.ok) {
+        const body = (await response.json()) as { token?: string };
+        setSessionToken(body.token ?? null);
+        setIsAuthenticated(true);
+        setAuthError('');
+        setPasscode('');
+        setFormData(eventDetails);
+        return;
+      }
+
+      if (response.status === 401) {
+        setAuthError('Incorrect email or password.');
+        return;
+      }
+      // 503 means server auth is not configured — fall through to the local gate.
+    } catch {
+      // Offline, or Functions are not running (plain `npm run dev`) — fall through.
+    }
+
+    // Local fallback: gates the UI only. Both halves must match the same account,
+    // and the admin list is the only authority — no hardcoded fallbacks.
     const isValidAdmin = adminUsers.some(
       (u) => sanitizeEmail(u.email) === cleanEmail && sanitizePasscode(u.passcode) === cleanPass,
     );
@@ -204,10 +253,49 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       setIsAuthenticated(true);
       setAuthError('');
       setPasscode('');
+      setSessionToken(null);
       setFormData(eventDetails);
     } else {
       // Deliberately does not say which half was wrong.
       setAuthError('Incorrect email or password.');
+    }
+  };
+
+  const loadRsvps = async () => {
+    if (!sessionToken) return;
+    setRsvpState('loading');
+    try {
+      const response = await fetch('/api/rsvps?limit=200', {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      if (!response.ok) {
+        setRsvpState('error');
+        return;
+      }
+      const body = (await response.json()) as { rsvps?: RsvpRow[] };
+      setRsvps(body.rsvps ?? []);
+      setRsvpState('idle');
+    } catch {
+      setRsvpState('error');
+    }
+  };
+
+  /** CSV is fetched with the auth header, then handed to the browser as a blob. */
+  const downloadRsvpCsv = async () => {
+    if (!sessionToken) return;
+    try {
+      const response = await fetch('/api/rsvps?format=csv&limit=500', {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      if (!response.ok) return;
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'kosua-ne-meko-rsvps.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      /* nothing actionable — the list stays on screen */
     }
   };
 
@@ -560,6 +648,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 >
                   <Camera className="w-4 h-4" />
                   <span>Gallery Photos ({gallery.length})</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('rsvps');
+                    if (sessionToken && rsvps.length === 0) loadRsvps();
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'rsvps' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                >
+                  <Ticket className="w-4 h-4 text-emerald-400" />
+                  <span>RSVPs</span>
                 </button>
               </div>
 
@@ -1633,6 +1733,106 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* TAB 6: RSVPs from D1 */}
+            {activeTab === 'rsvps' && (
+              <div className="space-y-4">
+                {!sessionToken ? (
+                  <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                    <p className="text-xs font-black uppercase text-amber-400">Server sign-in required</p>
+                    <p className="text-[11px] text-stone-300 font-semibold leading-relaxed">
+                      Attendee data is protected by server-side credentials, so it cannot be unlocked by the
+                      portal password alone. Set <span className="font-mono text-amber-300">ADMIN_EMAIL</span>,{' '}
+                      <span className="font-mono text-amber-300">ADMIN_PASSWORD</span> and{' '}
+                      <span className="font-mono text-amber-300">ADMIN_SESSION_SECRET</span> as Secrets in
+                      Cloudflare (or <span className="font-mono text-amber-300">.dev.vars</span> locally), then
+                      sign in again. Running <span className="font-mono text-amber-300">npm run dev</span> will
+                      never work here — Functions only run under{' '}
+                      <span className="font-mono text-amber-300">npm run pages:dev</span>.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">
+                        ATTENDEE RSVPS ({rsvps.length})
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={loadRsvps}
+                          disabled={rsvpState === 'loading'}
+                          className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-extrabold flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${rsvpState === 'loading' ? 'animate-spin' : ''}`} />
+                          <span>{rsvpState === 'loading' ? 'Loading…' : 'Refresh'}</span>
+                        </button>
+                        <button
+                          onClick={downloadRsvpCsv}
+                          className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-1.5"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Export CSV</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {rsvpState === 'error' && (
+                      <p className="text-xs font-bold text-red-400">
+                        Could not load RSVPs. Your session may have expired — close the portal and sign in again.
+                      </p>
+                    )}
+
+                    {rsvpState !== 'error' && rsvps.length === 0 && (
+                      <p className="text-xs text-stone-400 font-semibold">
+                        No RSVPs recorded yet. They appear here once attendees book on the deployed site.
+                      </p>
+                    )}
+
+                    {rsvps.length > 0 && (
+                      <div className="overflow-x-auto rounded-2xl border border-stone-700">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-stone-800 text-stone-300">
+                            <tr>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Attendee</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Contact</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Pass</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Sent</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Booked</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rsvps.map((row) => (
+                              <tr key={row.ticket_id} className="border-t border-stone-800 align-top">
+                                <td className="px-3 py-2">
+                                  <span className="font-bold text-white block">{row.customer_name}</span>
+                                  <span className="font-mono text-[10px] text-amber-400">{row.ticket_id}</span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-300">
+                                  <span className="block">{row.phone}</span>
+                                  <span className="block text-[10px] text-stone-400">{row.email}</span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-300">
+                                  {row.pass_name} &times; {row.quantity}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <span className={row.sms_status === 'sent' ? 'text-emerald-400' : 'text-stone-500'}>
+                                    SMS
+                                  </span>{' '}
+                                  <span className={row.email_status === 'sent' ? 'text-emerald-400' : 'text-stone-500'}>
+                                    Email
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-400 whitespace-nowrap">{row.created_at}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 

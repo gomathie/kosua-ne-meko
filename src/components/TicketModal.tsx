@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Ticket, Check, Sparkles, Flame, User, Mail, Phone, ShoppingCart, QrCode, Download, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
@@ -27,9 +27,54 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     { state: 'idle' | 'sending' | 'error' } | { state: 'done'; sms: ChannelResult; email: ChannelResult }
   >({ state: 'idle' });
 
+  // --- Turnstile -----------------------------------------------------------
+  // The site key is public by design; the matching secret lives only on the
+  // server, where /api/rsvp verifies the token before spending money on sends.
+  const turnstileSiteKey = import.meta.env?.VITE_TURNSTILE_SITE_KEY ?? '';
+  const turnstileRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
+
+  // Render the widget once the modal is showing the form. The Turnstile script
+  // loads async, so poll briefly for the global rather than assuming it is ready.
+  useEffect(() => {
+    if (!isOpen || bookedTicket || !turnstileSiteKey) return;
+
+    let cancelled = false;
+    let pollId: number | undefined;
+
+    const mount = () => {
+      if (cancelled || !turnstileRef.current || turnstileWidgetId.current) return;
+      if (!window.turnstile) {
+        pollId = window.setTimeout(mount, 200);
+        return;
+      }
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: turnstileSiteKey,
+        action: 'turnstile-spin-v1',
+        callback: (token) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+    };
+    mount();
+
+    return () => {
+      cancelled = true;
+      if (pollId) window.clearTimeout(pollId);
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+      }
+      turnstileWidgetId.current = null;
+    };
+  }, [isOpen, bookedTicket, turnstileSiteKey]);
+
   if (!isOpen) return null;
 
   const isBookingClosed = eventDetails?.isBookingOpen === false;
+  // Only gate on Turnstile when it is actually configured, so a deployment
+  // without a site key still works locally.
+  const needsTurnstile = Boolean(turnstileSiteKey);
 
   const totalGHS = selectedPass.priceGHS * quantity;
 
@@ -100,6 +145,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
         eventTitle: eventDetails?.title ?? '',
         eventDate: eventDetails?.dateString ?? '',
         venue: eventDetails?.locationName ?? '',
+        turnstileToken,
       }),
     })
       .then(async (res) => {
@@ -327,6 +373,18 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               </div>
             </div>
 
+            {/* Bot check — sits directly above the submit button it gates. */}
+            {needsTurnstile && !isBookingClosed && (
+              <div className="space-y-2">
+                <div ref={turnstileRef} />
+                {!turnstileToken && (
+                  <p className="text-[11px] font-semibold text-stone-500">
+                    Complete the verification above to confirm your RSVP.
+                  </p>
+                )}
+              </div>
+            )}
+
             {isBookingClosed && (
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-center space-y-1">
                 <p className="text-xs font-black uppercase">🔴 PRE-BOOKING CURRENTLY INACTIVE</p>
@@ -345,9 +403,9 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
               <button
                 type="submit"
-                disabled={isBookingClosed}
+                disabled={isBookingClosed || (needsTurnstile && !turnstileToken)}
                 className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg transition-all flex items-center gap-2 ${
-                  isBookingClosed
+                  isBookingClosed || (needsTurnstile && !turnstileToken)
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
                     : 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-600/30'
                 }`}

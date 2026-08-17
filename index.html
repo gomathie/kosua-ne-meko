@@ -31,6 +31,9 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Cloudflare Turnstile: bot protection for the RSVP form. Rendered
+         explicitly from TicketModal so React controls its lifecycle. -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

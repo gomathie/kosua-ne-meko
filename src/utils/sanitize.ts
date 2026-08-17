@@ -1,0 +1,353 @@
+import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails, EventItem, AdminUser, FullEventData } from '../types';
+
+/**
+ * Central input sanitization for every untrusted string that enters the app:
+ * the public RSVP form, every Admin Portal form, and anything replayed out of
+ * localStorage (which the user — or anything else running on this origin — can
+ * edit by hand).
+ *
+ * React escapes text nodes for us, so the jobs here are:
+ *  1. strip control / invisible / bidi characters that let text lie about itself,
+ *  2. cap lengths so one field can't blow out the layout or the storage quota,
+ *  3. keep `javascript:` & friends out of every href/src we render,
+ *  4. pin enum-ish fields ("tier", "category", "status") to their allowed values.
+ */
+
+/**
+ * Code point ranges that are never legitimate inside a form field: C0/C1
+ * controls, zero-width characters, bidi overrides (which let text render in a
+ * different order than it is stored), line/paragraph separators, and the BOM.
+ */
+const INVISIBLE_RANGES: ReadonlyArray<readonly [number, number]> = [
+  [0x0000, 0x001f], // C0 controls
+  [0x007f, 0x009f], // DEL + C1 controls
+  [0x200b, 0x200f], // zero-width space/joiners, LRM/RLM
+  [0x2028, 0x2029], // line / paragraph separator
+  [0x202a, 0x202e], // bidi embedding + overrides
+  [0x2066, 0x2069], // bidi isolates
+  [0xfeff, 0xfeff], // byte order mark
+];
+
+/** Replaces every invisible/control character in `value` with `replacement`. */
+function stripInvisible(value: string, replacement: string): string {
+  return Array.from(value)
+    .map((char) => {
+      const code = char.codePointAt(0) ?? 0;
+      return INVISIBLE_RANGES.some(([lo, hi]) => code >= lo && code <= hi) ? replacement : char;
+    })
+    .join("");
+}
+
+/** Schemes we are willing to put in an `href`. Everything else is dropped. */
+const SAFE_LINK_PROTOCOLS = ['http:', 'https:', 'mailto:', 'tel:'];
+
+/** Inline image types allowed in `src`. SVG is excluded — it can carry script. */
+const SAFE_DATA_IMAGE = /^data:image\/(png|jpe?g|gif|webp|avif);base64,[A-Za-z0-9+/=\s]+$/i;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
+
+export const LIMITS = {
+  id: 64,
+  name: 80,
+  email: 254,
+  phone: 24,
+  passcode: 64,
+  title: 120,
+  shortText: 140,
+  description: 400,
+  url: 2048,
+  isoDate: 40,
+} as const;
+
+/**
+ * Single-line free text: drop invisible characters, collapse runs of whitespace,
+ * trim, and cap the length. Non-strings become ''.
+ */
+export function sanitizeText(value: unknown, maxLength: number = LIMITS.shortText): string {
+  if (typeof value !== 'string') return '';
+  return stripInvisible(value, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength)
+    .trim();
+}
+
+/**
+ * Passcodes keep their exact characters (case, punctuation, inner spaces) —
+ * only invisible characters and surrounding whitespace are removed. Both the
+ * "create admin" and "log in" paths must use this so the two sides always agree.
+ */
+export function sanitizePasscode(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return stripInvisible(value, '').trim().slice(0, LIMITS.passcode);
+}
+
+/** Lowercased address, or '' when it isn't shaped like an email at all. */
+export function sanitizeEmail(value: unknown): string {
+  const cleaned = sanitizeText(value, LIMITS.email).replace(/\s/g, '').toLowerCase();
+  return EMAIL_PATTERN.test(cleaned) ? cleaned : '';
+}
+
+export function isValidEmail(value: unknown): boolean {
+  return sanitizeEmail(value) !== '';
+}
+
+/**
+ * Normalizes a phone number to an optional leading '+' plus digits, dropping the
+ * spaces, dashes and brackets people type. Caps at the E.164 maximum of 15 digits.
+ */
+export function sanitizePhone(value: unknown): string {
+  const raw = sanitizeText(value, LIMITS.phone * 2);
+  if (!raw) return '';
+  const prefix = raw.startsWith('+') ? '+' : '';
+  const digits = raw.replace(/\D/g, '').slice(0, 15);
+  return digits ? prefix + digits : '';
+}
+
+/** Ghana numbers are 10 local / 12 international digits; allow the range around it. */
+export function isValidPhone(value: unknown): boolean {
+  const digits = sanitizePhone(value).replace(/\D/g, '');
+  return digits.length >= 9 && digits.length <= 15;
+}
+
+/**
+ * Returns a URL that is safe to hand to `href`, or `fallback` if it isn't.
+ * Bare domains ("trypebble.com") are upgraded to https. Root-relative paths
+ * pass through untouched.
+ */
+export function sanitizeUrl(value: unknown, fallback: string = ''): string {
+  if (typeof value !== 'string') return fallback;
+
+  const cleaned = stripInvisible(value, '').trim().slice(0, LIMITS.url);
+  if (!cleaned) return fallback;
+
+  // Root-relative asset path — no scheme to police.
+  if (cleaned.startsWith('/') && !cleaned.startsWith('//')) return cleaned;
+
+  const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(cleaned);
+  const candidate = hasScheme || cleaned.startsWith('//') ? cleaned : `https://${cleaned}`;
+
+  try {
+    const parsed = new URL(candidate, 'https://kosuanemeko.local');
+    return SAFE_LINK_PROTOCOLS.includes(parsed.protocol) ? parsed.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Same as {@link sanitizeUrl} but for `src`: http(s) and inline raster data URIs
+ * only — no mailto:/tel:, no `data:image/svg+xml`.
+ */
+export function sanitizeImageUrl(value: unknown, fallback: string = ''): string {
+  if (typeof value !== 'string') return fallback;
+
+  const cleaned = stripInvisible(value, '').trim();
+  if (!cleaned) return fallback;
+
+  if (/^data:/i.test(cleaned)) {
+    return SAFE_DATA_IMAGE.test(cleaned) ? cleaned : fallback;
+  }
+
+  const url = sanitizeUrl(cleaned, '');
+  if (!url) return fallback;
+  return /^https?:/i.test(url) || url.startsWith('/') ? url : fallback;
+}
+
+/** Pins a value to one of `allowed`, falling back when it is anything else. */
+export function sanitizeEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof value === 'string' && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
+}
+
+export function sanitizeInt(value: unknown, min: number, max: number, fallback: number): number {
+  const parsed = typeof value === 'number' ? value : parseInt(String(value ?? ''), 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(parsed)));
+}
+
+export function sanitizeNumber(value: unknown, min: number, max: number, fallback: number): number {
+  const parsed = typeof value === 'number' ? value : parseFloat(String(value ?? ''));
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
+}
+
+/**
+ * Keeps the caller's own date text (the app stores local-time strings like
+ * `2026-09-05T10:00:00`, which must not be shifted into UTC) but only if it
+ * actually parses as a date.
+ */
+export function sanitizeIsoDate(value: unknown, fallback: string = ''): string {
+  const text = sanitizeText(value, LIMITS.isoDate).replace(/\s/g, '');
+  if (!text) return fallback;
+  return Number.isNaN(Date.parse(text)) ? fallback : text;
+}
+
+const VENDOR_CATEGORIES: readonly Vendor['category'][] = ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment'];
+const SCHEDULE_CATEGORIES: readonly ScheduleItem['category'][] = ['food', 'competition', 'music', 'community', 'entertainment'];
+const SPONSOR_TIERS: readonly Sponsor['tier'][] = ['Headline', 'Gold', 'Silver', 'Partner'];
+const GALLERY_CATEGORIES: readonly GalleryItem['category'][] = ['food', 'vibes', 'stage', 'community'];
+const EVENT_STATUSES: readonly EventItem['status'][] = ['active', 'upcoming', 'past'];
+const ADMIN_ROLES: readonly AdminUser['role'][] = ['Super Admin', 'Event Manager', 'Staff'];
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// ---------------------------------------------------------------------------
+// Record-level sanitizers — shared by the Admin Portal forms and the localStorage
+// loader so both ends of the round trip enforce identical rules.
+// ---------------------------------------------------------------------------
+
+export function sanitizeVendorInput(input: Omit<Vendor, 'id'>, fallbackImage = ''): Omit<Vendor, 'id'> {
+  return {
+    name: sanitizeText(input.name, LIMITS.name),
+    category: sanitizeEnum(input.category, VENDOR_CATEGORIES, 'street-food'),
+    description: sanitizeText(input.description, LIMITS.description),
+    specialty: sanitizeText(input.specialty, LIMITS.shortText),
+    imageUrl: sanitizeImageUrl(input.imageUrl, fallbackImage),
+    badge: sanitizeText(input.badge, LIMITS.shortText) || undefined,
+  };
+}
+
+export function sanitizeVendor(input: Vendor, fallbackImage = ''): Vendor {
+  return { ...sanitizeVendorInput(input, fallbackImage), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+export function sanitizeScheduleItem(input: ScheduleItem): ScheduleItem {
+  return {
+    time: sanitizeText(input.time, 40),
+    title: sanitizeText(input.title, LIMITS.title),
+    description: sanitizeText(input.description, LIMITS.description),
+    location: sanitizeText(input.location, LIMITS.shortText),
+    category: sanitizeEnum(input.category, SCHEDULE_CATEGORIES, 'food'),
+  };
+}
+
+export function sanitizeCollaboratorInput(input: Omit<Collaborator, 'id'>, fallbackLogo = ''): Omit<Collaborator, 'id'> {
+  return {
+    name: sanitizeText(input.name, LIMITS.name),
+    url: sanitizeUrl(input.url, ''),
+    tagline: sanitizeText(input.tagline, LIMITS.description),
+    badge: sanitizeText(input.badge, LIMITS.shortText) || undefined,
+    logoUrl: sanitizeImageUrl(input.logoUrl, fallbackLogo) || undefined,
+  };
+}
+
+export function sanitizeCollaborator(input: Collaborator, fallbackLogo = ''): Collaborator {
+  return { ...sanitizeCollaboratorInput(input, fallbackLogo), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+export function sanitizeSponsorInput(input: Omit<Sponsor, 'id'>, fallbackLogo = ''): Omit<Sponsor, 'id'> {
+  return {
+    name: sanitizeText(input.name, LIMITS.name),
+    tier: sanitizeEnum(input.tier, SPONSOR_TIERS, 'Gold'),
+    logoUrl: sanitizeImageUrl(input.logoUrl, fallbackLogo),
+    websiteUrl: sanitizeUrl(input.websiteUrl, '') || undefined,
+  };
+}
+
+export function sanitizeSponsor(input: Sponsor, fallbackLogo = ''): Sponsor {
+  return { ...sanitizeSponsorInput(input, fallbackLogo), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+export function sanitizeGalleryInput(input: Omit<GalleryItem, 'id'>, fallbackImage = ''): Omit<GalleryItem, 'id'> {
+  return {
+    title: sanitizeText(input.title, LIMITS.title),
+    imageUrl: sanitizeImageUrl(input.imageUrl, fallbackImage),
+    category: sanitizeEnum(input.category, GALLERY_CATEGORIES, 'food'),
+    caption: sanitizeText(input.caption, LIMITS.description) || undefined,
+  };
+}
+
+export function sanitizeGalleryItem(input: GalleryItem, fallbackImage = ''): GalleryItem {
+  return { ...sanitizeGalleryInput(input, fallbackImage), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+export function sanitizeAdminUserInput(input: Omit<AdminUser, 'id' | 'createdDate'>): Omit<AdminUser, 'id' | 'createdDate'> {
+  return {
+    name: sanitizeText(input.name, LIMITS.name),
+    email: sanitizeEmail(input.email) || undefined,
+    passcode: sanitizePasscode(input.passcode),
+    role: sanitizeEnum(input.role, ADMIN_ROLES, 'Staff'),
+  };
+}
+
+export function sanitizeAdminUser(input: AdminUser): AdminUser {
+  return {
+    ...sanitizeAdminUserInput(input),
+    id: sanitizeText(input.id, LIMITS.id),
+    createdDate: sanitizeText(input.createdDate, 40),
+  };
+}
+
+export function sanitizeEventDetails(input: EventDetails): EventDetails {
+  return {
+    title: sanitizeText(input.title, LIMITS.title),
+    shortTitle: sanitizeText(input.shortTitle, LIMITS.title),
+    tagline: sanitizeText(input.tagline, LIMITS.description),
+    dateString: sanitizeText(input.dateString, 60),
+    targetDateISO: sanitizeIsoDate(input.targetDateISO, new Date().toISOString()),
+    time: sanitizeText(input.time, 60),
+    locationName: sanitizeText(input.locationName, LIMITS.shortText),
+    city: sanitizeText(input.city, LIMITS.shortText),
+    fullAddress: sanitizeText(input.fullAddress, LIMITS.description),
+    organizer: sanitizeText(input.organizer, LIMITS.name),
+    organizerTagline: sanitizeText(input.organizerTagline, LIMITS.description),
+    collaborator: sanitizeText(input.collaborator, LIMITS.name),
+    collaboratorUrl: sanitizeUrl(input.collaboratorUrl, ''),
+    collaboratorTagline: sanitizeText(input.collaboratorTagline, LIMITS.description),
+    hashtag: sanitizeText(input.hashtag, LIMITS.shortText),
+    mapCoordinates: {
+      lat: sanitizeNumber(input.mapCoordinates?.lat, -90, 90, 0),
+      lng: sanitizeNumber(input.mapCoordinates?.lng, -180, 180, 0),
+    },
+    isBookingOpen: input.isBookingOpen !== false,
+  };
+}
+
+export function sanitizeEventItemInput(input: Omit<EventItem, 'id'>): Omit<EventItem, 'id'> {
+  return {
+    title: sanitizeText(input.title, LIMITS.title),
+    shortTitle: sanitizeText(input.shortTitle, LIMITS.title),
+    tagline: sanitizeText(input.tagline, LIMITS.description),
+    dateString: sanitizeText(input.dateString, 60),
+    targetDateISO: sanitizeIsoDate(input.targetDateISO, new Date().toISOString()),
+    time: sanitizeText(input.time, 60),
+    locationName: sanitizeText(input.locationName, LIMITS.shortText),
+    city: sanitizeText(input.city, LIMITS.shortText),
+    fullAddress: sanitizeText(input.fullAddress, LIMITS.description),
+    organizer: sanitizeText(input.organizer, LIMITS.name),
+    hashtag: sanitizeText(input.hashtag, LIMITS.shortText),
+    status: sanitizeEnum(input.status, EVENT_STATUSES, 'upcoming'),
+    allowPrebooking: input.allowPrebooking === true,
+  };
+}
+
+export function sanitizeEventItem(input: EventItem): EventItem {
+  return { ...sanitizeEventItemInput(input), id: sanitizeText(input.id, LIMITS.id) };
+}
+
+/**
+ * Scrubs a whole stored blob. Anything that isn't the right shape is replaced
+ * with the matching slice of `fallback`, so a hand-edited or half-written
+ * localStorage entry can never take the site down or inject a link.
+ */
+export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData): FullEventData {
+  if (!isRecord(parsed)) return fallback;
+
+  const list = <T,>(value: unknown, sanitizer: (item: T) => T, fallbackList: T[]): T[] =>
+    Array.isArray(value) ? value.filter(isRecord).map((item) => sanitizer(item as T)) : fallbackList;
+
+  return {
+    eventDetails: sanitizeEventDetails({
+      ...fallback.eventDetails,
+      ...(isRecord(parsed.eventDetails) ? (parsed.eventDetails as Partial<EventDetails>) : {}),
+    }),
+    eventsList: list<EventItem>(parsed.eventsList, sanitizeEventItem, fallback.eventsList),
+    adminUsers: list<AdminUser>(parsed.adminUsers, sanitizeAdminUser, fallback.adminUsers),
+    vendors: list<Vendor>(parsed.vendors, (v) => sanitizeVendor(v), fallback.vendors),
+    schedule: list<ScheduleItem>(parsed.schedule, sanitizeScheduleItem, fallback.schedule),
+    collaborators: list<Collaborator>(parsed.collaborators, (c) => sanitizeCollaborator(c), fallback.collaborators),
+    sponsors: list<Sponsor>(parsed.sponsors, (s) => sanitizeSponsor(s), fallback.sponsors),
+    gallery: list<GalleryItem>(parsed.gallery, (g) => sanitizeGalleryItem(g), fallback.gallery),
+  };
+}

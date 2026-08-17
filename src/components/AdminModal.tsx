@@ -527,17 +527,14 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               </p>
             </div>
 
-            {adminUsers.length === 0 && (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-1">
-                <p className="text-xs font-black uppercase text-amber-400">No admin account configured</p>
-                <p className="text-[11px] text-stone-300 font-semibold">
-                  Set <span className="font-mono text-amber-300">VITE_ADMIN_EMAIL</span> and{' '}
-                  <span className="font-mono text-amber-300">VITE_ADMIN_PASSWORD</span> in your{' '}
-                  <span className="font-mono text-amber-300">.env</span> file, then rebuild. See{' '}
-                  <span className="font-mono text-amber-300">.env.example</span>.
-                </p>
-              </div>
-            )}
+            {/*
+              No "not configured" banner here on purpose. This screen is public —
+              anyone can open /adm — so it must not describe how the deployment is
+              wired. It would also be wrong: an empty client-side admin list does
+              not mean sign-in is unavailable, because the server checks the
+              admin_users table. Misconfiguration is reported to the console
+              instead, where the operator will see it and a visitor will not.
+            */}
 
             <div className="space-y-4 text-left">
               <div className="space-y-2">
@@ -1741,16 +1738,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               <div className="space-y-4">
                 {!sessionToken ? (
                   <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
-                    <p className="text-xs font-black uppercase text-amber-400">Server sign-in required</p>
+                    <p className="text-xs font-black uppercase text-amber-400">Signed in locally only</p>
                     <p className="text-[11px] text-stone-300 font-semibold leading-relaxed">
-                      Attendee data is protected by server-side credentials, so it cannot be unlocked by the
-                      portal password alone. Set <span className="font-mono text-amber-300">ADMIN_EMAIL</span>,{' '}
-                      <span className="font-mono text-amber-300">ADMIN_PASSWORD</span> and{' '}
-                      <span className="font-mono text-amber-300">ADMIN_SESSION_SECRET</span> as Secrets in
-                      Cloudflare (or <span className="font-mono text-amber-300">.dev.vars</span> locally), then
-                      sign in again. Running <span className="font-mono text-amber-300">npm run dev</span> will
-                      never work here — Functions only run under{' '}
-                      <span className="font-mono text-amber-300">npm run pages:dev</span>.
+                      Attendee records live on the server and need a server session, which this sign-in did not
+                      get — either the deployment has no admin credentials configured, or you are running{' '}
+                      <span className="font-mono text-amber-300">npm run dev</span>, which does not run the API.
+                      Use <span className="font-mono text-amber-300">npm run pages:dev</span> locally. See the
+                      Admin API section of the README for the setup.
                     </p>
                   </div>
                 ) : (

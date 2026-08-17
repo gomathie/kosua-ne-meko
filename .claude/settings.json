@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --input-type=commonjs -e ' *)",
+      "Bash(echo \"TSC EXIT: $?\")",
+      "Bash(echo \"ignore-exit: $?\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"install exit: $?\")",
+      "Bash(echo \"LINT EXIT: $?\")",
+      "WebFetch(domain:bms.africa)"
+    ]
+  }
+}

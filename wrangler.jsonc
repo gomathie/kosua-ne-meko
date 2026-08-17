@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kosua-ne-meko",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-08-17",
+  // Required by worker-mailer, which speaks SMTP over cloudflare:sockets.
+  "compatibility_flags": ["nodejs_compat"],
+
+  // RSVP bookings written by functions/api/rsvp.ts.
+  //
+  // Create the database and paste the returned id here:
+  //   npx wrangler d1 create kosua-ne-mekodb
+  //
+  // Then apply the schema:
+  //   npm run db:migrate:local   (local dev)
+  //   npm run db:migrate         (production)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kosua-ne-meko-rsvps",
+      "database_id": "39fcbc8a-85bf-4346-915c-c6c49b7509fc"
+    }
+  ]
+}

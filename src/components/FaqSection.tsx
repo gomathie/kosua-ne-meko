@@ -23,7 +23,7 @@ export const FaqSection: React.FC = () => {
             FREQUENTLY ASKED <span className="text-orange-600">QUESTIONS</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base">
-            Everything you need to know about Kosua Ne Meko Hangout 2.0 at Cencor Avenue.
+            Everything you need to know about Kosua Ne Meko Hangout 2.0 at Cencor Venue.
           </p>
         </div>
 

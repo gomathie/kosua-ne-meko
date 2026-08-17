@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Ticket, Check, Sparkles, Flame, User, Mail, Phone, ShoppingCart, QrCode, Download, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
 import { EventDetails, TicketPass, UserTicket } from '../types';
 import { downloadTicketImage } from '../utils/downloadTicket';
+import { LIMITS, sanitizeText, sanitizeEmail, sanitizePhone, sanitizeInt, isValidEmail, isValidPhone } from '../utils/sanitize';
 
 interface TicketModalProps {
   isOpen: boolean;
@@ -20,16 +21,86 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   const [phone, setPhone] = useState('');
   const [mekoPreference, setMekoPreference] = useState('Classic Accra Red Meko');
   const [bookedTicket, setBookedTicket] = useState<UserTicket | null>(null);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
+  type ChannelResult = 'sent' | 'failed' | 'skipped';
+  const [confirmStatus, setConfirmStatus] = useState<
+    { state: 'idle' | 'sending' | 'error' } | { state: 'done'; sms: ChannelResult; email: ChannelResult }
+  >({ state: 'idle' });
+
+  // --- Turnstile -----------------------------------------------------------
+  // The site key is public by design; the matching secret lives only on the
+  // server, where /api/rsvp verifies the token before spending money on sends.
+  const turnstileSiteKey = import.meta.env?.VITE_TURNSTILE_SITE_KEY ?? '';
+  const turnstileRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState('');
+
+  // Render the widget once the modal is showing the form. The Turnstile script
+  // loads async, so poll briefly for the global rather than assuming it is ready.
+  useEffect(() => {
+    if (!isOpen || bookedTicket || !turnstileSiteKey) return;
+
+    let cancelled = false;
+    let pollId: number | undefined;
+
+    const mount = () => {
+      if (cancelled || !turnstileRef.current || turnstileWidgetId.current) return;
+      if (!window.turnstile) {
+        pollId = window.setTimeout(mount, 200);
+        return;
+      }
+      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: turnstileSiteKey,
+        action: 'turnstile-spin-v1',
+        callback: (token) => setTurnstileToken(token),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+    };
+    mount();
+
+    return () => {
+      cancelled = true;
+      if (pollId) window.clearTimeout(pollId);
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.remove(turnstileWidgetId.current);
+      }
+      turnstileWidgetId.current = null;
+    };
+  }, [isOpen, bookedTicket, turnstileSiteKey]);
 
   if (!isOpen) return null;
 
   const isBookingClosed = eventDetails?.isBookingOpen === false;
+  // Only gate on Turnstile when it is actually configured, so a deployment
+  // without a site key still works locally.
+  const needsTurnstile = Boolean(turnstileSiteKey);
 
   const totalGHS = selectedPass.priceGHS * quantity;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerName || !email || !phone) return;
+
+    // Clean first, then validate what is left — a field of nothing but spaces or
+    // zero-width characters must not count as "filled in".
+    const cleanName = sanitizeText(customerName, LIMITS.name);
+    const cleanEmail = sanitizeEmail(email);
+    const cleanPhone = sanitizePhone(phone);
+    const cleanQuantity = sanitizeInt(quantity, 1, 10, 1);
+    const cleanMeko = sanitizeText(mekoPreference, LIMITS.shortText);
+
+    const nextErrors: typeof errors = {};
+    if (cleanName.length < 2) nextErrors.name = 'Please enter your full name.';
+    if (!isValidEmail(email)) nextErrors.email = 'Please enter a valid email address.';
+    if (!isValidPhone(phone)) nextErrors.phone = 'Enter a valid Ghana number, e.g. 024 123 4567.';
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    // Reflect the cleaned values back so the attendee sees exactly what was saved.
+    setCustomerName(cleanName);
+    setEmail(cleanEmail);
+    setPhone(cleanPhone);
 
     // Trigger celebratory confetti
     confetti({
@@ -44,18 +115,50 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
       id: ticketId,
       passId: selectedPass.id,
       passName: selectedPass.name,
-      customerName,
-      email,
-      phone,
-      quantity,
-      totalGHS,
-      mekoLevel: mekoPreference,
+      customerName: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      quantity: cleanQuantity,
+      totalGHS: selectedPass.priceGHS * cleanQuantity,
+      mekoLevel: cleanMeko,
       purchaseDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketId + '-' + customerName)}`,
+      qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(ticketId + '-' + cleanName)}`,
     };
 
     setBookedTicket(newTicket);
     onTicketBooked(newTicket);
+
+    // The pass is already saved locally and valid — the confirmations are a
+    // courtesy, so a failure here is reported but never blocks the RSVP.
+    setConfirmStatus({ state: 'sending' });
+    fetch('/api/rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: cleanName,
+        phone: cleanPhone,
+        email: cleanEmail,
+        ticketId,
+        passName: selectedPass.name,
+        quantity: cleanQuantity,
+        mekoLevel: cleanMeko,
+        eventTitle: eventDetails?.title ?? '',
+        eventDate: eventDetails?.dateString ?? '',
+        venue: eventDetails?.locationName ?? '',
+        turnstileToken,
+      }),
+    })
+      .then(async (res) => {
+        const body = (await res.json().catch(() => null)) as
+          | { sms?: ChannelResult; email?: ChannelResult }
+          | null;
+        if (!res.ok || !body) {
+          setConfirmStatus({ state: 'error' });
+          return;
+        }
+        setConfirmStatus({ state: 'done', sms: body.sms ?? 'skipped', email: body.email ?? 'skipped' });
+      })
+      .catch(() => setConfirmStatus({ state: 'error' }));
   };
 
   const handleReset = () => {
@@ -63,8 +166,17 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     setCustomerName('');
     setEmail('');
     setPhone('');
+    setErrors({});
+    setConfirmStatus({ state: 'idle' });
     onClose();
   };
+
+  const fieldClasses = (hasError: boolean) =>
+    `w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 ${
+      hasError
+        ? 'border-red-400 bg-red-50 focus:ring-red-500'
+        : 'border-stone-300 focus:ring-orange-500'
+    }`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/80 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200">
@@ -167,12 +279,19 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.name}
+                      autoComplete="name"
+                      aria-invalid={Boolean(errors.name)}
                       placeholder="e.g. Kwame Mensah"
                       value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setCustomerName(e.target.value);
+                        if (errors.name) setErrors({ ...errors, name: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.name))}
                     />
                   </div>
+                  {errors.name && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.name}</p>}
                 </div>
 
                 <div>
@@ -182,12 +301,19 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="email"
                       required
+                      maxLength={LIMITS.email}
+                      autoComplete="email"
+                      aria-invalid={Boolean(errors.email)}
                       placeholder="kwame@example.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) setErrors({ ...errors, email: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.email))}
                     />
                   </div>
+                  {errors.email && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
@@ -197,19 +323,27 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     <input
                       type="tel"
                       required
+                      maxLength={LIMITS.phone}
+                      autoComplete="tel"
+                      inputMode="tel"
+                      aria-invalid={Boolean(errors.phone)}
                       placeholder="+233 24 123 4567"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        if (errors.phone) setErrors({ ...errors, phone: undefined });
+                      }}
+                      className={fieldClasses(Boolean(errors.phone))}
                     />
                   </div>
+                  {errors.phone && <p className="text-[11px] font-bold text-red-600 mt-1">{errors.phone}</p>}
                 </div>
 
                 <div>
                   <label className="text-xs font-bold text-stone-700 block mb-1">Quantity</label>
                   <select
                     value={quantity}
-                    onChange={(e) => setQuantity(Number(e.target.value))}
+                    onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, 10, 1))}
                     className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
@@ -239,6 +373,18 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               </div>
             </div>
 
+            {/* Bot check — sits directly above the submit button it gates. */}
+            {needsTurnstile && !isBookingClosed && (
+              <div className="space-y-2">
+                <div ref={turnstileRef} />
+                {!turnstileToken && (
+                  <p className="text-[11px] font-semibold text-stone-500">
+                    Complete the verification above to confirm your RSVP.
+                  </p>
+                )}
+              </div>
+            )}
+
             {isBookingClosed && (
               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-center space-y-1">
                 <p className="text-xs font-black uppercase">🔴 PRE-BOOKING CURRENTLY INACTIVE</p>
@@ -257,9 +403,9 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
               <button
                 type="submit"
-                disabled={isBookingClosed}
+                disabled={isBookingClosed || (needsTurnstile && !turnstileToken)}
                 className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg transition-all flex items-center gap-2 ${
-                  isBookingClosed
+                  isBookingClosed || (needsTurnstile && !turnstileToken)
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed shadow-none'
                     : 'bg-orange-600 hover:bg-orange-700 text-white shadow-orange-600/30'
                 }`}
@@ -283,6 +429,34 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               <p className="text-xs text-stone-600 max-w-sm mx-auto">
                 Your ticket for Kosua Ne Meko Hangout 2.0 is saved! Present this QR code pass at the entrance on Sept 5.
               </p>
+
+              {confirmStatus.state === 'sending' && (
+                <p className="text-[11px] font-semibold text-stone-500">Sending your confirmation…</p>
+              )}
+              {confirmStatus.state === 'done' && (confirmStatus.sms === 'sent' || confirmStatus.email === 'sent') && (
+                <p className="text-[11px] font-bold text-emerald-600">
+                  Confirmation sent
+                  {confirmStatus.sms === 'sent' && ` by SMS to ${bookedTicket.phone}`}
+                  {confirmStatus.sms === 'sent' && confirmStatus.email === 'sent' && ' and'}
+                  {confirmStatus.email === 'sent' && ` by email to ${bookedTicket.email}`}.
+                </p>
+              )}
+              {/* A genuine send failure — distinct from confirmations simply being off. */}
+              {(confirmStatus.state === 'error' ||
+                (confirmStatus.state === 'done' &&
+                  (confirmStatus.sms === 'failed' || confirmStatus.email === 'failed'))) && (
+                <p className="text-[11px] font-semibold text-amber-700">
+                  We couldn’t send your confirmation — your pass is still valid, so save or download it.
+                </p>
+              )}
+              {/* Nothing was attempted because no channel is configured yet. */}
+              {confirmStatus.state === 'done' &&
+                confirmStatus.sms === 'skipped' &&
+                confirmStatus.email === 'skipped' && (
+                  <p className="text-[11px] font-semibold text-stone-500">
+                    Save or download your pass — your ticket ID is your entry.
+                  </p>
+                )}
             </div>
 
             {/* Digital Ticket Pass Card */}

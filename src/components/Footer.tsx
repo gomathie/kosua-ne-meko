@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
             <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800 space-y-1 text-xs">
               <span className="text-amber-400 font-extrabold block text-[10px] uppercase">HOST & ORGANIZER</span>
               <h5 className="font-black text-white text-sm font-display">EKOW SAM FARMS</h5>
-              <p className="text-stone-400">Cencor Avenue, North Dzorwulu, Greater Accra, Ghana</p>
+              <p className="text-stone-400">Cencor Venue, North Dzorwulu, Greater Accra, Ghana</p>
               <p className="text-stone-400">Email: events@ekowsamfarms.com</p>
             </div>
 
@@ -82,7 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
 
         </div>
 
-        {/* Copyright & Admin Portal Link */}
+        {/* Copyright & Portal Link */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
           <p>© 2026 {title}. Organized by {eventDetails?.organizer || 'Ekow Sam Farms'}.</p>
           <div className="flex items-center gap-4">
@@ -92,13 +92,13 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
                 className="text-stone-400 hover:text-orange-400 flex items-center gap-1 font-bold transition-colors"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>Admin Portal</span>
+                <span>Portal</span>
               </button>
             )}
             <p className="flex items-center gap-1">
               <span>Made with</span>
               <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-              <span>v2.0</span>
+              <span>v2.0</span> by <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">Pebble</a>
             </p>
           </div>
         </div>

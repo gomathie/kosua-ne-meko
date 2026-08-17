@@ -18,12 +18,22 @@ import { MyTicketsModal } from './components/MyTicketsModal';
 import { AdminModal } from './components/AdminModal';
 import { UserTicket } from './types';
 import { useEventData } from './utils/eventStore';
+import { sanitizeUserTickets } from './utils/sanitize';
+
+/**
+ * Discreet entry points for the Admin Portal. The path form needs SPA history
+ * fallback on the host; the hash form works on any static host, so both are
+ * accepted.
+ */
+const ADMIN_PATH = '/adm';
+const ADMIN_HASH = '#adm';
 
 export default function App() {
   const {
     data,
     updateEventDetails,
     addEventItem,
+    updateEventItem,
     setActiveEvent,
     deleteEventItem,
     addAdminUser,
@@ -50,25 +60,32 @@ export default function App() {
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
 
-  // Load saved tickets & check for #admin URL hash
+  // Load saved tickets & check for the admin entry point in the URL
   useEffect(() => {
     try {
       const saved = localStorage.getItem('kosua_tickets');
       if (saved) {
-        setTickets(JSON.parse(saved));
+        setTickets(sanitizeUserTickets(JSON.parse(saved)));
       }
     } catch (err) {
       console.error('Failed to load tickets from storage', err);
     }
 
     const checkAdminUrl = () => {
-      if (window.location.hash === '#admin' || window.location.search.includes('admin')) {
+      // Trailing slashes are ignored; endsWith keeps this working when the site
+      // is served from a subdirectory.
+      const path = window.location.pathname.replace(/\/+$/, '');
+      if (path === ADMIN_PATH || path.endsWith(ADMIN_PATH) || window.location.hash === ADMIN_HASH) {
         setIsAdminModalOpen(true);
       }
     };
     checkAdminUrl();
     window.addEventListener('hashchange', checkAdminUrl);
-    return () => window.removeEventListener('hashchange', checkAdminUrl);
+    window.addEventListener('popstate', checkAdminUrl);
+    return () => {
+      window.removeEventListener('hashchange', checkAdminUrl);
+      window.removeEventListener('popstate', checkAdminUrl);
+    };
   }, []);
 
   const handleTicketBooked = (newTicket: UserTicket) => {
@@ -181,6 +198,7 @@ export default function App() {
         gallery={data.gallery}
         onUpdateEventDetails={updateEventDetails}
         onAddEventItem={addEventItem}
+        onUpdateEventItem={updateEventItem}
         onSetActiveEvent={setActiveEvent}
         onDeleteEventItem={deleteEventItem}
         onAddAdminUser={addAdminUser}

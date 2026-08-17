@@ -3,6 +3,7 @@ import { X, Ticket, QrCode, Trash2, MapPin, Calendar, Download } from 'lucide-re
 import { UserTicket } from '../types';
 import { EVENT_DETAILS } from '../data/eventData';
 import { downloadTicketImage } from '../utils/downloadTicket';
+import { sanitizeImageUrl } from '../utils/sanitize';
 
 interface MyTicketsModalProps {
   isOpen: boolean;
@@ -99,7 +100,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
 
                     <div className="sm:col-span-4 bg-white p-2 rounded-xl flex flex-col items-center justify-center">
                       <img
-                        src={t.qrCodeUrl}
+                        src={sanitizeImageUrl(t.qrCodeUrl)}
                         alt="QR code"
                         referrerPolicy="no-referrer"
                         className="w-20 h-20 object-contain"

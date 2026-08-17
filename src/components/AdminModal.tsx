@@ -1,6 +1,43 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles } from 'lucide-react';
+import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
 import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
+import {
+  LIMITS,
+  sanitizeEmail,
+  sanitizePasscode,
+  sanitizeEventDetails,
+  sanitizeEventItemInput,
+  sanitizeEventItem,
+  sanitizeAdminUserInput,
+  sanitizeVendorInput,
+  sanitizeVendor,
+  sanitizeScheduleItem,
+  sanitizeCollaboratorInput,
+  sanitizeCollaborator,
+  sanitizeSponsorInput,
+  sanitizeSponsor,
+  sanitizeGalleryInput,
+  sanitizeImageUrl,
+} from '../utils/sanitize';
+
+/** One row of the D1 `rsvps` table, as returned by GET /api/rsvps. */
+interface RsvpRow {
+  ticket_id: string;
+  customer_name: string;
+  phone: string;
+  email: string;
+  pass_name: string;
+  quantity: number;
+  sms_status: string;
+  email_status: string;
+  created_at: string;
+}
+
+/** Stand-in artwork used when an admin leaves an image field blank. */
+const FALLBACK_VENDOR_IMAGE = 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80';
+const FALLBACK_LOGO_IMAGE = 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80';
+const FALLBACK_SPONSOR_LOGO = 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80';
+const FALLBACK_GALLERY_IMAGE = 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -71,10 +108,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onDeleteGalleryItem,
   onResetAll,
 }) => {
+  const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  /**
+   * Server-issued session token. Only present when POST /api/admin/login
+   * succeeded — it is what unlocks the RSVP list, since the portal's own
+   * password ships in the JS bundle and cannot protect data.
+   */
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [rsvps, setRsvps] = useState<RsvpRow[]>([]);
+  const [rsvpState, setRsvpState] = useState<'idle' | 'loading' | 'error'>('idle');
+  const [revealedPasscodeId, setRevealedPasscodeId] = useState<string | null>(null);
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
+  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'rsvps'>('event');
 
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
@@ -109,7 +156,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     category: 'street-food' as Vendor['category'],
     description: '',
     specialty: '',
-    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+    imageUrl: FALLBACK_VENDOR_IMAGE,
     badge: '',
   });
 
@@ -149,43 +196,130 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   // New Gallery Photo Form State
   const [newGallery, setNewGallery] = useState({
     title: '',
-    imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
+    imageUrl: FALLBACK_GALLERY_IMAGE,
     category: 'food' as GalleryItem['category'],
     caption: '',
   });
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanPass = passcode.trim();
-    // Validate against stored admin users or fallbacks admin123 / admin / abenkwan123
-    const isValidAdmin =
-      adminUsers.some((u) => u.passcode === cleanPass) ||
-      cleanPass === 'admin123' ||
-      cleanPass === 'admin' ||
-      cleanPass === 'abenkwan123';
+    // Must use the same normalization the "add admin" form uses, or a credential
+    // created with stray whitespace could never be typed back in.
+    const cleanEmail = sanitizeEmail(loginEmail);
+    const cleanPass = sanitizePasscode(passcode);
+
+    if (!cleanEmail || !cleanPass) {
+      setAuthError('Enter your admin email and password.');
+      return;
+    }
+
+    // Try the server first. When it is configured it is the real authority, and
+    // only it can hand back the token needed to read attendee data.
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, password: cleanPass }),
+      });
+
+      if (response.ok) {
+        const body = (await response.json()) as { token?: string };
+        setSessionToken(body.token ?? null);
+        setIsAuthenticated(true);
+        setAuthError('');
+        setPasscode('');
+        setFormData(eventDetails);
+        return;
+      }
+
+      if (response.status === 401) {
+        setAuthError('Incorrect email or password.');
+        return;
+      }
+      // 503 means server auth is not configured — fall through to the local gate.
+    } catch {
+      // Offline, or Functions are not running (plain `npm run dev`) — fall through.
+    }
+
+    // Local fallback: gates the UI only. Both halves must match the same account,
+    // and the admin list is the only authority — no hardcoded fallbacks.
+    const isValidAdmin = adminUsers.some(
+      (u) => sanitizeEmail(u.email) === cleanEmail && sanitizePasscode(u.passcode) === cleanPass,
+    );
 
     if (isValidAdmin) {
       setIsAuthenticated(true);
       setAuthError('');
+      setPasscode('');
+      setSessionToken(null);
       setFormData(eventDetails);
     } else {
-      setAuthError('Incorrect passcode. Try "admin123" or an assigned admin passcode.');
+      // Deliberately does not say which half was wrong.
+      setAuthError('Incorrect email or password.');
+    }
+  };
+
+  const loadRsvps = async () => {
+    if (!sessionToken) return;
+    setRsvpState('loading');
+    try {
+      const response = await fetch('/api/rsvps?limit=200', {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      if (!response.ok) {
+        setRsvpState('error');
+        return;
+      }
+      const body = (await response.json()) as { rsvps?: RsvpRow[] };
+      setRsvps(body.rsvps ?? []);
+      setRsvpState('idle');
+    } catch {
+      setRsvpState('error');
+    }
+  };
+
+  /** CSV is fetched with the auth header, then handed to the browser as a blob. */
+  const downloadRsvpCsv = async () => {
+    if (!sessionToken) return;
+    try {
+      const response = await fetch('/api/rsvps?format=csv&limit=500', {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      if (!response.ok) return;
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'kosua-ne-meko-rsvps.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      /* nothing actionable — the list stays on screen */
     }
   };
 
   const handleSaveEventDetails = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdateEventDetails(formData);
+    const clean = sanitizeEventDetails(formData);
+    if (!clean.title || !clean.shortTitle || !clean.dateString || !clean.locationName || !clean.city) {
+      alert('Title, short title, date, venue and city are all required.');
+      return;
+    }
+    setFormData(clean);
+    onUpdateEventDetails(clean);
     alert('Event & Venue details saved successfully!');
   };
 
   const handleCreateEventItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEvent.title.trim() || !newEvent.dateString.trim()) return;
-    onAddEventItem(newEvent);
-    alert(`New event "${newEvent.shortTitle}" created successfully!`);
+    const clean = sanitizeEventItemInput(newEvent);
+    if (!clean.title || !clean.dateString) {
+      alert('An event needs at least a title and a display date.');
+      return;
+    }
+    onAddEventItem(clean);
+    alert(`New event "${clean.shortTitle || clean.title}" created successfully!`);
     setNewEvent({
       title: '',
       shortTitle: '',
@@ -204,14 +338,26 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateAdminUser = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAdmin.name.trim() || !newAdmin.passcode.trim()) return;
-    onAddAdminUser({
-      name: newAdmin.name.trim(),
-      email: newAdmin.email.trim() || undefined,
-      passcode: newAdmin.passcode.trim(),
-      role: newAdmin.role,
-    });
-    alert(`Admin user "${newAdmin.name}" added with passcode "${newAdmin.passcode}"!`);
+    const clean = sanitizeAdminUserInput(newAdmin);
+    if (!clean.name || !clean.passcode) {
+      alert('An admin needs a name and a password.');
+      return;
+    }
+    // Email is the login identifier now, so it is no longer optional.
+    if (!clean.email) {
+      alert('Enter a valid email address — it is the admin login.');
+      return;
+    }
+    if (clean.passcode.length < 8) {
+      alert('Passwords must be at least 8 characters.');
+      return;
+    }
+    if (adminUsers.some((u) => sanitizeEmail(u.email) === clean.email)) {
+      alert('An admin with that email already exists.');
+      return;
+    }
+    onAddAdminUser(clean);
+    alert(`Admin "${clean.name}" added. They sign in with ${clean.email}.`);
     setNewAdmin({
       name: '',
       email: '',
@@ -220,24 +366,46 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     });
   };
 
+  /**
+   * The admin list is now the only way in, so the last account must survive —
+   * deleting it would lock everyone out of the portal permanently.
+   */
+  const handleDeleteAdminUser = (user: AdminUser) => {
+    if (adminUsers.length <= 1) {
+      alert('You cannot remove the only admin account — you would be locked out of the portal.');
+      return;
+    }
+    if (confirm(`Remove admin "${user.name}"? Their passcode will stop working immediately.`)) {
+      onDeleteAdminUser(user.id);
+    }
+  };
+
   const handleCreateVendor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVendor.name || !newVendor.description) return;
-    onAddVendor(newVendor);
+    const clean = sanitizeVendorInput(newVendor, FALLBACK_VENDOR_IMAGE);
+    if (!clean.name || !clean.description) {
+      alert('A vendor needs a name and a description.');
+      return;
+    }
+    onAddVendor(clean);
     setNewVendor({
       name: '',
       category: 'street-food',
       description: '',
       specialty: '',
-      imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+      imageUrl: FALLBACK_VENDOR_IMAGE,
       badge: '',
     });
   };
 
   const handleCreateScheduleItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.title || !newItem.time) return;
-    onAddScheduleItem(newItem);
+    const clean = sanitizeScheduleItem(newItem);
+    if (!clean.title || !clean.time) {
+      alert('An activity needs a title and a time.');
+      return;
+    }
+    onAddScheduleItem(clean);
     setNewItem({
       time: '12:00 PM',
       title: '',
@@ -249,13 +417,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateCollaborator = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCollab.name.trim()) return;
+    const clean = sanitizeCollaboratorInput(newCollab, FALLBACK_LOGO_IMAGE);
+    if (!clean.name) {
+      alert('A collaborator needs a name.');
+      return;
+    }
+    if (newCollab.url.trim() && !clean.url) {
+      alert('That website link is not a valid http(s) URL.');
+      return;
+    }
     onAddCollaborator({
-      name: newCollab.name.trim(),
-      url: newCollab.url.trim() || 'https://trypebble.com',
-      tagline: newCollab.tagline.trim() || 'Official Event Partner',
-      badge: newCollab.badge.trim() || 'Official Partner',
-      logoUrl: newCollab.logoUrl.trim() || 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
+      ...clean,
+      url: clean.url || 'https://trypebble.com',
+      tagline: clean.tagline || 'Official Event Partner',
+      badge: clean.badge || 'Official Partner',
     });
     setNewCollab({
       name: '',
@@ -268,13 +443,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateSponsor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSponsor.name.trim()) return;
-    onAddSponsor({
-      name: newSponsor.name.trim(),
-      tier: newSponsor.tier,
-      logoUrl: newSponsor.logoUrl.trim() || 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
-      websiteUrl: newSponsor.websiteUrl.trim() || undefined,
-    });
+    const clean = sanitizeSponsorInput(newSponsor, FALLBACK_SPONSOR_LOGO);
+    if (!clean.name) {
+      alert('A sponsor needs a name.');
+      return;
+    }
+    if (newSponsor.websiteUrl.trim() && !clean.websiteUrl) {
+      alert('That website link is not a valid http(s) URL.');
+      return;
+    }
+    if (newSponsor.logoUrl.trim() && clean.logoUrl === FALLBACK_SPONSOR_LOGO) {
+      alert('That logo link is not a valid image URL.');
+      return;
+    }
+    onAddSponsor(clean);
     setNewSponsor({
       name: '',
       tier: 'Gold',
@@ -285,11 +467,19 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleCreateGallery = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGallery.title || !newGallery.imageUrl) return;
-    onAddGalleryItem(newGallery);
+    const clean = sanitizeGalleryInput(newGallery, '');
+    if (!clean.title) {
+      alert('A gallery photo needs a title.');
+      return;
+    }
+    if (!clean.imageUrl) {
+      alert('That image link is not a valid http(s) or inline image URL.');
+      return;
+    }
+    onAddGalleryItem(clean);
     setNewGallery({
       title: '',
-      imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
+      imageUrl: FALLBACK_GALLERY_IMAGE,
       category: 'food',
       caption: '',
     });
@@ -333,21 +523,54 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             <div>
               <h4 className="text-2xl font-black font-display uppercase">ADMIN LOGIN</h4>
               <p className="text-xs text-stone-400 mt-1">
-                Enter admin passcode to configure event 3.0, vendors, sponsors, and activities.
+                Sign in to configure events, vendors, sponsors, and activities.
               </p>
             </div>
 
-            <div className="space-y-2 text-left">
-              <label className="text-xs font-bold text-stone-300 block">Passcode</label>
-              <input
-                type="password"
-                required
-                placeholder="Enter passcode (example: abenkwan123)"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              {authError && <p className="text-xs font-bold text-red-400 mt-1">{authError}</p>}
+            {adminUsers.length === 0 && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-1">
+                <p className="text-xs font-black uppercase text-amber-400">No admin account configured</p>
+                <p className="text-[11px] text-stone-300 font-semibold">
+                  Set <span className="font-mono text-amber-300">VITE_ADMIN_EMAIL</span> and{' '}
+                  <span className="font-mono text-amber-300">VITE_ADMIN_PASSWORD</span> in your{' '}
+                  <span className="font-mono text-amber-300">.env</span> file, then rebuild. See{' '}
+                  <span className="font-mono text-amber-300">.env.example</span>.
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-4 text-left">
+              <div className="space-y-2">
+                <label htmlFor="admin-email" className="text-xs font-bold text-stone-300 block">Email</label>
+                <input
+                  id="admin-email"
+                  type="email"
+                  required
+                  autoComplete="username"
+                  placeholder="you@ekowsamfarms.com"
+                  maxLength={LIMITS.email}
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="admin-password" className="text-xs font-bold text-stone-300 block">Password</label>
+                <input
+                  id="admin-password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  placeholder="Enter your admin password"
+                  maxLength={LIMITS.passcode}
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              {authError && <p className="text-xs font-bold text-red-400" role="alert">{authError}</p>}
             </div>
 
             <button
@@ -426,6 +649,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                   <Camera className="w-4 h-4" />
                   <span>Gallery Photos ({gallery.length})</span>
                 </button>
+
+                <button
+                  onClick={() => {
+                    setActiveTab('rsvps');
+                    if (sessionToken && rsvps.length === 0) loadRsvps();
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'rsvps' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                >
+                  <Ticket className="w-4 h-4 text-emerald-400" />
+                  <span>RSVPs</span>
+                </button>
               </div>
 
               <button
@@ -451,6 +686,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.title}
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="e.g. KOSUA NE MEKO HANGOUT 3.0"
@@ -463,6 +699,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.title}
                       value={formData.shortTitle}
                       onChange={(e) => setFormData({ ...formData, shortTitle: e.target.value })}
                       placeholder="e.g. Kosua Ne Meko 3.0"
@@ -474,6 +711,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <label className="text-xs font-bold text-stone-300 block mb-1">Event Tagline</label>
                     <input
                       type="text"
+                      maxLength={LIMITS.description}
                       value={formData.tagline}
                       onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
                       placeholder="Accra’s Premier Street Food Festival"
@@ -486,6 +724,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       required
+                      maxLength={60}
                       value={formData.dateString}
                       onChange={(e) => setFormData({ ...formData, dateString: e.target.value })}
                       placeholder="SAT. 12TH DEC. 2026"
@@ -497,6 +736,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <label className="text-xs font-bold text-stone-300 block mb-1">Target Date ISO (for Countdown)</label>
                     <input
                       type="text"
+                      maxLength={LIMITS.isoDate}
                       value={formData.targetDateISO}
                       onChange={(e) => setFormData({ ...formData, targetDateISO: e.target.value })}
                       placeholder="2026-12-12T10:00:00"
@@ -508,6 +748,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <label className="text-xs font-bold text-stone-300 block mb-1">Event Time</label>
                     <input
                       type="text"
+                      maxLength={60}
                       value={formData.time}
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                       placeholder="10:00 AM – 10:00 PM GMT"
@@ -520,9 +761,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.shortText}
                       value={formData.locationName}
                       onChange={(e) => setFormData({ ...formData, locationName: e.target.value })}
-                      placeholder="Cencor Avenue, North Dzorwulu"
+                      placeholder="Cencor Venue, North Dzorwulu"
                       className="w-full px-3 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -532,6 +774,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       required
+                      maxLength={LIMITS.shortText}
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="Accra, Ghana"
@@ -545,6 +788,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <label className="text-xs font-bold text-stone-300 block mb-1">Organizer Name</label>
                     <input
                       type="text"
+                      maxLength={LIMITS.name}
                       value={formData.organizer}
                       onChange={(e) => setFormData({ ...formData, organizer: e.target.value })}
                       placeholder="Ekow Sam Farms"
@@ -556,6 +800,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <label className="text-xs font-bold text-stone-300 block mb-1">Event Hashtag</label>
                     <input
                       type="text"
+                      maxLength={LIMITS.shortText}
                       value={formData.hashtag}
                       onChange={(e) => setFormData({ ...formData, hashtag: e.target.value })}
                       placeholder="#KosuaNeMekoHangout3"
@@ -607,6 +852,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="KOSUA NE MEKO HANGOUT 3.0"
+                        maxLength={LIMITS.title}
                         value={newEvent.title}
                         onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
@@ -619,6 +865,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="Kosua Ne Meko 3.0"
+                        maxLength={LIMITS.title}
                         value={newEvent.shortTitle}
                         onChange={(e) => setNewEvent({ ...newEvent, shortTitle: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
@@ -633,6 +880,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="SAT. 12TH DEC. 2026"
+                        maxLength={60}
                         value={newEvent.dateString}
                         onChange={(e) => setNewEvent({ ...newEvent, dateString: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
@@ -669,6 +917,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         placeholder="Independence Square Lawn"
+                        maxLength={LIMITS.shortText}
                         value={newEvent.locationName}
                         onChange={(e) => setNewEvent({ ...newEvent, locationName: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -724,7 +973,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                         <div className="flex flex-wrap items-center gap-2 shrink-0">
                           <button
-                            onClick={() => onUpdateEventItem({ ...ev, allowPrebooking: !ev.allowPrebooking })}
+                            onClick={() => onUpdateEventItem(sanitizeEventItem({ ...ev, allowPrebooking: !ev.allowPrebooking }))}
                             className="px-2.5 py-1.5 rounded-xl bg-stone-700 hover:bg-stone-600 text-white font-bold text-[11px]"
                             title="Toggle RSVP Pre-booking status"
                           >
@@ -772,6 +1021,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="e.g. Kwame Mensah"
+                        maxLength={LIMITS.name}
                         value={newAdmin.name}
                         onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-bold text-white"
@@ -779,10 +1029,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Email (Optional)</label>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Email * (their login)</label>
                       <input
                         type="email"
+                        required
                         placeholder="kwame@ekowsamfarms.com"
+                        maxLength={LIMITS.email}
                         value={newAdmin.email}
                         onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -792,11 +1044,12 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-stone-300 block mb-1">Custom Passcode *</label>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Password * (min 8 characters)</label>
                       <input
                         type="text"
                         required
-                        placeholder="e.g. abenkwan123"
+                        placeholder="At least 8 characters"
+                        maxLength={LIMITS.passcode}
                         value={newAdmin.passcode}
                         onChange={(e) => setNewAdmin({ ...newAdmin, passcode: e.target.value })}
                         className="w-full px-3 py-2.5 rounded-xl bg-stone-900 border border-stone-700 text-xs font-mono font-bold text-amber-400"
@@ -835,13 +1088,24 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <span className="text-xs font-black text-white">{user.name}</span>
                             <span className="px-2 py-0.5 rounded-md bg-stone-900 text-emerald-400 text-[9px] font-black uppercase">{user.role}</span>
                           </div>
-                          {user.email && <span className="text-[10px] text-stone-400 block">{user.email}</span>}
-                          <span className="text-[10px] font-mono text-amber-400 font-bold block mt-1">Passcode: {user.passcode}</span>
+                          <span className="text-[10px] text-stone-400 block">{user.email}</span>
+                          {/* Masked by default so one admin's screen does not expose everyone's password. */}
+                          <span className="text-[10px] font-mono text-amber-400 font-bold mt-1 flex items-center gap-2">
+                            <span>Password: {revealedPasscodeId === user.id ? user.passcode : '••••••••'}</span>
+                            <button
+                              type="button"
+                              onClick={() => setRevealedPasscodeId(revealedPasscodeId === user.id ? null : user.id)}
+                              className="text-[9px] uppercase font-black text-stone-400 hover:text-white underline"
+                            >
+                              {revealedPasscodeId === user.id ? 'Hide' : 'Show'}
+                            </button>
+                          </span>
                         </div>
                         <button
-                          onClick={() => onDeleteAdminUser(user.id)}
-                          className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300"
-                          title="Remove Admin"
+                          onClick={() => handleDeleteAdminUser(user)}
+                          disabled={adminUsers.length <= 1}
+                          className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-900/40"
+                          title={adminUsers.length <= 1 ? 'Cannot remove the only admin' : 'Remove Admin'}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -866,6 +1130,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="e.g. Mama Joe Pepper Kitchen"
+                        maxLength={LIMITS.name}
                         value={newVendor.name}
                         onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -892,6 +1157,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         placeholder="Specialty deviled eggs & meko"
+                        maxLength={LIMITS.shortText}
                         value={newVendor.specialty}
                         onChange={(e) => setNewVendor({ ...newVendor, specialty: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -903,6 +1169,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         placeholder="Official Host / Local Legend"
+                        maxLength={LIMITS.shortText}
                         value={newVendor.badge}
                         onChange={(e) => setNewVendor({ ...newVendor, badge: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -916,6 +1183,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       type="text"
                       required
                       placeholder="Organically raised farm eggs served with signature salsa..."
+                      maxLength={LIMITS.description}
                       value={newVendor.description}
                       onChange={(e) => setNewVendor({ ...newVendor, description: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -944,6 +1212,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <h5 className="text-[11px] font-black uppercase text-orange-400">EDIT VENDOR</h5>
                             <input
                               type="text"
+                              maxLength={LIMITS.name}
                               value={editingVendor.name}
                               onChange={(e) => setEditingVendor({ ...editingVendor, name: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
@@ -951,6 +1220,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             />
                             <input
                               type="text"
+                              maxLength={LIMITS.shortText}
                               value={editingVendor.specialty}
                               onChange={(e) => setEditingVendor({ ...editingVendor, specialty: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-amber-400 rounded font-semibold"
@@ -958,6 +1228,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             />
                             <input
                               type="text"
+                              maxLength={LIMITS.description}
                               value={editingVendor.description}
                               onChange={(e) => setEditingVendor({ ...editingVendor, description: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded"
@@ -974,7 +1245,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               <button
                                 type="button"
                                 onClick={() => {
-                                  onUpdateVendor(editingVendor);
+                                  onUpdateVendor(sanitizeVendor(editingVendor, FALLBACK_VENDOR_IMAGE));
                                   setEditingVendor(null);
                                 }}
                                 className="px-3 py-1 rounded bg-orange-600 hover:bg-orange-700 text-[10px] font-black text-white uppercase"
@@ -986,7 +1257,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         ) : (
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 overflow-hidden">
-                              {v.imageUrl && <img src={v.imageUrl} alt={v.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />}
+                              {v.imageUrl && <img src={sanitizeImageUrl(v.imageUrl)} alt={v.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />}
                               <div className="overflow-hidden">
                                 <span className="text-xs font-extrabold text-white block truncate">{v.name}</span>
                                 <span className="text-[10px] text-amber-400 font-semibold truncate block">{v.specialty}</span>
@@ -1031,6 +1302,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="Pebble"
+                        maxLength={LIMITS.name}
                         value={newCollab.name}
                         onChange={(e) => setNewCollab({ ...newCollab, name: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1041,6 +1313,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <label className="text-[11px] font-bold text-stone-300 block mb-1">Website URL</label>
                       <input
                         type="url"
+                        maxLength={LIMITS.url}
                         value={newCollab.url}
                         onChange={(e) => setNewCollab({ ...newCollab, url: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1053,6 +1326,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       placeholder="Your Home of Authentic Local Content"
+                      maxLength={LIMITS.description}
                       value={newCollab.tagline}
                       onChange={(e) => setNewCollab({ ...newCollab, tagline: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1077,6 +1351,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="e.g. Industrial Coatings Africa"
+                        maxLength={LIMITS.name}
                         value={newSponsor.name}
                         onChange={(e) => setNewSponsor({ ...newSponsor, name: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1104,6 +1379,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="url"
                         placeholder="https://..."
+                        maxLength={LIMITS.url}
                         value={newSponsor.logoUrl}
                         onChange={(e) => setNewSponsor({ ...newSponsor, logoUrl: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1115,6 +1391,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="url"
                         placeholder="https://..."
+                        maxLength={LIMITS.url}
                         value={newSponsor.websiteUrl}
                         onChange={(e) => setNewSponsor({ ...newSponsor, websiteUrl: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1140,6 +1417,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <h5 className="text-[11px] font-black uppercase text-orange-400">EDIT COLLABORATOR</h5>
                             <input
                               type="text"
+                              maxLength={LIMITS.name}
                               value={editingCollaborator.name}
                               onChange={(e) => setEditingCollaborator({ ...editingCollaborator, name: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
@@ -1147,6 +1425,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             />
                             <input
                               type="text"
+                              maxLength={LIMITS.description}
                               value={editingCollaborator.tagline}
                               onChange={(e) => setEditingCollaborator({ ...editingCollaborator, tagline: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded"
@@ -1154,13 +1433,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             />
                             <div className="flex justify-end gap-2 pt-1">
                               <button onClick={() => setEditingCollaborator(null)} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
-                              <button onClick={() => { onUpdateCollaborator(editingCollaborator); setEditingCollaborator(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
+                              <button onClick={() => { onUpdateCollaborator(sanitizeCollaborator(editingCollaborator, FALLBACK_LOGO_IMAGE)); setEditingCollaborator(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
                             </div>
                           </div>
                         ) : (
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
-                              {c.logoUrl && <img src={c.logoUrl} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />}
+                              {c.logoUrl && <img src={sanitizeImageUrl(c.logoUrl)} alt={c.name} className="w-8 h-8 rounded-lg object-cover" />}
                               <div>
                                 <span className="text-xs font-bold text-white block">{c.name}</span>
                                 <span className="text-[10px] text-stone-400">{c.tagline}</span>
@@ -1189,6 +1468,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <h5 className="text-[11px] font-black uppercase text-amber-400">EDIT SPONSOR</h5>
                             <input
                               type="text"
+                              maxLength={LIMITS.name}
                               value={editingSponsor.name}
                               onChange={(e) => setEditingSponsor({ ...editingSponsor, name: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
@@ -1206,13 +1486,13 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             </select>
                             <div className="flex justify-end gap-2 pt-1">
                               <button onClick={() => setEditingSponsor(null)} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
-                              <button onClick={() => { onUpdateSponsor(editingSponsor); setEditingSponsor(null); }} className="px-3 py-1 bg-amber-600 text-[10px] text-white font-bold rounded">Save</button>
+                              <button onClick={() => { onUpdateSponsor(sanitizeSponsor(editingSponsor, FALLBACK_SPONSOR_LOGO)); setEditingSponsor(null); }} className="px-3 py-1 bg-amber-600 text-[10px] text-white font-bold rounded">Save</button>
                             </div>
                           </div>
                         ) : (
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2.5">
-                              {s.logoUrl && <img src={s.logoUrl} alt={s.name} className="w-8 h-8 rounded-lg object-cover" />}
+                              {s.logoUrl && <img src={sanitizeImageUrl(s.logoUrl)} alt={s.name} className="w-8 h-8 rounded-lg object-cover" />}
                               <div>
                                 <span className="text-xs font-bold text-white block">{s.name}</span>
                                 <span className="text-[10px] text-amber-400 font-extrabold uppercase">{s.tier} Sponsor</span>
@@ -1249,6 +1529,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="11:30 AM"
+                        maxLength={40}
                         value={newItem.time}
                         onChange={(e) => setNewItem({ ...newItem, time: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1261,6 +1542,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="Asanka Grinding Workshop"
+                        maxLength={LIMITS.title}
                         value={newItem.title}
                         onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1272,6 +1554,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         placeholder="Main Stage"
+                        maxLength={LIMITS.shortText}
                         value={newItem.location}
                         onChange={(e) => setNewItem({ ...newItem, location: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1284,6 +1567,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       placeholder="Learn traditional Ghanaian pepper grinding techniques..."
+                      maxLength={LIMITS.description}
                       value={newItem.description}
                       onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1309,6 +1593,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <div className="grid grid-cols-2 gap-2">
                               <input
                                 type="text"
+                                maxLength={40}
                                 value={editingScheduleItem.time}
                                 onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, time: e.target.value })}
                                 className="px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-amber-400 font-bold rounded"
@@ -1316,6 +1601,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                               />
                               <input
                                 type="text"
+                                maxLength={LIMITS.title}
                                 value={editingScheduleItem.title}
                                 onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, title: e.target.value })}
                                 className="px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white font-bold rounded"
@@ -1324,6 +1610,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             </div>
                             <input
                               type="text"
+                              maxLength={LIMITS.description}
                               value={editingScheduleItem.description}
                               onChange={(e) => setEditingScheduleItem({ ...editingScheduleItem, description: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded"
@@ -1331,7 +1618,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             />
                             <div className="flex justify-end gap-2 pt-1">
                               <button onClick={() => { setEditingScheduleIndex(null); setEditingScheduleItem(null); }} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
-                              <button onClick={() => { onUpdateScheduleItem(idx, editingScheduleItem); setEditingScheduleIndex(null); setEditingScheduleItem(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
+                              <button onClick={() => { onUpdateScheduleItem(idx, sanitizeScheduleItem(editingScheduleItem)); setEditingScheduleIndex(null); setEditingScheduleItem(null); }} className="px-3 py-1 bg-orange-600 text-[10px] text-white font-bold rounded">Save</button>
                             </div>
                           </div>
                         ) : (
@@ -1372,6 +1659,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         type="text"
                         required
                         placeholder="e.g. Asanka Meko Grinding Live"
+                        maxLength={LIMITS.title}
                         value={newGallery.title}
                         onChange={(e) => setNewGallery({ ...newGallery, title: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1399,6 +1687,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       type="url"
                       required
                       placeholder="https://images.unsplash.com/..."
+                      maxLength={LIMITS.url}
                       value={newGallery.imageUrl}
                       onChange={(e) => setNewGallery({ ...newGallery, imageUrl: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1410,6 +1699,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     <input
                       type="text"
                       placeholder="Moments from the live street food market..."
+                      maxLength={LIMITS.description}
                       value={newGallery.caption}
                       onChange={(e) => setNewGallery({ ...newGallery, caption: e.target.value })}
                       className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
@@ -1430,7 +1720,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     {gallery.map((g) => (
                       <div key={g.id} className="bg-stone-800 rounded-xl overflow-hidden border border-stone-700 p-2 flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 overflow-hidden">
-                          <img src={g.imageUrl} alt={g.title} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                          <img src={sanitizeImageUrl(g.imageUrl)} alt={g.title} referrerPolicy="no-referrer" className="w-12 h-12 rounded-lg object-cover shrink-0" />
                           <div className="overflow-hidden">
                             <span className="text-xs font-bold text-white block truncate">{g.title}</span>
                             <span className="text-[9px] font-black uppercase text-orange-400">{g.category}</span>
@@ -1443,6 +1733,106 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* TAB 6: RSVPs from D1 */}
+            {activeTab === 'rsvps' && (
+              <div className="space-y-4">
+                {!sessionToken ? (
+                  <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+                    <p className="text-xs font-black uppercase text-amber-400">Server sign-in required</p>
+                    <p className="text-[11px] text-stone-300 font-semibold leading-relaxed">
+                      Attendee data is protected by server-side credentials, so it cannot be unlocked by the
+                      portal password alone. Set <span className="font-mono text-amber-300">ADMIN_EMAIL</span>,{' '}
+                      <span className="font-mono text-amber-300">ADMIN_PASSWORD</span> and{' '}
+                      <span className="font-mono text-amber-300">ADMIN_SESSION_SECRET</span> as Secrets in
+                      Cloudflare (or <span className="font-mono text-amber-300">.dev.vars</span> locally), then
+                      sign in again. Running <span className="font-mono text-amber-300">npm run dev</span> will
+                      never work here — Functions only run under{' '}
+                      <span className="font-mono text-amber-300">npm run pages:dev</span>.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">
+                        ATTENDEE RSVPS ({rsvps.length})
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={loadRsvps}
+                          disabled={rsvpState === 'loading'}
+                          className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-extrabold flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${rsvpState === 'loading' ? 'animate-spin' : ''}`} />
+                          <span>{rsvpState === 'loading' ? 'Loading…' : 'Refresh'}</span>
+                        </button>
+                        <button
+                          onClick={downloadRsvpCsv}
+                          className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center gap-1.5"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>Export CSV</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {rsvpState === 'error' && (
+                      <p className="text-xs font-bold text-red-400">
+                        Could not load RSVPs. Your session may have expired — close the portal and sign in again.
+                      </p>
+                    )}
+
+                    {rsvpState !== 'error' && rsvps.length === 0 && (
+                      <p className="text-xs text-stone-400 font-semibold">
+                        No RSVPs recorded yet. They appear here once attendees book on the deployed site.
+                      </p>
+                    )}
+
+                    {rsvps.length > 0 && (
+                      <div className="overflow-x-auto rounded-2xl border border-stone-700">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-stone-800 text-stone-300">
+                            <tr>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Attendee</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Contact</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Pass</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Sent</th>
+                              <th className="px-3 py-2 font-black uppercase text-[10px]">Booked</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rsvps.map((row) => (
+                              <tr key={row.ticket_id} className="border-t border-stone-800 align-top">
+                                <td className="px-3 py-2">
+                                  <span className="font-bold text-white block">{row.customer_name}</span>
+                                  <span className="font-mono text-[10px] text-amber-400">{row.ticket_id}</span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-300">
+                                  <span className="block">{row.phone}</span>
+                                  <span className="block text-[10px] text-stone-400">{row.email}</span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-300">
+                                  {row.pass_name} &times; {row.quantity}
+                                </td>
+                                <td className="px-3 py-2">
+                                  <span className={row.sms_status === 'sent' ? 'text-emerald-400' : 'text-stone-500'}>
+                                    SMS
+                                  </span>{' '}
+                                  <span className={row.email_status === 'sent' ? 'text-emerald-400' : 'text-stone-500'}>
+                                    Email
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 text-stone-400 whitespace-nowrap">{row.created_at}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 

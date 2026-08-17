@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, Ticket, ChevronRight, Compass, Sparkles, Flame, Clock } from 'lucide-react';
 import { EventDetails } from '../types';
+import { sanitizeUrl } from '../utils/sanitize';
 
 import chiliPepperSvg from '../assets/peppers/chili-pepper.svg';
 import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
@@ -84,7 +85,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
 
             {/* Collaboration Badge */}
             {eventDetails.collaborator && (
-              <a href={eventDetails.collaboratorUrl || '#'} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
+              <a href={sanitizeUrl(eventDetails.collaboratorUrl, '#')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
                 <Sparkles className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-stone-300">In collaboration with</span>
                 <span className="text-orange-400 font-black">{eventDetails.collaborator.toUpperCase()}</span>

@@ -44,7 +44,7 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
             EVENT DAY <span className="text-orange-600">SCHEDULE</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base max-w-xl mx-auto">
-            From doors open at 10 AM to the night bonfire after-party, plan your day at Cencor Avenue!
+            From doors open at 10 AM to the night bonfire after-party, plan your day at Cencor Venue!
           </p>
 
           {/* Filter Pills */}

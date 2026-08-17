@@ -1,0 +1,27 @@
+# Local secrets for Cloudflare Pages Functions (`npx wrangler pages dev dist`).
+#
+# Copy to .dev.vars (gitignored) and fill in. These mirror the *server-side*
+# variables you set in the Cloudflare dashboard under
+# Settings > Variables and Secrets.
+#
+# VITE_* variables do NOT belong here — those are build-time and come from .env.
+
+# Protects GET /api/rsvps. Use the same email/password as the portal.
+ADMIN_EMAIL=""
+ADMIN_PASSWORD=""
+ADMIN_SESSION_SECRET=""
+
+# Pairs with VITE_TURNSTILE_SITE_KEY in .env. Without it, /api/rsvp sends nothing.
+TURNSTILE_SECRET_KEY=""
+
+MNOTIFY_API_KEY=""
+MNOTIFY_SENDER_ID="KosuaMeko"
+MNOTIFY_NOTIFY_TO=""
+
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_SECURE="false"
+SMTP_USER=""
+SMTP_PASSWORD=""
+SMTP_FROM="Kosua Ne Meko <hello@ekowsamfarms.com>"
+SMTP_NOTIFY_TO=""

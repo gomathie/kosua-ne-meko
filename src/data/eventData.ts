@@ -7,9 +7,9 @@ export const EVENT_DETAILS: EventDetails = {
   dateString: 'SAT. 5TH SEPT. 2026',
   targetDateISO: '2026-09-05T10:00:00',
   time: '10:00 AM – 10:00 PM GMT',
-  locationName: 'Cencor Avenue, North Dzorwulu',
+  locationName: 'Cencor Venue, North Dzorwulu',
   city: 'Accra, Ghana',
-  fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
+  fullAddress: 'Cencor Venue, North Dzorwulu, Accra',
   organizer: 'Ekow Sam Farms',
   organizerTagline: 'Farm-Fresh Eggs & Sustainable Ghanaian Poultry',
   collaborator: 'Pebble',
@@ -32,9 +32,9 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
     dateString: 'SAT. 5TH SEPT. 2026',
     targetDateISO: '2026-09-05T10:00:00',
     time: '10:00 AM – 10:00 PM GMT',
-    locationName: 'Cencor Avenue, North Dzorwulu',
+    locationName: 'Cencor Venue, North Dzorwulu',
     city: 'Accra, Ghana',
-    fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
+    fullAddress: 'Cencor Venue, North Dzorwulu, Accra',
     organizer: 'Ekow Sam Farms',
     hashtag: '#KosuaNeMekoHangout2',
     status: 'active',
@@ -58,24 +58,40 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
   },
 ];
 
-export const INITIAL_ADMIN_USERS: AdminUser[] = [
-  {
-    id: 'admin-1',
-    name: 'Super Admin',
-    email: 'admin@ekowsamfarms.com',
-    passcode: 'admin123',
-    role: 'Super Admin',
-    createdDate: '2026-01-01',
-  },
-  {
-    id: 'admin-2',
-    name: 'Goma Admin',
-    email: 'goma@trypebble.com',
-    passcode: 'abenkwan123',
-    role: 'Event Manager',
-    createdDate: '2026-07-27',
-  },
-];
+/**
+ * Admin credentials come from .env (see .env.example), which is gitignored, so
+ * they stay out of the repository.
+ *
+ * NOTE: Vite inlines VITE_* values into the production bundle at build time.
+ * This keeps the password out of git — it does NOT hide it from visitors, who
+ * can still read it from the shipped JavaScript. Real protection needs
+ * server-side auth.
+ */
+const ADMIN_EMAIL = import.meta.env?.VITE_ADMIN_EMAIL ?? '';
+const ADMIN_PASSWORD = import.meta.env?.VITE_ADMIN_PASSWORD ?? '';
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.warn(
+    '[admin] VITE_ADMIN_EMAIL / VITE_ADMIN_PASSWORD are not set — no admin account ' +
+      'is configured and the portal cannot be opened. Copy .env.example to .env and fill them in.',
+  );
+}
+
+// An account with no configured credentials would be an unusable placeholder, so
+// the list stays empty instead and the login screen explains why.
+export const INITIAL_ADMIN_USERS: AdminUser[] =
+  ADMIN_EMAIL && ADMIN_PASSWORD
+    ? [
+        {
+          id: 'admin-1',
+          name: 'Super Admin',
+          email: ADMIN_EMAIL,
+          passcode: ADMIN_PASSWORD,
+          role: 'Super Admin',
+          createdDate: '2026-01-01',
+        },
+      ]
+    : [];
 
 export const INITIAL_COLLABORATORS: Collaborator[] = [
   {
@@ -364,15 +380,15 @@ export const VENDORS: Vendor[] = [
 export const FAQS: FAQItem[] = [
   {
     question: 'Where exactly is the event located in Dzorwulu?',
-    answer: 'The event takes place at Cencor Avenue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
+    answer: 'The event takes place at Cencor Venue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
   },
   {
     question: 'Is the event really free?',
     answer: 'Yes! Entry to Kosua Ne Meko Hangout 2.0 is completely FREE. Simply register for your RSVP pass and show up. Food, drinks, and other items are available for purchase from our amazing vendors on-site.',
   },
   {
-    question: 'Is parking available at Cencor Avenue?',
-    answer: 'Yes! Dedicated secure parking is available on Cencor Avenue with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
+    question: 'Is parking available at Cencor Venue?',
+    answer: 'Yes! Dedicated secure parking is available on Cencor Venue with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
   },
   {
     question: 'Can I bring children or families?',

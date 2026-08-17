@@ -128,7 +128,7 @@ export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
   ctx.fillText('VENUE', colLeft, y);
   ctx.fillStyle = '#d6d3d1';
   ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-  ctx.fillText('Cencor Avenue', colLeft, y + 40);
+  ctx.fillText('Cencor Venue', colLeft, y + 40);
 
   // Meko Choice
   ctx.fillStyle = '#78716c';

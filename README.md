@@ -28,7 +28,7 @@ The web app serves as the official festival hub: allowing festival-goers to expl
 - Profiles for primary organizers (**Ekow Sam Farms**) and partners (**Pebble**).
 
 ### 📍 Venue Location & Directions
-- Interactive map coordinates and direction info for Cencor Avenue, North Dzorwulu, Accra.
+- Interactive map coordinates and direction info for Cencor Venue, North Dzorwulu, Accra.
 
 ### 📸 Photo & Video Highlights
 - Gallery displaying memories and highlights from previous festival editions.

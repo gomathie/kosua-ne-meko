@@ -7,9 +7,9 @@ export const EVENT_DETAILS: EventDetails = {
   dateString: 'SAT. 5TH SEPT. 2026',
   targetDateISO: '2026-09-05T10:00:00',
   time: '10:00 AM – 10:00 PM GMT',
-  locationName: 'Cencor Avenue, North Dzorwulu',
+  locationName: 'Cencor Venue, North Dzorwulu',
   city: 'Accra, Ghana',
-  fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
+  fullAddress: 'Cencor Venue, North Dzorwulu, Accra',
   organizer: 'Ekow Sam Farms',
   organizerTagline: 'Farm-Fresh Eggs & Sustainable Ghanaian Poultry',
   collaborator: 'Pebble',
@@ -32,9 +32,9 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
     dateString: 'SAT. 5TH SEPT. 2026',
     targetDateISO: '2026-09-05T10:00:00',
     time: '10:00 AM – 10:00 PM GMT',
-    locationName: 'Cencor Avenue, North Dzorwulu',
+    locationName: 'Cencor Venue, North Dzorwulu',
     city: 'Accra, Ghana',
-    fullAddress: 'Cencor Avenue, North Dzorwulu, Accra',
+    fullAddress: 'Cencor Venue, North Dzorwulu, Accra',
     organizer: 'Ekow Sam Farms',
     hashtag: '#KosuaNeMekoHangout2',
     status: 'active',
@@ -364,15 +364,15 @@ export const VENDORS: Vendor[] = [
 export const FAQS: FAQItem[] = [
   {
     question: 'Where exactly is the event located in Dzorwulu?',
-    answer: 'The event takes place at Cencor Avenue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
+    answer: 'The event takes place at Cencor Venue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
   },
   {
     question: 'Is the event really free?',
     answer: 'Yes! Entry to Kosua Ne Meko Hangout 2.0 is completely FREE. Simply register for your RSVP pass and show up. Food, drinks, and other items are available for purchase from our amazing vendors on-site.',
   },
   {
-    question: 'Is parking available at Cencor Avenue?',
-    answer: 'Yes! Dedicated secure parking is available on Cencor Avenue with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
+    question: 'Is parking available at Cencor Venue?',
+    answer: 'Yes! Dedicated secure parking is available on Cencor Venue with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
   },
   {
     question: 'Can I bring children or families?',

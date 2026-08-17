@@ -522,7 +522,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       required
                       value={formData.locationName}
                       onChange={(e) => setFormData({ ...formData, locationName: e.target.value })}
-                      placeholder="Cencor Avenue, North Dzorwulu"
+                      placeholder="Cencor Venue, North Dzorwulu"
                       className="w-full px-3 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>

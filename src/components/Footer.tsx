@@ -60,7 +60,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
             <div className="bg-stone-900 p-4 rounded-2xl border border-stone-800 space-y-1 text-xs">
               <span className="text-amber-400 font-extrabold block text-[10px] uppercase">HOST & ORGANIZER</span>
               <h5 className="font-black text-white text-sm font-display">EKOW SAM FARMS</h5>
-              <p className="text-stone-400">Cencor Avenue, North Dzorwulu, Greater Accra, Ghana</p>
+              <p className="text-stone-400">Cencor Venue, North Dzorwulu, Greater Accra, Ghana</p>
               <p className="text-stone-400">Email: events@ekowsamfarms.com</p>
             </div>
 

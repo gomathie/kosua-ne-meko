@@ -3,6 +3,7 @@ import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapP
 import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
 import {
   LIMITS,
+  sanitizeEmail,
   sanitizePasscode,
   sanitizeEventDetails,
   sanitizeEventItemInput,
@@ -94,6 +95,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   onDeleteGalleryItem,
   onResetAll,
 }) => {
+  const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -181,24 +183,30 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Must use the same normalization the "add admin" form uses, or a passcode
+    // Must use the same normalization the "add admin" form uses, or a credential
     // created with stray whitespace could never be typed back in.
+    const cleanEmail = sanitizeEmail(loginEmail);
     const cleanPass = sanitizePasscode(passcode);
-    if (!cleanPass) {
-      setAuthError('Enter your admin passcode.');
+
+    if (!cleanEmail || !cleanPass) {
+      setAuthError('Enter your admin email and password.');
       return;
     }
 
-    // The admin list is the only authority — no hardcoded fallbacks, so removing
-    // an admin in the portal actually revokes their passcode.
-    const isValidAdmin = adminUsers.some((u) => sanitizePasscode(u.passcode) === cleanPass);
+    // Both must match the same account, and the admin list is the only authority —
+    // no hardcoded fallbacks, so removing an admin really does revoke their access.
+    const isValidAdmin = adminUsers.some(
+      (u) => sanitizeEmail(u.email) === cleanEmail && sanitizePasscode(u.passcode) === cleanPass,
+    );
 
     if (isValidAdmin) {
       setIsAuthenticated(true);
       setAuthError('');
+      setPasscode('');
       setFormData(eventDetails);
     } else {
-      setAuthError('Incorrect passcode. Use the passcode assigned to your admin account.');
+      // Deliberately does not say which half was wrong.
+      setAuthError('Incorrect email or password.');
     }
   };
 
@@ -243,23 +251,24 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     e.preventDefault();
     const clean = sanitizeAdminUserInput(newAdmin);
     if (!clean.name || !clean.passcode) {
-      alert('An admin needs a name and a passcode.');
+      alert('An admin needs a name and a password.');
       return;
     }
-    if (clean.passcode.length < 6) {
-      alert('Passcodes must be at least 6 characters.');
+    // Email is the login identifier now, so it is no longer optional.
+    if (!clean.email) {
+      alert('Enter a valid email address — it is the admin login.');
       return;
     }
-    if (newAdmin.email.trim() && !clean.email) {
-      alert('That email address is not valid. Clear it or correct it.');
+    if (clean.passcode.length < 8) {
+      alert('Passwords must be at least 8 characters.');
       return;
     }
-    if (adminUsers.some((u) => sanitizePasscode(u.passcode) === clean.passcode)) {
-      alert('That passcode is already in use by another admin. Choose a different one.');
+    if (adminUsers.some((u) => sanitizeEmail(u.email) === clean.email)) {
+      alert('An admin with that email already exists.');
       return;
     }
     onAddAdminUser(clean);
-    alert(`Admin user "${clean.name}" added with passcode "${clean.passcode}"!`);
+    alert(`Admin "${clean.name}" added. They sign in with ${clean.email}.`);
     setNewAdmin({
       name: '',
       email: '',
@@ -425,22 +434,42 @@ export const AdminModal: React.FC<AdminModalProps> = ({
             <div>
               <h4 className="text-2xl font-black font-display uppercase">ADMIN LOGIN</h4>
               <p className="text-xs text-stone-400 mt-1">
-                Enter admin passcode to configure event 3.0, vendors, sponsors, and activities.
+                Sign in to configure events, vendors, sponsors, and activities.
               </p>
             </div>
 
-            <div className="space-y-2 text-left">
-              <label className="text-xs font-bold text-stone-300 block">Passcode</label>
-              <input
-                type="password"
-                required
-                placeholder="Enter your admin passcode"
-                maxLength={LIMITS.passcode}
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-              {authError && <p className="text-xs font-bold text-red-400 mt-1">{authError}</p>}
+            <div className="space-y-4 text-left">
+              <div className="space-y-2">
+                <label htmlFor="admin-email" className="text-xs font-bold text-stone-300 block">Email</label>
+                <input
+                  id="admin-email"
+                  type="email"
+                  required
+                  autoComplete="username"
+                  placeholder="you@ekowsamfarms.com"
+                  maxLength={LIMITS.email}
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="admin-password" className="text-xs font-bold text-stone-300 block">Password</label>
+                <input
+                  id="admin-password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  placeholder="Enter your admin password"
+                  maxLength={LIMITS.passcode}
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+
+              {authError && <p className="text-xs font-bold text-red-400" role="alert">{authError}</p>}
             </div>
 
             <button

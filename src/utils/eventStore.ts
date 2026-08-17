@@ -3,11 +3,14 @@ import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponso
 import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
 import { sanitizeFullEventData } from './sanitize';
 
-// Bump only when the *shape* of the stored data changes. Admin credentials no
-// longer need a bump — see applyEnvAdmins below, which re-applies the .env admin
-// on every read. v4 retired the seeded passcodes; v5 moved sign-in to
-// email + password; v6 removed the second admin and moved credentials to .env.
-const STORAGE_KEY = 'kosua_event_data_v6';
+// Bump when the stored shape changes, or when seed content must reach browsers
+// that already hold a copy — a returning visitor reads their stored blob, so new
+// seed data is invisible to them until the key changes. Admin credentials are
+// exempt: applyEnvAdmins below re-applies them on every read.
+// v4 retired the seeded passcodes; v5 moved sign-in to email + password;
+// v6 removed the second admin and moved credentials to .env;
+// v7 added the Industrial Coatings Africa and Hitrace Solutions collaborators.
+const STORAGE_KEY = 'kosua_event_data_v7';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {

@@ -102,6 +102,24 @@ export const INITIAL_COLLABORATORS: Collaborator[] = [
     badge: 'Official Media & Cinema Partner',
     logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
   },
+  {
+    id: 'collab-2',
+    name: 'Industrial Coatings Africa',
+    url: 'https://industrialcoatingsafrica.com',
+    // Taglines are quoted from each company's own site — do not paraphrase or
+    // invent copy on a partner's behalf.
+    tagline: 'Protective coatings engineered for Africa’s toughest environments.',
+    badge: 'Official Event Collaborator',
+    // No logoUrl: better to show the name cleanly than a stock photo standing in
+    // for a real company's brand. Add the real asset via the Admin Portal.
+  },
+  {
+    id: 'collab-3',
+    name: 'Hitrace Solutions',
+    url: 'https://hitracesolutions.com',
+    tagline: 'We Simply Put You in Control',
+    badge: 'Official Event Collaborator',
+  },
 ];
 
 export const INITIAL_SPONSORS: Sponsor[] = [

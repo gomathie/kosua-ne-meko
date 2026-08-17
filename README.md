@@ -37,7 +37,7 @@ The web app serves as the official festival hub: allowing festival-goers to expl
 - **Dashboard Analytics**: Ticket sales metrics, check-in stats, and revenue tracking.
 - **Event Management**: Edit event details, schedules, vendors, sponsors, and admin roles.
 - **Data Export**: Export attendee and booking data as CSV files.
-- Accessible via the `#admin` URL hash.
+- Accessible via the `/adm` path or the `#adm` URL hash, plus the discreet link in the footer.
 
 ---
 
@@ -101,8 +101,15 @@ kosua-ne-meko/
 ## 🔐 Accessing the Admin Portal
 
 To access the administrative dashboard:
-1. Append `#admin` to the URL (e.g., `http://localhost:3000/#admin`).
-2. Log in with the administrator credentials configured in `src/data/eventData.ts`.
+1. Go to `/adm` (e.g. `http://localhost:3000/adm`), or append `#adm` to the URL
+   (`http://localhost:3000/#adm`). The footer also has a discreet "Admin Portal" link.
+   > The `/adm` path requires SPA history fallback on your host — if your deploy
+   > returns a 404 there, use the `#adm` hash form instead, which works anywhere.
+2. Log in with a passcode from the admin list in `src/data/eventData.ts`.
+
+Passcodes are the only credential — there are no hardcoded fallbacks, so removing
+an admin in the portal revokes their access. The last remaining admin cannot be
+deleted, to prevent locking yourself out.
 
 ---
 

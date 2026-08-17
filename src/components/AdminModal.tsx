@@ -189,19 +189,16 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       return;
     }
 
-    // Validate against stored admin users or fallbacks admin123 / admin / abenkwan123
-    const isValidAdmin =
-      adminUsers.some((u) => sanitizePasscode(u.passcode) === cleanPass) ||
-      cleanPass === 'admin123' ||
-      cleanPass === 'admin' ||
-      cleanPass === 'abenkwan123';
+    // The admin list is the only authority — no hardcoded fallbacks, so removing
+    // an admin in the portal actually revokes their passcode.
+    const isValidAdmin = adminUsers.some((u) => sanitizePasscode(u.passcode) === cleanPass);
 
     if (isValidAdmin) {
       setIsAuthenticated(true);
       setAuthError('');
       setFormData(eventDetails);
     } else {
-      setAuthError('Incorrect passcode. Try "admin123" or an assigned admin passcode.');
+      setAuthError('Incorrect passcode. Use the passcode assigned to your admin account.');
     }
   };
 
@@ -269,6 +266,20 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       passcode: '',
       role: 'Event Manager',
     });
+  };
+
+  /**
+   * The admin list is now the only way in, so the last account must survive —
+   * deleting it would lock everyone out of the portal permanently.
+   */
+  const handleDeleteAdminUser = (user: AdminUser) => {
+    if (adminUsers.length <= 1) {
+      alert('You cannot remove the only admin account — you would be locked out of the portal.');
+      return;
+    }
+    if (confirm(`Remove admin "${user.name}"? Their passcode will stop working immediately.`)) {
+      onDeleteAdminUser(user.id);
+    }
   };
 
   const handleCreateVendor = (e: React.FormEvent) => {
@@ -423,7 +434,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               <input
                 type="password"
                 required
-                placeholder="Enter passcode (example: abenkwan123)"
+                placeholder="Enter your admin passcode"
                 maxLength={LIMITS.passcode}
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
@@ -894,7 +905,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. abenkwan123"
+                        placeholder="At least 6 characters"
                         maxLength={LIMITS.passcode}
                         value={newAdmin.passcode}
                         onChange={(e) => setNewAdmin({ ...newAdmin, passcode: e.target.value })}
@@ -938,9 +949,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                           <span className="text-[10px] font-mono text-amber-400 font-bold block mt-1">Passcode: {user.passcode}</span>
                         </div>
                         <button
-                          onClick={() => onDeleteAdminUser(user.id)}
-                          className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300"
-                          title="Remove Admin"
+                          onClick={() => handleDeleteAdminUser(user)}
+                          disabled={adminUsers.length <= 1}
+                          className="p-2 rounded-xl bg-red-900/40 hover:bg-red-800 text-red-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-900/40"
+                          title={adminUsers.length <= 1 ? 'Cannot remove the only admin' : 'Remove Admin'}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

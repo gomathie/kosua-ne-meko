@@ -3,7 +3,9 @@ import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponso
 import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
 import { sanitizeFullEventData } from './sanitize';
 
-const STORAGE_KEY = 'kosua_event_data_v3';
+// Bumped to v4 to retire the old seeded admin passcodes: browsers holding a v3
+// blob would otherwise keep authenticating against the admin list saved in it.
+const STORAGE_KEY = 'kosua_event_data_v4';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {

@@ -13,29 +13,40 @@ import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails,
  *  4. pin enum-ish fields ("tier", "category", "status") to their allowed values.
  */
 
-/**
- * Code point ranges that are never legitimate inside a form field: C0/C1
- * controls, zero-width characters, bidi overrides (which let text render in a
- * different order than it is stored), line/paragraph separators, and the BOM.
- */
-const INVISIBLE_RANGES: ReadonlyArray<readonly [number, number]> = [
-  [0x0000, 0x001f], // C0 controls
+type Range = readonly [number, number];
+
+/** Control characters — they stand in for a break, so they become whitespace. */
+const BREAKING_RANGES: ReadonlyArray<Range> = [
+  [0x0000, 0x001f], // C0 controls (NUL, tab, CR, LF...)
   [0x007f, 0x009f], // DEL + C1 controls
-  [0x200b, 0x200f], // zero-width space/joiners, LRM/RLM
   [0x2028, 0x2029], // line / paragraph separator
+];
+
+/**
+ * Characters with no width at all — zero-width spaces/joiners and the bidi
+ * controls that let stored text render in a different order than it reads.
+ * These are deleted rather than spaced out, since they exist to hide seams.
+ */
+const ZERO_WIDTH_RANGES: ReadonlyArray<Range> = [
+  [0x200b, 0x200f], // zero-width space/joiners, LRM/RLM
   [0x202a, 0x202e], // bidi embedding + overrides
   [0x2066, 0x2069], // bidi isolates
   [0xfeff, 0xfeff], // byte order mark
 ];
 
-/** Replaces every invisible/control character in `value` with `replacement`. */
-function stripInvisible(value: string, replacement: string): string {
+const inRanges = (code: number, ranges: ReadonlyArray<Range>): boolean =>
+  ranges.some(([lo, hi]) => code >= lo && code <= hi);
+
+/** Deletes zero-width/bidi characters; swaps control characters for `breakWith`. */
+function stripInvisible(value: string, breakWith: string): string {
   return Array.from(value)
     .map((char) => {
       const code = char.codePointAt(0) ?? 0;
-      return INVISIBLE_RANGES.some(([lo, hi]) => code >= lo && code <= hi) ? replacement : char;
+      if (inRanges(code, ZERO_WIDTH_RANGES)) return '';
+      if (inRanges(code, BREAKING_RANGES)) return breakWith;
+      return char;
     })
-    .join("");
+    .join('');
 }
 
 /** Schemes we are willing to put in an `href`. Everything else is dropped. */

@@ -1,0 +1,11 @@
+# Local secrets for Cloudflare Pages Functions (`npx wrangler pages dev dist`).
+#
+# Copy to .dev.vars (gitignored) and fill in. These mirror the *server-side*
+# variables you set in the Cloudflare dashboard under
+# Settings > Variables and Secrets.
+#
+# VITE_* variables do NOT belong here — those are build-time and come from .env.
+
+MNOTIFY_API_KEY=""
+MNOTIFY_SENDER_ID="KosuaMeko"
+MNOTIFY_NOTIFY_TO=""

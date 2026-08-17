@@ -22,6 +22,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   const [mekoPreference, setMekoPreference] = useState('Classic Accra Red Meko');
   const [bookedTicket, setBookedTicket] = useState<UserTicket | null>(null);
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
+  const [smsStatus, setSmsStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
 
   if (!isOpen) return null;
 
@@ -78,6 +79,25 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
     setBookedTicket(newTicket);
     onTicketBooked(newTicket);
+
+    // The pass is already saved locally and valid — the SMS is a courtesy, so a
+    // failure here is reported but never blocks the RSVP.
+    setSmsStatus('sending');
+    fetch('/api/rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: cleanName,
+        phone: cleanPhone,
+        ticketId,
+        passName: selectedPass.name,
+        quantity: cleanQuantity,
+        eventDate: eventDetails?.dateString ?? '',
+        venue: eventDetails?.locationName ?? '',
+      }),
+    })
+      .then((res) => setSmsStatus(res.ok ? 'sent' : 'failed'))
+      .catch(() => setSmsStatus('failed'));
   };
 
   const handleReset = () => {
@@ -86,6 +106,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     setEmail('');
     setPhone('');
     setErrors({});
+    setSmsStatus('idle');
     onClose();
   };
 
@@ -335,6 +356,20 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               <p className="text-xs text-stone-600 max-w-sm mx-auto">
                 Your ticket for Kosua Ne Meko Hangout 2.0 is saved! Present this QR code pass at the entrance on Sept 5.
               </p>
+
+              {smsStatus === 'sending' && (
+                <p className="text-[11px] font-semibold text-stone-500">Sending confirmation SMS…</p>
+              )}
+              {smsStatus === 'sent' && (
+                <p className="text-[11px] font-bold text-emerald-600">
+                  Confirmation SMS sent to {bookedTicket.phone}.
+                </p>
+              )}
+              {smsStatus === 'failed' && (
+                <p className="text-[11px] font-semibold text-amber-700">
+                  We couldn’t send the confirmation SMS — your pass is still valid, so save or download it.
+                </p>
+              )}
             </div>
 
             {/* Digital Ticket Pass Card */}

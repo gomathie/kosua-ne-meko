@@ -6,7 +6,8 @@
       "Bash(echo \"ignore-exit: $?\")",
       "Bash(echo \"exit: $?\")",
       "Bash(echo \"install exit: $?\")",
-      "Bash(echo \"LINT EXIT: $?\")"
+      "Bash(echo \"LINT EXIT: $?\")",
+      "WebFetch(domain:bms.africa)"
     ]
   }
 }

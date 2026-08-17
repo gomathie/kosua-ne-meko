@@ -441,12 +441,22 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   {confirmStatus.email === 'sent' && ` by email to ${bookedTicket.email}`}.
                 </p>
               )}
+              {/* A genuine send failure — distinct from confirmations simply being off. */}
               {(confirmStatus.state === 'error' ||
-                (confirmStatus.state === 'done' && confirmStatus.sms !== 'sent' && confirmStatus.email !== 'sent')) && (
+                (confirmStatus.state === 'done' &&
+                  (confirmStatus.sms === 'failed' || confirmStatus.email === 'failed'))) && (
                 <p className="text-[11px] font-semibold text-amber-700">
                   We couldn’t send your confirmation — your pass is still valid, so save or download it.
                 </p>
               )}
+              {/* Nothing was attempted because no channel is configured yet. */}
+              {confirmStatus.state === 'done' &&
+                confirmStatus.sms === 'skipped' &&
+                confirmStatus.email === 'skipped' && (
+                  <p className="text-[11px] font-semibold text-stone-500">
+                    Save or download your pass — your ticket ID is your entry.
+                  </p>
+                )}
             </div>
 
             {/* Digital Ticket Pass Card */}

@@ -166,12 +166,56 @@ must be registered with mNotify and is limited to 11 alphanumeric characters.
 None of these carry a `VITE_` prefix — that is precisely what keeps them server-side.
 Never add one. `npm run dev` does not run Functions; use `npm run pages:dev`.
 
-> **⚠️ The endpoint is unauthenticated and costs money per call.** Anyone can POST to
-> `/api/rsvp` and make it send an SMS, which is how SMS-pumping fraud drains prepaid
-> credit. Mitigations already in place: one recipient per request, a fixed message
-> template (no client text is echoed), strict length caps, and Ghana-number validation.
-> Before promoting real traffic you should add **Cloudflare Turnstile** on the RSVP
-> form plus a **KV- or Durable-Object-backed rate limit** per IP and per phone number.
+### Abuse protection
+
+`/api/rsvp` spends money on every accepted call, which is exactly what SMS-pumping
+fraud targets. Two independent layers run **before** anything is sent:
+
+1. **Cloudflare Turnstile.** The widget sits above the submit button in the RSVP form;
+   `functions/_shared/guards.ts` verifies the token against `siteverify` server-side.
+   The check **fails closed** — if `TURNSTILE_SECRET_KEY` is missing the endpoint
+   returns 503 rather than sending, so a misconfiguration cannot silently open it.
+2. **Rate limits**, backed by the D1 `rate_limits` table: **10 per IP per hour** and
+   **3 per phone number per hour** (`RATE_LIMITS` in `functions/_shared/guards.ts`).
+   D1 is used rather than KV because KV is eventually consistent and unreliable for
+   counting. Limits fail *open* on a database error — a D1 blip should not block real
+   attendees, and Turnstile is still in front.
+
+Also still in force: one recipient per request, fixed server-side message templates
+(no client text is ever echoed into a message), strict length caps, and phone/email
+validation.
+
+**Setup:** create a widget at **dash.cloudflare.com → Turnstile → Add widget** (domains:
+your production hostname plus `localhost` and `127.0.0.1`). Put the **site** key in
+`VITE_TURNSTILE_SITE_KEY` (public, build-time) and the **secret** key in
+`TURNSTILE_SECRET_KEY` (a Cloudflare Secret — never `VITE_`).
+
+---
+
+## 🔑 Admin API (server-side auth)
+
+The portal password only gates the UI — it ships in the JS bundle. Attendee data is
+protected separately by credentials that never leave the server.
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /api/admin/login` | Verifies `ADMIN_EMAIL` / `ADMIN_PASSWORD`, returns a signed session token (8h) |
+| `GET /api/rsvps` | Lists RSVPs. Requires `Authorization: Bearer <token>`. `?format=csv` exports |
+
+Tokens are stateless HMAC-SHA256 (`functions/_shared/auth.ts`) — signed, not encrypted,
+carrying only an email and an expiry. Comparisons are constant-time, and the login
+response never reveals which half of the credential was wrong.
+
+Set `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` as Cloudflare **Secrets**
+(and in `.dev.vars` locally). Generate the signing secret with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+The portal's login tries the server first; if the server returns 503 (auth not
+configured) or is unreachable, it falls back to the local UI-only gate — in which case
+the **RSVPs** tab explains what to set instead of showing data.
 
 ---
 
@@ -203,10 +247,9 @@ npx wrangler d1 execute kosua-ne-mekodb --remote \
   --command "SELECT created_at, customer_name, phone, pass_name, quantity FROM rsvps ORDER BY created_at DESC LIMIT 50"
 ```
 
-> **Read path not built yet.** Nothing in the Admin Portal reads this table — the portal
-> still lists only the passes held in that browser. A `GET /api/rsvps` for the portal
-> needs a server-side credential check first, since the current admin password is
-> client-side only and cannot protect an endpoint.
+**Reading it:** the Admin Portal's **RSVPs** tab lists bookings and exports CSV, via
+`GET /api/rsvps` (see the Admin API section above). `migrations/0002_create_rate_limits.sql`
+adds the rate-limit ledger used by `/api/rsvp`.
 
 ---
 

@@ -161,12 +161,14 @@ async function sendEmail(env: Env, to: string, subject: string, html: string): P
 export async function onRequestPost(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context;
 
+  // Each channel is independently optional. Recording the booking is the part
+  // that always matters — an RSVP must still reach D1 when SMS/email are not
+  // set up yet, otherwise the attendee list silently stays empty.
   const smsConfigured = Boolean(env.MNOTIFY_API_KEY && env.MNOTIFY_SENDER_ID);
   const emailConfigured = Boolean(env.SMTP_HOST && env.SMTP_USER && env.SMTP_PASSWORD && env.SMTP_FROM);
 
   if (!smsConfigured && !emailConfigured) {
-    console.error('[rsvp] neither mNotify nor SMTP is configured');
-    return json({ ok: false, error: 'Confirmations are not configured on this deployment.' }, 503);
+    console.warn('[rsvp] no messaging channel configured — recording the RSVP only');
   }
 
   let payload: RsvpPayload;

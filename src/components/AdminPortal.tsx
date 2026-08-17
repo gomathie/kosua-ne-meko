@@ -40,7 +40,6 @@ const FALLBACK_SPONSOR_LOGO = 'https://images.unsplash.com/photo-1548550023-2bdb
 const FALLBACK_GALLERY_IMAGE = 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80';
 
 interface AdminPortalProps {
-  isOpen: boolean;
   onClose: () => void;
   eventDetails: EventDetails;
   eventsList: EventItem[];
@@ -75,7 +74,6 @@ interface AdminPortalProps {
 }
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
-  isOpen,
   onClose,
   eventDetails,
   eventsList,
@@ -201,7 +199,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     caption: '',
   });
 
-  if (!isOpen) return null;
+  // Rendered only when the route matches, so there is no open/closed state here.
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

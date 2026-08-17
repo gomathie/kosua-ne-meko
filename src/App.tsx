@@ -15,7 +15,7 @@ import { FaqSection } from './components/FaqSection';
 import { Footer } from './components/Footer';
 import { TicketModal } from './components/TicketModal';
 import { MyTicketsModal } from './components/MyTicketsModal';
-import { AdminModal } from './components/AdminModal';
+import { AdminPortal } from './components/AdminPortal';
 import { UserTicket } from './types';
 import { useEventData } from './utils/eventStore';
 import { sanitizeUserTickets } from './utils/sanitize';
@@ -58,7 +58,8 @@ export default function App() {
   const [tickets, setTickets] = useState<UserTicket[]>([]);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
   const [isMyTicketsOpen, setIsMyTicketsOpen] = useState(false);
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  /** The portal is a route, not an overlay — when true it replaces the site. */
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
 
   // Load saved tickets & check for the admin entry point in the URL
   useEffect(() => {
@@ -71,13 +72,15 @@ export default function App() {
       console.error('Failed to load tickets from storage', err);
     }
 
+    // Re-evaluated on every navigation, so leaving the portal (or pressing Back)
+    // returns to the site rather than leaving it stuck open.
     const checkAdminUrl = () => {
       // Trailing slashes are ignored; endsWith keeps this working when the site
       // is served from a subdirectory.
       const path = window.location.pathname.replace(/\/+$/, '');
-      if (path === ADMIN_PATH || path.endsWith(ADMIN_PATH) || window.location.hash === ADMIN_HASH) {
-        setIsAdminModalOpen(true);
-      }
+      const onAdminRoute =
+        path === ADMIN_PATH || path.endsWith(ADMIN_PATH) || window.location.hash === ADMIN_HASH;
+      setIsAdminRoute(onAdminRoute);
     };
     checkAdminUrl();
     window.addEventListener('hashchange', checkAdminUrl);
@@ -87,6 +90,19 @@ export default function App() {
       window.removeEventListener('popstate', checkAdminUrl);
     };
   }, []);
+
+  /** Navigates to the portal without a reload, so it behaves like a real page. */
+  const openAdminPortal = () => {
+    window.history.pushState({}, '', ADMIN_PATH);
+    setIsAdminRoute(true);
+    window.scrollTo({ top: 0 });
+  };
+
+  const leaveAdminPortal = () => {
+    // Clears the hash form too, otherwise #adm would re-open the portal.
+    window.history.pushState({}, '', '/');
+    setIsAdminRoute(false);
+  };
 
   const handleTicketBooked = (newTicket: UserTicket) => {
     const updated = [newTicket, ...tickets];
@@ -107,9 +123,51 @@ export default function App() {
     }
   };
 
+  // The portal is a page in its own right: it replaces the site rather than
+  // floating over it, so none of the festival chrome renders behind it.
+  if (isAdminRoute) {
+    return (
+      <div className="font-sans antialiased selection:bg-orange-500 selection:text-white">
+        <AdminPortal
+          onClose={leaveAdminPortal}
+          eventDetails={data.eventDetails}
+          eventsList={data.eventsList}
+          adminUsers={data.adminUsers}
+          vendors={data.vendors}
+          schedule={data.schedule}
+          collaborators={data.collaborators}
+          sponsors={data.sponsors}
+          gallery={data.gallery}
+          onUpdateEventDetails={updateEventDetails}
+          onAddEventItem={addEventItem}
+          onUpdateEventItem={updateEventItem}
+          onSetActiveEvent={setActiveEvent}
+          onDeleteEventItem={deleteEventItem}
+          onAddAdminUser={addAdminUser}
+          onDeleteAdminUser={deleteAdminUser}
+          onAddVendor={addVendor}
+          onUpdateVendor={updateVendor}
+          onDeleteVendor={deleteVendor}
+          onAddScheduleItem={addScheduleItem}
+          onUpdateScheduleItem={updateScheduleItem}
+          onDeleteScheduleItem={deleteScheduleItem}
+          onAddCollaborator={addCollaborator}
+          onUpdateCollaborator={updateCollaborator}
+          onDeleteCollaborator={deleteCollaborator}
+          onAddSponsor={addSponsor}
+          onUpdateSponsor={updateSponsor}
+          onDeleteSponsor={deleteSponsor}
+          onAddGalleryItem={addGalleryItem}
+          onDeleteGalleryItem={deleteGalleryItem}
+          onResetAll={resetAll}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white text-stone-900 font-sans antialiased selection:bg-orange-500 selection:text-white relative">
-      
+
       {/* Navigation Bar */}
       <Navbar
         eventDetails={data.eventDetails}
@@ -134,7 +192,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer eventDetails={data.eventDetails} onOpenAdmin={() => setIsAdminModalOpen(true)} />
+      <Footer eventDetails={data.eventDetails} onOpenAdmin={openAdminPortal} />
 
       {/* Floating Sticky Mobile Quick Action Bar */}
       <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-stone-900/95 backdrop-blur-lg border-t border-stone-800 p-3 shadow-2xl flex items-center justify-between gap-2 text-white">
@@ -183,41 +241,6 @@ export default function App() {
         onClose={() => setIsMyTicketsOpen(false)}
         tickets={tickets}
         onClearTickets={handleClearTickets}
-      />
-
-      <AdminModal
-        isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        eventDetails={data.eventDetails}
-        eventsList={data.eventsList}
-        adminUsers={data.adminUsers}
-        vendors={data.vendors}
-        schedule={data.schedule}
-        collaborators={data.collaborators}
-        sponsors={data.sponsors}
-        gallery={data.gallery}
-        onUpdateEventDetails={updateEventDetails}
-        onAddEventItem={addEventItem}
-        onUpdateEventItem={updateEventItem}
-        onSetActiveEvent={setActiveEvent}
-        onDeleteEventItem={deleteEventItem}
-        onAddAdminUser={addAdminUser}
-        onDeleteAdminUser={deleteAdminUser}
-        onAddVendor={addVendor}
-        onUpdateVendor={updateVendor}
-        onDeleteVendor={deleteVendor}
-        onAddScheduleItem={addScheduleItem}
-        onUpdateScheduleItem={updateScheduleItem}
-        onDeleteScheduleItem={deleteScheduleItem}
-        onAddCollaborator={addCollaborator}
-        onUpdateCollaborator={updateCollaborator}
-        onDeleteCollaborator={deleteCollaborator}
-        onAddSponsor={addSponsor}
-        onUpdateSponsor={updateSponsor}
-        onDeleteSponsor={deleteSponsor}
-        onAddGalleryItem={addGalleryItem}
-        onDeleteGalleryItem={deleteGalleryItem}
-        onResetAll={resetAll}
       />
 
     </div>

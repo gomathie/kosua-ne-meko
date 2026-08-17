@@ -105,11 +105,19 @@ To access the administrative dashboard:
    (`http://localhost:3000/#adm`). The footer also has a discreet "Admin Portal" link.
    > The `/adm` path requires SPA history fallback on your host — if your deploy
    > returns a 404 there, use the `#adm` hash form instead, which works anywhere.
-2. Log in with a passcode from the admin list in `src/data/eventData.ts`.
+2. Sign in with the **email and password** of an account in the admin list
+   (`INITIAL_ADMIN_USERS` in `src/data/eventData.ts`). Both must match the same account.
 
-Passcodes are the only credential — there are no hardcoded fallbacks, so removing
-an admin in the portal revokes their access. The last remaining admin cannot be
-deleted, to prevent locking yourself out.
+The admin list is the only authority — there are no hardcoded fallbacks, so removing
+an admin in the portal revokes their access immediately. The last remaining admin
+cannot be deleted, to prevent locking yourself out.
+
+> **Security note:** this is a convenience gate, not a security boundary. Passwords
+> live in client-side code and `localStorage` in plain text, so anyone can read them
+> from the JS bundle or devtools. Changing a password requires a redeploy **and** a
+> `STORAGE_KEY` bump in `src/utils/eventStore.ts` (otherwise browsers keep
+> authenticating against the admin list already saved in their storage). Move auth
+> to a server before treating the portal as protected.
 
 ---
 

@@ -98,6 +98,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [revealedPasscodeId, setRevealedPasscodeId] = useState<string | null>(null);
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery'>('event');
 
@@ -916,9 +917,10 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Email (Optional)</label>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Admin Email * (their login)</label>
                       <input
                         type="email"
+                        required
                         placeholder="kwame@ekowsamfarms.com"
                         maxLength={LIMITS.email}
                         value={newAdmin.email}
@@ -930,11 +932,11 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-stone-300 block mb-1">Custom Passcode *</label>
+                      <label className="text-xs font-bold text-stone-300 block mb-1">Password * (min 8 characters)</label>
                       <input
                         type="text"
                         required
-                        placeholder="At least 6 characters"
+                        placeholder="At least 8 characters"
                         maxLength={LIMITS.passcode}
                         value={newAdmin.passcode}
                         onChange={(e) => setNewAdmin({ ...newAdmin, passcode: e.target.value })}
@@ -974,8 +976,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                             <span className="text-xs font-black text-white">{user.name}</span>
                             <span className="px-2 py-0.5 rounded-md bg-stone-900 text-emerald-400 text-[9px] font-black uppercase">{user.role}</span>
                           </div>
-                          {user.email && <span className="text-[10px] text-stone-400 block">{user.email}</span>}
-                          <span className="text-[10px] font-mono text-amber-400 font-bold block mt-1">Passcode: {user.passcode}</span>
+                          <span className="text-[10px] text-stone-400 block">{user.email}</span>
+                          {/* Masked by default so one admin's screen does not expose everyone's password. */}
+                          <span className="text-[10px] font-mono text-amber-400 font-bold mt-1 flex items-center gap-2">
+                            <span>Password: {revealedPasscodeId === user.id ? user.passcode : '••••••••'}</span>
+                            <button
+                              type="button"
+                              onClick={() => setRevealedPasscodeId(revealedPasscodeId === user.id ? null : user.id)}
+                              className="text-[9px] uppercase font-black text-stone-400 hover:text-white underline"
+                            >
+                              {revealedPasscodeId === user.id ? 'Hide' : 'Show'}
+                            </button>
+                          </span>
                         </div>
                         <button
                           onClick={() => handleDeleteAdminUser(user)}

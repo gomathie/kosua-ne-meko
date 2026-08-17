@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Camera, X, Maximize2, Sparkles } from 'lucide-react';
 import { GalleryItem } from '../types';
+import { formatCategoryLabel } from '../utils/sanitize';
 import { sanitizeImageUrl } from '../utils/sanitize';
 
 interface GallerySectionProps {
   gallery: GalleryItem[];
+  /** Admin-managed list, so new categories appear as filters automatically. */
+  categories?: string[];
 }
 
-export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
+export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categories = [] }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeImage, setActiveImage] = useState<GalleryItem | null>(null);
 
@@ -36,10 +39,10 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery }) => {
           <div className="pt-4 flex flex-wrap justify-center gap-2">
             {[
               { id: 'all', label: 'All Photos' },
-              { id: 'food', label: 'Kosua & Meko' },
-              { id: 'vibes', label: 'Crowd & Vibes' },
-              { id: 'stage', label: 'Stage & Cinema' },
-              { id: 'community', label: 'Games & Tournaments' },
+              // Only offer filters that actually match photos in the gallery.
+              ...categories
+                .filter((c) => gallery.some((item) => item.category === c))
+                .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((cat) => (
               <button
                 key={cat.id}

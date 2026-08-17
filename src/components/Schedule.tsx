@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { Clock, MapPin, Calendar, Flame, Music, Gamepad2, Utensils } from 'lucide-react';
 import { ScheduleItem } from '../types';
+import { formatCategoryLabel } from '../utils/sanitize';
 
 interface ScheduleProps {
   schedule: ScheduleItem[];
   dateString?: string;
   locationName?: string;
+  /** Admin-managed list, so new categories appear as filters automatically. */
+  categories?: string[];
 }
 
-export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locationName }) => {
+export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locationName, categories = [] }) => {
   const [filter, setFilter] = useState<string>('all');
 
   const filteredItems = filter === 'all' 
@@ -26,7 +29,13 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
       case 'community':
         return <span className="bg-indigo-100 text-indigo-800 text-[10px] font-black px-2.5 py-1 rounded-md uppercase flex items-center gap-1"><Gamepad2 className="w-3 h-3" /> Board Games</span>;
       default:
-        return null;
+        // Admin-added categories have no bespoke icon or colour, but they must
+        // still render — returning null here would leave the item unlabelled.
+        return (
+          <span className="bg-stone-100 text-stone-700 text-[10px] font-black px-2.5 py-1 rounded-md uppercase">
+            {formatCategoryLabel(category)}
+          </span>
+        );
     }
   };
 
@@ -51,10 +60,10 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
           <div className="flex flex-wrap justify-center gap-2 pt-4">
             {[
               { id: 'all', label: 'All Activities' },
-              { id: 'food', label: 'Food & Workshops' },
-              { id: 'competition', label: 'Pepper Challenge' },
-              { id: 'community', label: 'Ludo & Oware' },
-              { id: 'music', label: 'Live DJ & Party' },
+              // Only offer filters that actually match something on the timeline.
+              ...categories
+                .filter((c) => schedule.some((item) => item.category === c))
+                .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((tab) => (
               <button
                 key={tab.id}

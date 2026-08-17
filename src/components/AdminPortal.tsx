@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
-import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
+import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind } from '../types';
 import {
   LIMITS,
   sanitizeEmail,
@@ -18,6 +18,7 @@ import {
   sanitizeSponsor,
   sanitizeGalleryInput,
   sanitizeImageUrl,
+  formatCategoryLabel,
 } from '../utils/sanitize';
 
 /** One row of the D1 `rsvps` table, as returned by GET /api/rsvps. */
@@ -70,8 +71,102 @@ interface AdminPortalProps {
   onDeleteSponsor: (id: string) => void;
   onAddGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   onDeleteGalleryItem: (id: string) => void;
+  categories: EventCategories;
+  onAddCategory: (kind: CategoryKind, label: string) => string | null;
+  onDeleteCategory: (kind: CategoryKind, category: string) => void;
   onResetAll: () => void;
 }
+
+/**
+ * Add/remove control for one category list, reused by the Vendors, Activities
+ * and Gallery tabs so the three stay consistent.
+ */
+const CategoryManager: React.FC<{
+  kind: CategoryKind;
+  categories: string[];
+  onAdd: (kind: CategoryKind, label: string) => string | null;
+  onDelete: (kind: CategoryKind, category: string) => void;
+  inUse: string[];
+}> = ({ kind, categories, onAdd, onDelete, inUse }) => {
+  const [draft, setDraft] = useState('');
+
+  const submit = () => {
+    const label = draft.trim();
+    if (!label) return;
+    if (onAdd(kind, label) === null) {
+      alert(`"${label}" is either empty or already a category.`);
+      return;
+    }
+    setDraft('');
+  };
+
+  return (
+    <div className="bg-stone-800/60 p-4 rounded-2xl border border-stone-700 space-y-3">
+      <h5 className="text-[11px] font-black uppercase text-stone-300 tracking-wider">
+        Categories ({categories.length})
+      </h5>
+
+      <div className="flex flex-wrap gap-2">
+        {categories.map((category) => {
+          // A category still attached to records cannot be removed without
+          // orphaning them, so the button explains itself instead of vanishing.
+          const used = inUse.filter((value) => value === category).length;
+          return (
+            <span
+              key={category}
+              className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-lg bg-stone-900 border border-stone-700 text-[11px] font-bold text-stone-200"
+            >
+              {formatCategoryLabel(category)}
+              {used > 0 && <span className="text-[9px] text-stone-500">({used})</span>}
+              <button
+                type="button"
+                title={used > 0 ? `${used} item(s) still use this` : 'Remove category'}
+                onClick={() => {
+                  if (used > 0) {
+                    alert(
+                      `"${formatCategoryLabel(category)}" is still used by ${used} item(s). ` +
+                        'Move them to another category first.',
+                    );
+                    return;
+                  }
+                  onDelete(kind, category);
+                }}
+                className="p-0.5 rounded text-stone-500 hover:text-red-400 hover:bg-red-950/50"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </span>
+          );
+        })}
+      </div>
+
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={draft}
+          maxLength={48}
+          placeholder="New category, e.g. Vegan Corner"
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter must not submit the surrounding form.
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          className="flex-1 px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+        />
+        <button
+          type="button"
+          onClick={submit}
+          className="px-3 py-2 rounded-xl bg-stone-700 hover:bg-stone-600 text-white text-xs font-black flex items-center gap-1"
+        >
+          <Plus className="w-3.5 h-3.5" /> Add
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const AdminPortal: React.FC<AdminPortalProps> = ({
   onClose,
@@ -104,6 +199,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   onDeleteSponsor,
   onAddGalleryItem,
   onDeleteGalleryItem,
+  categories,
+  onAddCategory,
+  onDeleteCategory,
   onResetAll,
 }) => {
   const [loginEmail, setLoginEmail] = useState('');
@@ -1125,6 +1223,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             {activeTab === 'vendors' && (
               <div className="space-y-6">
                 {/* Form to Add Vendor */}
+                <CategoryManager
+                  kind="vendors"
+                  categories={categories.vendors}
+                  onAdd={onAddCategory}
+                  onDelete={onDeleteCategory}
+                  inUse={vendors.map((v) => v.category)}
+                />
                 <form onSubmit={handleCreateVendor} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-4">
                   <h4 className="text-xs font-black uppercase text-orange-400 tracking-wider">ADD NEW VENDOR STALL</h4>
 
@@ -1146,14 +1251,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <label className="text-[11px] font-bold text-stone-300 block mb-1">Category</label>
                       <select
                         value={newVendor.category}
-                        onChange={(e) => setNewVendor({ ...newVendor, category: e.target.value as Vendor['category'] })}
+                        onChange={(e) => setNewVendor({ ...newVendor, category: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
                       >
-                        <option value="eggs-pepper">Eggs & Pepper</option>
-                        <option value="street-food">Street Eats</option>
-                        <option value="drinks">Drinks & Palm Wine</option>
-                        <option value="farm-fresh">Farm Fresh</option>
-                        <option value="entertainment">Entertainment</option>
+                        {categories.vendors.map((c) => (
+                          <option key={c} value={c}>{formatCategoryLabel(c)}</option>
+                        ))}
                       </select>
                     </div>
 
@@ -1524,6 +1627,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             {activeTab === 'schedule' && (
               <div className="space-y-6">
                 {/* Form to Add Schedule Activity */}
+                <CategoryManager
+                  kind="schedule"
+                  categories={categories.schedule}
+                  onAdd={onAddCategory}
+                  onDelete={onDeleteCategory}
+                  inUse={schedule.map((i) => i.category)}
+                />
                 <form onSubmit={handleCreateScheduleItem} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-3">
                   <h4 className="text-xs font-black uppercase text-orange-400 tracking-wider">ADD EVENT ACTIVITY</h4>
 
@@ -1552,6 +1662,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
                       />
+                    </div>
+
+                    <div>
+                      {/* Activities had no category control at all, so every one
+                          was silently filed under "food". */}
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Category</label>
+                      <select
+                        value={newItem.category}
+                        onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      >
+                        {categories.schedule.map((c) => (
+                          <option key={c} value={c}>{formatCategoryLabel(c)}</option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
@@ -1654,6 +1779,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             {activeTab === 'gallery' && (
               <div className="space-y-6">
                 {/* Form to Add Gallery Photo */}
+                <CategoryManager
+                  kind="gallery"
+                  categories={categories.gallery}
+                  onAdd={onAddCategory}
+                  onDelete={onDeleteCategory}
+                  inUse={gallery.map((g) => g.category)}
+                />
                 <form onSubmit={handleCreateGallery} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-3">
                   <h4 className="text-xs font-black uppercase text-amber-400 tracking-wider">ADD EVENT GALLERY PHOTO</h4>
 
@@ -1675,13 +1807,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <label className="text-[11px] font-bold text-stone-300 block mb-1">Category</label>
                       <select
                         value={newGallery.category}
-                        onChange={(e) => setNewGallery({ ...newGallery, category: e.target.value as GalleryItem['category'] })}
+                        onChange={(e) => setNewGallery({ ...newGallery, category: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
                       >
-                        <option value="food">Kosua & Meko</option>
-                        <option value="vibes">Crowd & Vibes</option>
-                        <option value="stage">Stage & Cinema</option>
-                        <option value="community">Games & Tournaments</option>
+                        {categories.gallery.map((c) => (
+                          <option key={c} value={c}>{formatCategoryLabel(c)}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

@@ -52,6 +52,8 @@ export default function App() {
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,
+    addCategory,
+    deleteCategory,
     resetAll,
   } = useEventData();
 
@@ -159,6 +161,9 @@ export default function App() {
           onDeleteSponsor={deleteSponsor}
           onAddGalleryItem={addGalleryItem}
           onDeleteGalleryItem={deleteGalleryItem}
+          categories={data.categories}
+          onAddCategory={addCategory}
+          onDeleteCategory={deleteCategory}
           onResetAll={resetAll}
         />
       </div>
@@ -181,9 +186,9 @@ export default function App() {
         <Hero eventDetails={data.eventDetails} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <EventHighlights />
         <PepperMeter />
-        <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} />
-        <Vendors vendors={data.vendors} />
-        <GallerySection gallery={data.gallery} />
+        <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} categories={data.categories.schedule} />
+        <Vendors vendors={data.vendors} categories={data.categories.vendors} />
+        <GallerySection gallery={data.gallery} categories={data.categories.gallery} />
         <UpcomingEventsSection events={data.eventsList} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
         <LocationMap eventDetails={data.eventDetails} />

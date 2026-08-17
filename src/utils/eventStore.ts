@@ -9,8 +9,9 @@ import { sanitizeFullEventData, sanitizeCategory } from './sanitize';
 // exempt: applyEnvAdmins below re-applies them on every read.
 // v4 retired the seeded passcodes; v5 moved sign-in to email + password;
 // v6 removed the second admin and moved credentials to .env;
-// v7 added the Industrial Coatings Africa and Hitrace Solutions collaborators.
-const STORAGE_KEY = 'kosua_event_data_v7';
+// v7 added the Industrial Coatings Africa and Hitrace Solutions collaborators;
+// v8 moved those two to Silver sponsors and added admin-managed categories.
+const STORAGE_KEY = 'kosua_event_data_v8';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {

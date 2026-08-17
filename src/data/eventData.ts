@@ -112,27 +112,8 @@ export const INITIAL_COLLABORATORS: Collaborator[] = [
     badge: 'Official Media & Cinema Partner',
     logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
   },
-  {
-    id: 'collab-2',
-    name: 'Industrial Coatings Africa',
-    url: 'https://industrialcoatingsafrica.com',
-    // Taglines are quoted from each company's own site — do not paraphrase or
-    // invent copy on a partner's behalf.
-    tagline: 'Protective coatings engineered for Africa’s toughest environments.',
-    badge: 'Official Event Collaborator',
-    // Self-hosted from public/logos rather than hotlinked: a partner's CDN path
-    // can change or block cross-origin use, which would leave a broken logo on
-    // the live site.
-    logoUrl: '/logos/industrial-coatings-africa.png',
-  },
-  {
-    id: 'collab-3',
-    name: 'Hitrace Solutions',
-    url: 'https://hitracesolutions.com',
-    tagline: 'We Simply Put You in Control',
-    badge: 'Official Event Collaborator',
-    logoUrl: '/logos/hitrace-solutions.png',
-  },
+  // Industrial Coatings Africa and Hitrace Solutions are Silver sponsors —
+  // see INITIAL_SPONSORS below, not here.
 ];
 
 export const INITIAL_SPONSORS: Sponsor[] = [
@@ -167,9 +148,18 @@ export const INITIAL_SPONSORS: Sponsor[] = [
   {
     id: 'spon-5',
     name: 'Industrial Coatings Africa',
-    tier: 'Gold',
-    logoUrl: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://example.com',
+    tier: 'Silver',
+    // Real mark, self-hosted from public/logos. This entry previously carried a
+    // stock photo and an example.com link, which misrepresented a real sponsor.
+    logoUrl: '/logos/industrial-coatings-africa.png',
+    websiteUrl: 'https://industrialcoatingsafrica.com',
+  },
+  {
+    id: 'spon-6',
+    name: 'Hitrace Solutions',
+    tier: 'Silver',
+    logoUrl: '/logos/hitrace-solutions.png',
+    websiteUrl: 'https://hitracesolutions.com',
   },
 ];
 

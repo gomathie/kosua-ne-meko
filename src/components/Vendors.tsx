@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Utensils, Search, Award } from 'lucide-react';
 import { Vendor } from '../types';
-import { sanitizeImageUrl } from '../utils/sanitize';
+import { sanitizeImageUrl, formatCategoryLabel } from '../utils/sanitize';
 
 interface VendorsProps {
   vendors: Vendor[];
+  /** Admin-managed list, so new categories appear as filters automatically. */
+  categories?: string[];
 }
 
-export const Vendors: React.FC<VendorsProps> = ({ vendors }) => {
+export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -56,11 +58,10 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors }) => {
           <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             {[
               { id: 'all', label: 'All Stalls' },
-              { id: 'eggs-pepper', label: 'Eggs & Pepper' },
-              { id: 'street-food', label: 'Street Eats' },
-              { id: 'drinks', label: 'Palm Wine & Sobolo' },
-              { id: 'farm-fresh', label: 'Farm Take-Home' },
-              { id: 'entertainment', label: 'Pebble Cinema' },
+              // Only offer filters that actually match a stall.
+              ...categories
+                .filter((c) => vendors.some((v) => v.category === c))
+                .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((cat) => (
               <button
                 key={cat.id}

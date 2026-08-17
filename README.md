@@ -123,42 +123,48 @@ cannot be deleted, to prevent locking yourself out.
 
 ---
 
-## ✉️ Email (SMTP)
+## 📬 RSVP confirmations (SMS + email)
 
-SMTP settings live in `.env` as `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`,
-`SMTP_PASSWORD`, `SMTP_FROM` and `SMTP_NOTIFY_TO` — see `.env.example`.
-
-These are intentionally **not** prefixed with `VITE_`. Vite only exposes `VITE_*`
-variables to the browser, so the missing prefix is what keeps the mail password
-server-side. Never rename them to `VITE_SMTP_*`.
-
-> **Not wired up, and SMTP will not work on Cloudflare.** Workers and Pages Functions
-> cannot open raw SMTP connections, so `nodemailer` and friends are unusable there.
-> To send email from a Cloudflare deployment, use an HTTP email API (Resend, Mailgun,
-> SendGrid) and swap these variables for that provider's API key. The SMTP variables
-> above are only useful if you run the site on a Node host instead.
-
----
-
-## 📱 SMS (mNotify)
-
-RSVP confirmations are sent by SMS through [mNotify](https://readthedocs.mnotify.com/),
-via the Cloudflare Pages Function at `functions/api/rsvp.ts` (`POST /api/rsvp`).
+One Cloudflare Pages Function, `functions/api/rsvp.ts` (`POST /api/rsvp`), handles both
+channels and persists the booking to D1.
 
 **Flow:** `handleSubmit` in `src/components/TicketModal.tsx` saves the pass locally,
-then posts the booking to `/api/rsvp`. The Function re-validates the input, builds the
-message from a fixed server-side template, and calls mNotify's quick-SMS endpoint.
-SMS failure never blocks an RSVP — the pass is already saved and the UI says so.
+then posts the booking to `/api/rsvp`. The Function re-validates every field, sends the
+SMS and the email from **fixed server-side templates**, writes the row to D1, and
+returns `{ ok, sms, email, stored }`. Each channel fails independently and neither can
+block an RSVP — the pass is already saved, and the UI reports what actually went out.
 
-**Configuration** (`MNOTIFY_API_KEY`, `MNOTIFY_SENDER_ID`, `MNOTIFY_NOTIFY_TO`):
+### Email — SMTP
+
+Sent over real SMTP by [`worker-mailer`](https://github.com/zou-yu/worker-mailer),
+which speaks SMTP on Cloudflare's `cloudflare:sockets` TCP API. **Nodemailer does not
+work on Workers** — this library is what makes plain SMTP viable here. It needs
+`"compatibility_flags": ["nodejs_compat"]`, already set in `wrangler.jsonc`.
+
+Variables: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASSWORD`,
+`SMTP_FROM`, `SMTP_NOTIFY_TO`.
+
+> **Port 25 is blocked on Cloudflare.** Use **587** (`SMTP_SECURE="false"`, upgrades via
+> STARTTLS) or **465** (`SMTP_SECURE="true"`, implicit TLS). If mail silently fails,
+> check the port first — then confirm your provider allows SMTP AUTH from a datacentre IP.
+
+### SMS — mNotify
+
+Sent via [mNotify](https://readthedocs.mnotify.com/)'s quick-SMS endpoint. Response
+code `2000` means success; anything else is logged and reported as a failure.
+
+Variables: `MNOTIFY_API_KEY`, `MNOTIFY_SENDER_ID`, `MNOTIFY_NOTIFY_TO`. The sender ID
+must be registered with mNotify and is limited to 11 alphanumeric characters.
+
+### Configuring both
 
 | Where | How |
 |---|---|
 | Cloudflare | Settings → Variables and Secrets → add as **Secrets** (encrypted) |
-| Local dev | `.dev.vars` (copy `.dev.vars.example`), run `npx wrangler pages dev dist` |
+| Local dev | `.dev.vars` (copy `.dev.vars.example`), then `npm run pages:dev` |
 
-No `VITE_` prefix — that is what keeps the SMS key server-side. The sender ID must be
-registered with mNotify and is limited to 11 alphanumeric characters.
+None of these carry a `VITE_` prefix — that is precisely what keeps them server-side.
+Never add one. `npm run dev` does not run Functions; use `npm run pages:dev`.
 
 > **⚠️ The endpoint is unauthenticated and costs money per call.** Anyone can POST to
 > `/api/rsvp` and make it send an SMS, which is how SMS-pumping fraud drains prepaid
@@ -166,6 +172,41 @@ registered with mNotify and is limited to 11 alphanumeric characters.
 > template (no client text is echoed), strict length caps, and Ghana-number validation.
 > Before promoting real traffic you should add **Cloudflare Turnstile** on the RSVP
 > form plus a **KV- or Durable-Object-backed rate limit** per IP and per phone number.
+
+---
+
+## 🗄️ Database (Cloudflare D1)
+
+RSVP bookings are stored in D1 — until now a booking existed only in the attendee's own
+`localStorage`, so the organiser had no attendee list and a cleared browser lost the pass.
+
+**Schema:** `migrations/0001_create_rsvps.sql` — one `rsvps` table keyed by `ticket_id`,
+with indexes on `created_at`, `phone` and `email`. The insert is `INSERT OR REPLACE`, so
+a retried submission updates its row instead of duplicating it.
+
+**First-time setup:**
+
+```bash
+npx wrangler d1 create kosua-ne-mekodb   # paste the returned id into wrangler.jsonc
+npm run db:migrate:local                 # apply schema to the local dev database
+npm run db:migrate                       # apply schema to production
+```
+
+The binding is `DB`, declared in `wrangler.jsonc`. Until a real `database_id` is pasted
+in, the Function logs a warning and skips persistence — confirmations still send, and
+`stored: false` comes back in the response.
+
+**Querying what came in:**
+
+```bash
+npx wrangler d1 execute kosua-ne-mekodb --remote \
+  --command "SELECT created_at, customer_name, phone, pass_name, quantity FROM rsvps ORDER BY created_at DESC LIMIT 50"
+```
+
+> **Read path not built yet.** Nothing in the Admin Portal reads this table — the portal
+> still lists only the passes held in that browser. A `GET /api/rsvps` for the portal
+> needs a server-side credential check first, since the current admin password is
+> client-side only and cannot protect an endpoint.
 
 ---
 

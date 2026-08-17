@@ -10,7 +10,8 @@ import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails,
  *  1. strip control / invisible / bidi characters that let text lie about itself,
  *  2. cap lengths so one field can't blow out the layout or the storage quota,
  *  3. keep `javascript:` & friends out of every href/src we render,
- *  4. pin enum-ish fields ("tier", "category", "status") to their allowed values.
+ *  4. pin closed-set fields ("tier", "status", "role") to their allowed values,
+ *     while normalising open-ended ones ("category") to a safe slug instead.
  */
 
 type Range = readonly [number, number];
@@ -228,10 +229,7 @@ export function sanitizeIsoDate(value: unknown, fallback: string = ''): string {
   return Number.isNaN(Date.parse(text)) ? fallback : text;
 }
 
-const VENDOR_CATEGORIES: readonly Vendor['category'][] = ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment'];
-const SCHEDULE_CATEGORIES: readonly ScheduleItem['category'][] = ['food', 'competition', 'music', 'community', 'entertainment'];
 const SPONSOR_TIERS: readonly Sponsor['tier'][] = ['Headline', 'Gold', 'Silver', 'Partner'];
-const GALLERY_CATEGORIES: readonly GalleryItem['category'][] = ['food', 'vibes', 'stage', 'community'];
 const EVENT_STATUSES: readonly EventItem['status'][] = ['active', 'upcoming', 'past'];
 const ADMIN_ROLES: readonly AdminUser['role'][] = ['Super Admin', 'Event Manager', 'Staff'];
 
@@ -246,7 +244,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 export function sanitizeVendorInput(input: Omit<Vendor, 'id'>, fallbackImage = ''): Omit<Vendor, 'id'> {
   return {
     name: sanitizeText(input.name, LIMITS.name),
-    category: sanitizeEnum(input.category, VENDOR_CATEGORIES, 'street-food'),
+    category: sanitizeCategory(input.category, 'street-food'),
     description: sanitizeText(input.description, LIMITS.description),
     specialty: sanitizeText(input.specialty, LIMITS.shortText),
     imageUrl: sanitizeImageUrl(input.imageUrl, fallbackImage),
@@ -264,7 +262,7 @@ export function sanitizeScheduleItem(input: ScheduleItem): ScheduleItem {
     title: sanitizeText(input.title, LIMITS.title),
     description: sanitizeText(input.description, LIMITS.description),
     location: sanitizeText(input.location, LIMITS.shortText),
-    category: sanitizeEnum(input.category, SCHEDULE_CATEGORIES, 'food'),
+    category: sanitizeCategory(input.category, 'food'),
   };
 }
 
@@ -299,7 +297,7 @@ export function sanitizeGalleryInput(input: Omit<GalleryItem, 'id'>, fallbackIma
   return {
     title: sanitizeText(input.title, LIMITS.title),
     imageUrl: sanitizeImageUrl(input.imageUrl, fallbackImage),
-    category: sanitizeEnum(input.category, GALLERY_CATEGORIES, 'food'),
+    category: sanitizeCategory(input.category, 'food'),
     caption: sanitizeText(input.caption, LIMITS.description) || undefined,
   };
 }
@@ -409,7 +407,14 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
   const list = <T,>(value: unknown, sanitizer: (item: T) => T, fallbackList: T[]): T[] =>
     Array.isArray(value) ? value.filter(isRecord).map((item) => sanitizer(item as T)) : fallbackList;
 
+  const storedCategories = isRecord(parsed.categories) ? parsed.categories : {};
+
   return {
+    categories: {
+      vendors: sanitizeCategoryList(storedCategories.vendors, fallback.categories.vendors),
+      schedule: sanitizeCategoryList(storedCategories.schedule, fallback.categories.schedule),
+      gallery: sanitizeCategoryList(storedCategories.gallery, fallback.categories.gallery),
+    },
     eventDetails: sanitizeEventDetails({
       ...fallback.eventDetails,
       ...(isRecord(parsed.eventDetails) ? (parsed.eventDetails as Partial<EventDetails>) : {}),

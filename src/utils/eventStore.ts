@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser } from '../types';
-import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS } from '../data/eventData';
-import { sanitizeFullEventData } from './sanitize';
+import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, CategoryKind } from '../types';
+import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS, INITIAL_CATEGORIES } from '../data/eventData';
+import { sanitizeFullEventData, sanitizeCategory } from './sanitize';
 
 // Bump when the stored shape changes, or when seed content must reach browsers
 // that already hold a copy — a returning visitor reads their stored blob, so new
@@ -14,6 +14,7 @@ const STORAGE_KEY = 'kosua_event_data_v7';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {
+  categories: INITIAL_CATEGORIES,
   eventDetails: EVENT_DETAILS,
   eventsList: INITIAL_EVENTS_LIST,
   adminUsers: INITIAL_ADMIN_USERS,
@@ -100,6 +101,8 @@ export function useEventData(): {
   deleteSponsor: (id: string) => void;
   addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   deleteGalleryItem: (id: string) => void;
+  addCategory: (kind: CategoryKind, label: string) => string | null;
+  deleteCategory: (kind: CategoryKind, category: string) => void;
   resetAll: () => void;
 } {
   const [data, setData] = useState<FullEventData>(getStoredEventData());
@@ -402,6 +405,37 @@ export function useEventData(): {
     saveStoredEventData(updated);
   };
 
+  /**
+   * Adds a category. Returns the stored slug, or null when it is empty or a
+   * duplicate — the caller uses that to tell the admin what happened.
+   */
+  const addCategory = (kind: CategoryKind, label: string): string | null => {
+    const slug = sanitizeCategory(label);
+    if (!slug || data.categories[kind].includes(slug)) return null;
+
+    const updated: FullEventData = {
+      ...data,
+      categories: { ...data.categories, [kind]: [...data.categories[kind], slug] },
+    };
+    saveStoredEventData(updated);
+    return slug;
+  };
+
+  /**
+   * Removes a category from the list. Records already tagged with it keep their
+   * value rather than being silently retagged — the admin decides where those go.
+   */
+  const deleteCategory = (kind: CategoryKind, category: string) => {
+    const updated: FullEventData = {
+      ...data,
+      categories: {
+        ...data.categories,
+        [kind]: data.categories[kind].filter((entry) => entry !== category),
+      },
+    };
+    saveStoredEventData(updated);
+  };
+
   const resetAll = () => {
     resetEventDataToDefault();
   };
@@ -429,6 +463,8 @@ export function useEventData(): {
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,
+    addCategory,
+    deleteCategory,
     resetAll,
   };
 }

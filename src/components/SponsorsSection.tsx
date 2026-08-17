@@ -53,7 +53,12 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
                       src={sanitizeImageUrl(c.logoUrl)}
                       alt={c.name}
                       referrerPolicy="no-referrer"
-                      className="w-16 h-16 rounded-2xl object-cover border border-stone-700 shrink-0"
+                      /*
+                        object-contain, not object-cover: a wordmark is rarely
+                        square and cover would crop it. The white chip keeps
+                        dark-ink logos legible against this dark section.
+                      */
+                      className="w-16 h-16 rounded-2xl bg-white p-2 object-contain border border-stone-700 shrink-0"
                     />
                   )}
                   <div className="flex-1">
@@ -96,7 +101,7 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
                       className="px-6 py-4 rounded-2xl bg-stone-800 border border-stone-700 hover:border-orange-500 flex items-center gap-3 transition-all hover:scale-105 shadow-md"
                     >
                       {s.logoUrl && (
-                        <img src={sanitizeImageUrl(s.logoUrl)} alt={s.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-xl object-cover" />
+                        <img src={sanitizeImageUrl(s.logoUrl)} alt={s.name} referrerPolicy="no-referrer" className="w-10 h-10 rounded-xl bg-white p-1 object-contain" />
                       )}
                       <span className="text-base font-black text-white uppercase">{s.name}</span>
                     </a>
@@ -120,7 +125,7 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
                       className="px-4 py-2.5 rounded-xl bg-stone-800/60 border border-stone-700/80 hover:border-stone-500 flex items-center gap-2 transition-all hover:bg-stone-800"
                     >
                       {s.logoUrl && (
-                        <img src={sanitizeImageUrl(s.logoUrl)} alt={s.name} referrerPolicy="no-referrer" className="w-6 h-6 rounded-md object-cover" />
+                        <img src={sanitizeImageUrl(s.logoUrl)} alt={s.name} referrerPolicy="no-referrer" className="w-6 h-6 rounded-md bg-white p-0.5 object-contain" />
                       )}
                       <span className="text-xs font-bold text-stone-300">{s.name}</span>
                       <span className="text-[9px] font-black uppercase px-1.5 py-0.5 bg-stone-700 text-stone-300 rounded">

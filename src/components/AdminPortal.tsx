@@ -215,7 +215,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [rsvps, setRsvps] = useState<RsvpRow[]>([]);
   const [rsvpState, setRsvpState] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [revealedPasscodeId, setRevealedPasscodeId] = useState<string | null>(null);
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'rsvps'>('event');
 
@@ -334,26 +333,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         setAuthError('Incorrect email or password.');
         return;
       }
-      // 503 means server auth is not configured — fall through to the local gate.
+      if (response.status === 503) {
+        setAuthError('Sign-in is not configured on this deployment.');
+        return;
+      }
+      setAuthError('Sign-in failed. Please try again.');
     } catch {
-      // Offline, or Functions are not running (plain `npm run dev`) — fall through.
-    }
-
-    // Local fallback: gates the UI only. Both halves must match the same account,
-    // and the admin list is the only authority — no hardcoded fallbacks.
-    const isValidAdmin = adminUsers.some(
-      (u) => sanitizeEmail(u.email) === cleanEmail && sanitizePasscode(u.passcode) === cleanPass,
-    );
-
-    if (isValidAdmin) {
-      setIsAuthenticated(true);
-      setAuthError('');
-      setPasscode('');
-      setSessionToken(null);
-      setFormData(eventDetails);
-    } else {
-      // Deliberately does not say which half was wrong.
-      setAuthError('Incorrect email or password.');
+      // Offline, or Functions are not running (plain `npm run dev`).
+      setAuthError('Cannot reach the sign-in service. Run `npm run pages:dev` locally.');
     }
   };
 
@@ -1194,16 +1181,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             <span className="px-2 py-0.5 rounded-md bg-stone-900 text-emerald-400 text-[9px] font-black uppercase">{user.role}</span>
                           </div>
                           <span className="text-[10px] text-stone-400 block">{user.email}</span>
-                          {/* Masked by default so one admin's screen does not expose everyone's password. */}
-                          <span className="text-[10px] font-mono text-amber-400 font-bold mt-1 flex items-center gap-2">
-                            <span>Password: {revealedPasscodeId === user.id ? user.passcode : '••••••••'}</span>
-                            <button
-                              type="button"
-                              onClick={() => setRevealedPasscodeId(revealedPasscodeId === user.id ? null : user.id)}
-                              className="text-[9px] uppercase font-black text-stone-400 hover:text-white underline"
-                            >
-                              {revealedPasscodeId === user.id ? 'Hide' : 'Show'}
-                            </button>
+                          {/*
+                            Never render the password, not even behind a toggle.
+                            The real credential is the PBKDF2 hash in D1, which
+                            this screen has no access to and no reason to show.
+                          */}
+                          <span className="text-[10px] font-mono text-stone-500 font-bold mt-1 block">
+                            Password set — change it in .env or the admin_users table
                           </span>
                         </div>
                         <button

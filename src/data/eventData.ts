@@ -67,31 +67,22 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
  * can still read it from the shipped JavaScript. Real protection needs
  * server-side auth.
  */
-const ADMIN_EMAIL = import.meta.env?.VITE_ADMIN_EMAIL ?? '';
-const ADMIN_PASSWORD = import.meta.env?.VITE_ADMIN_PASSWORD ?? '';
-
-if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-  console.warn(
-    '[admin] VITE_ADMIN_EMAIL / VITE_ADMIN_PASSWORD are not set — no admin account ' +
-      'is configured and the portal cannot be opened. Copy .env.example to .env and fill them in.',
-  );
-}
-
-// An account with no configured credentials would be an unusable placeholder, so
-// the list stays empty instead and the login screen explains why.
-export const INITIAL_ADMIN_USERS: AdminUser[] =
-  ADMIN_EMAIL && ADMIN_PASSWORD
-    ? [
-        {
-          id: 'admin-1',
-          name: 'Super Admin',
-          email: ADMIN_EMAIL,
-          passcode: ADMIN_PASSWORD,
-          role: 'Super Admin',
-          createdDate: '2026-01-01',
-        },
-      ]
-    : [];
+/**
+ * Deliberately empty, and deliberately not built from any VITE_ variable.
+ *
+ * A password the browser can verify is a password the browser must contain, and
+ * Vite inlines every VITE_* value into the bundle — so any client-side admin
+ * credential is readable by every visitor, hashed or not. Hashing it locally
+ * would only obscure a secret that is printed in full a few lines away.
+ *
+ * The portal therefore authenticates solely through POST /api/admin/login,
+ * which checks a PBKDF2 hash held in D1 and never leaves the server.
+ *
+ * Local development: `npm run dev` does not run Pages Functions, so the portal
+ * cannot be signed into there. Use `npm run pages:dev`, which serves the API
+ * and the real login alongside the site.
+ */
+export const INITIAL_ADMIN_USERS: AdminUser[] = [];
 
 /**
  * Starting categories. Admins add to these through the portal, so nothing here

@@ -110,8 +110,10 @@ export const INITIAL_COLLABORATORS: Collaborator[] = [
     // invent copy on a partner's behalf.
     tagline: 'Protective coatings engineered for Africa’s toughest environments.',
     badge: 'Official Event Collaborator',
-    // No logoUrl: better to show the name cleanly than a stock photo standing in
-    // for a real company's brand. Add the real asset via the Admin Portal.
+    // Self-hosted from public/logos rather than hotlinked: a partner's CDN path
+    // can change or block cross-origin use, which would leave a broken logo on
+    // the live site.
+    logoUrl: '/logos/industrial-coatings-africa.png',
   },
   {
     id: 'collab-3',
@@ -119,6 +121,7 @@ export const INITIAL_COLLABORATORS: Collaborator[] = [
     url: 'https://hitracesolutions.com',
     tagline: 'We Simply Put You in Control',
     badge: 'Official Event Collaborator',
+    logoUrl: '/logos/hitrace-solutions.png',
   },
 ];
 

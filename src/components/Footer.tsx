@@ -82,7 +82,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
 
         </div>
 
-        {/* Copyright & Admin Portal Link */}
+        {/* Copyright & Portal Link */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500">
           <p>© 2026 {title}. Organized by {eventDetails?.organizer || 'Ekow Sam Farms'}.</p>
           <div className="flex items-center gap-4">
@@ -92,7 +92,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
                 className="text-stone-400 hover:text-orange-400 flex items-center gap-1 font-bold transition-colors"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>Admin Portal</span>
+                <span>Portal</span>
               </button>
             )}
             <p className="flex items-center gap-1">

@@ -58,24 +58,40 @@ export const INITIAL_EVENTS_LIST: EventItem[] = [
   },
 ];
 
-export const INITIAL_ADMIN_USERS: AdminUser[] = [
-  {
-    id: 'admin-1',
-    name: 'Super Admin',
-    email: 'hello@ekowsamfarms.com',
-    passcode: '0FsU7V9q2gDFvfjn',
-    role: 'Super Admin',
-    createdDate: '2026-01-01',
-  },
-  {
-    id: 'admin-2',
-    name: 'Goma Admin',
-    email: 'goma@trypebble.com',
-    passcode: 'abenkwan123',
-    role: 'Event Manager',
-    createdDate: '2026-07-27',
-  },
-];
+/**
+ * Admin credentials come from .env (see .env.example), which is gitignored, so
+ * they stay out of the repository.
+ *
+ * NOTE: Vite inlines VITE_* values into the production bundle at build time.
+ * This keeps the password out of git — it does NOT hide it from visitors, who
+ * can still read it from the shipped JavaScript. Real protection needs
+ * server-side auth.
+ */
+const ADMIN_EMAIL = import.meta.env?.VITE_ADMIN_EMAIL ?? '';
+const ADMIN_PASSWORD = import.meta.env?.VITE_ADMIN_PASSWORD ?? '';
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.warn(
+    '[admin] VITE_ADMIN_EMAIL / VITE_ADMIN_PASSWORD are not set — no admin account ' +
+      'is configured and the portal cannot be opened. Copy .env.example to .env and fill them in.',
+  );
+}
+
+// An account with no configured credentials would be an unusable placeholder, so
+// the list stays empty instead and the login screen explains why.
+export const INITIAL_ADMIN_USERS: AdminUser[] =
+  ADMIN_EMAIL && ADMIN_PASSWORD
+    ? [
+        {
+          id: 'admin-1',
+          name: 'Super Admin',
+          email: ADMIN_EMAIL,
+          passcode: ADMIN_PASSWORD,
+          role: 'Super Admin',
+          createdDate: '2026-01-01',
+        },
+      ]
+    : [];
 
 export const INITIAL_COLLABORATORS: Collaborator[] = [
   {

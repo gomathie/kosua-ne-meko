@@ -5,8 +5,9 @@ import { sanitizeFullEventData } from './sanitize';
 
 // Bumped on every admin-credential change: a browser holding an older blob would
 // otherwise keep authenticating against the admin list saved inside it.
-// v4 retired the seeded passcodes; v5 moved sign-in to email + password.
-const STORAGE_KEY = 'kosua_event_data_v5';
+// v4 retired the seeded passcodes; v5 moved sign-in to email + password;
+// v6 removed the second admin and moved credentials to .env.
+const STORAGE_KEY = 'kosua_event_data_v6';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {

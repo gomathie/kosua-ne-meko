@@ -439,6 +439,18 @@ export const AdminModal: React.FC<AdminModalProps> = ({
               </p>
             </div>
 
+            {adminUsers.length === 0 && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-left space-y-1">
+                <p className="text-xs font-black uppercase text-amber-400">No admin account configured</p>
+                <p className="text-[11px] text-stone-300 font-semibold">
+                  Set <span className="font-mono text-amber-300">VITE_ADMIN_EMAIL</span> and{' '}
+                  <span className="font-mono text-amber-300">VITE_ADMIN_PASSWORD</span> in your{' '}
+                  <span className="font-mono text-amber-300">.env</span> file, then rebuild. See{' '}
+                  <span className="font-mono text-amber-300">.env.example</span>.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-4 text-left">
               <div className="space-y-2">
                 <label htmlFor="admin-email" className="text-xs font-bold text-stone-300 block">Email</label>

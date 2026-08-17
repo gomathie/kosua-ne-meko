@@ -199,8 +199,26 @@ protected separately by credentials that never leave the server.
 
 | Endpoint | Purpose |
 |---|---|
-| `POST /api/admin/login` | Verifies `ADMIN_EMAIL` / `ADMIN_PASSWORD`, returns a signed session token (8h) |
+| `POST /api/admin/login` | Verifies credentials against the `admin_users` table, returns a signed session token (8h) |
 | `GET /api/rsvps` | Lists RSVPs. Requires `Authorization: Bearer <token>`. `?format=csv` exports |
+
+**Accounts live in D1** (`admin_users`, `migrations/0003_create_admin_users.sql`), so they can
+be added or revoked without a redeploy. Passwords are stored as PBKDF2-SHA256 digests
+(`pbkdf2$<iterations>$<salt>$<hash>`, see `functions/_shared/password.ts`) — never in
+plain text. `ADMIN_EMAIL` / `ADMIN_PASSWORD` remain only as a bootstrap fallback, used
+when the database holds no matching account.
+
+Add or rotate an admin by writing a hashed row — never insert a plain password:
+
+```bash
+# Generate the hash, then apply it (keeps the password out of shell history)
+SEED_EMAIL="you@example.com" SEED_PASSWORD="…" npx tsx scripts/seed-admin.ts
+npx wrangler d1 execute kosua-ne-meko-rsvps --remote --file seed-admin.sql
+```
+
+> **No session revocation.** Tokens are stateless, so they stay valid for their full 8h
+> even after a password change. Shorten `SESSION_TTL_SECONDS` in
+> `functions/_shared/auth.ts` if that matters, or move to a session table.
 
 Tokens are stateless HMAC-SHA256 (`functions/_shared/auth.ts`) — signed, not encrypted,
 carrying only an email and an expiry. Comparisons are constant-time, and the login

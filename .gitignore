@@ -10,3 +10,4 @@ coverage/
 .dev.vars*
 !.dev.vars.example
 .wrangler/
+seed-admin.sql

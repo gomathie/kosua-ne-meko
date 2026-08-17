@@ -276,7 +276,8 @@ export function sanitizeGalleryItem(input: GalleryItem, fallbackImage = ''): Gal
 export function sanitizeAdminUserInput(input: Omit<AdminUser, 'id' | 'createdDate'>): Omit<AdminUser, 'id' | 'createdDate'> {
   return {
     name: sanitizeText(input.name, LIMITS.name),
-    email: sanitizeEmail(input.email) || undefined,
+    // Empty when the address is malformed — an account with no email cannot sign in.
+    email: sanitizeEmail(input.email),
     passcode: sanitizePasscode(input.passcode),
     role: sanitizeEnum(input.role, ADMIN_ROLES, 'Staff'),
   };

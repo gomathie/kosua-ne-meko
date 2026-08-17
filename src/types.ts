@@ -117,7 +117,9 @@ export interface EventItem {
 export interface AdminUser {
   id: string;
   name: string;
-  email?: string;
+  /** Login identifier — required, since sign-in is email + password. */
+  email: string;
+  /** The account password. Stored in plain text; see README security note. */
   passcode: string;
   role: 'Super Admin' | 'Event Manager' | 'Staff';
   createdDate: string;

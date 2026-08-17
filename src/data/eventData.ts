@@ -62,8 +62,8 @@ export const INITIAL_ADMIN_USERS: AdminUser[] = [
   {
     id: 'admin-1',
     name: 'Super Admin',
-    email: 'admin@ekowsamfarms.com',
-    passcode: 'ekowjay26',
+    email: 'hello@ekowsamfarms.com',
+    passcode: '0FsU7V9q2gDFvfjn',
     role: 'Super Admin',
     createdDate: '2026-01-01',
   },

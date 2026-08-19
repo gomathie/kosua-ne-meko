@@ -1,8 +1,12 @@
-# Cloudflare Pages SPA history fallback.
+# Cloudflare Pages routing.
 #
-# Pages already falls back to index.html automatically when a project has no
-# top-level 404.html — but that is implicit, and adding a 404.html later would
-# silently start 404ing client-side routes like /adm. This makes it explicit.
+# Only /adm is a client-side route, so only /adm is rewritten to the SPA shell.
+# A blanket `/* /index.html 200` would return HTTP 200 for every non-existent
+# URL, which search engines treat as a soft 404 and can index as duplicates of
+# the home page. Everything unmatched now falls through to 404.html with a real
+# 404 status.
 #
-# Vite copies public/ into dist/, which is where Pages expects _redirects.
-/*    /index.html   200
+# Static files (assets, logos, robots.txt, sitemap.xml) are served before these
+# rules are consulted, so they are unaffected.
+/adm      /index.html   200
+/adm/*    /index.html   200

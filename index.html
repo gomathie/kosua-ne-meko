@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-GH">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,15 +11,23 @@
     <meta name="keywords" content="Kosua Ne Meko, Kosua Ne Meko Hangout, Accra events, Ghana street food, Ekow Sam Farms, TryPebble, North Dzorwulu, street food festival Accra, boiled egg meko" />
     <meta name="author" content="Ekow Sam Farms & Pebble" />
     <meta name="theme-color" content="#ea580c" />
+    <!-- Canonical + crawler directives. Without a canonical, /adm and any
+         soft-404 URL can be indexed as a duplicate of the home page. -->
+    <link rel="canonical" href="https://kosuanemeko.com/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>" />
 
     <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:url" content="https://kosuanemeko.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Kosua Ne Meko Hangout 2.0 | Accra's Premier Street Food Festival" />
     <meta property="og:description" content="Join us on Sat 5th Sept 2026 at Cencor Venue, North Dzorwulu! Ticket RSVP, pepper meter, live Afrobeats, games & African outdoor cinema." />
     <meta property="og:image" content="https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=1200&h=630&q=80" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Boiled eggs served with spicy Ghanaian meko pepper salsa at Kosua Ne Meko Hangout." />
     <meta property="og:site_name" content="Kosua Ne Meko Hangout 2.0" />
     <meta property="og:locale" content="en_GH" />
 
@@ -27,10 +35,73 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Kosua Ne Meko Hangout 2.0 | Accra's Premier Street Food Festival" />
     <meta name="twitter:description" content="Join us on Sat 5th Sept 2026 at Cencor Venue, North Dzorwulu! Ticket RSVP, pepper meter, live Afrobeats, games & African outdoor cinema." />
+    <meta name="twitter:image:alt" content="Boiled eggs with Ghanaian meko pepper salsa at Kosua Ne Meko Hangout." />
     <meta name="twitter:image" content="https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=1200&h=630&q=80" />
+
+    <!-- Event structured data: drives Google rich results (date, venue, free
+         entry). Mirrors EVENT_DETAILS in src/data/eventData.ts — if the event
+         date or venue changes there, update this too. -->
+    <script type="application/ld+json">
+    {
+          "@context": "https://schema.org",
+          "@type": "Festival",
+          "name": "Kosua Ne Meko Hangout 2.0",
+          "description": "Accra's premier street food and cultural festival: farm-fresh boiled eggs with stone-ground meko pepper salsa, live Afrobeats, board game tournaments and African outdoor cinema.",
+          "startDate": "2026-09-05T10:00:00+00:00",
+          "endDate": "2026-09-05T22:00:00+00:00",
+          "eventStatus": "https://schema.org/EventScheduled",
+          "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+          "url": "https://kosuanemeko.com/",
+          "image": [
+                "https://kosuanemeko.com/logos/industrial-coatings-africa.png"
+          ],
+          "location": {
+                "@type": "Place",
+                "name": "Cencor Venue, North Dzorwulu",
+                "address": {
+                      "@type": "PostalAddress",
+                      "streetAddress": "Cencor Venue, North Dzorwulu",
+                      "addressLocality": "Accra",
+                      "addressRegion": "Greater Accra",
+                      "addressCountry": "GH"
+                },
+                "geo": {
+                      "@type": "GeoCoordinates",
+                      "latitude": 5.612,
+                      "longitude": -0.198
+                }
+          },
+          "organizer": {
+                "@type": "Organization",
+                "name": "Ekow Sam Farms",
+                "url": "https://ekowsamfarms.com"
+          },
+          "offers": {
+                "@type": "Offer",
+                "name": "Free RSVP Pass",
+                "price": "0",
+                "priceCurrency": "GHS",
+                "availability": "https://schema.org/InStock",
+                "url": "https://kosuanemeko.com/",
+                "validFrom": "2026-01-01T00:00:00+00:00"
+          },
+          "isAccessibleForFree": true
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:42rem;margin:3rem auto;padding:0 1.5rem;font-family:system-ui,sans-serif;line-height:1.6">
+        <h1>Kosua Ne Meko Hangout 2.0</h1>
+        <p><strong>Accra&rsquo;s premier street food &amp; cultural festival.</strong></p>
+        <p>Saturday 5th September 2026, 10:00&nbsp;AM &ndash; 10:00&nbsp;PM GMT at
+           Cencor Venue, North Dzorwulu, Accra, Ghana. Entry is free.</p>
+        <p>Farm-fresh boiled eggs with stone-ground meko pepper salsa, live Afrobeats,
+           board game tournaments and African outdoor cinema. Organised by Ekow Sam Farms.</p>
+        <p>This site needs JavaScript enabled to RSVP for a free pass.</p>
+      </div>
+    </noscript>
     <!-- Cloudflare Turnstile: bot protection for the RSVP form. Rendered
          explicitly from TicketModal so React controls its lifecycle. -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>

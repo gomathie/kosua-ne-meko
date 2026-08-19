@@ -1,0 +1,10 @@
+# https://kosuanemeko.com/robots.txt
+User-agent: *
+Allow: /
+
+# The admin portal and its API have nothing to offer a search engine, and
+# crawling them only burns crawl budget on pages that require a login.
+Disallow: /adm
+Disallow: /api/
+
+Sitemap: https://kosuanemeko.com/sitemap.xml

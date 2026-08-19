@@ -1,12 +1,9 @@
 # Cloudflare Pages routing.
 #
-# Only /adm is a client-side route, so only /adm is rewritten to the SPA shell.
-# A blanket `/* /index.html 200` would return HTTP 200 for every non-existent
-# URL, which search engines treat as a soft 404 and can index as duplicates of
-# the home page. Everything unmatched now falls through to 404.html with a real
-# 404 status.
+# There is intentionally no `/* /index.html 200` catch-all: it returns HTTP 200
+# for every non-existent URL, which search engines treat as a soft 404 and may
+# index as duplicates of the home page. Unmatched URLs now reach 404.html.
 #
-# Static files (assets, logos, robots.txt, sitemap.xml) are served before these
-# rules are consulted, so they are unaffected.
-/adm      /index.html   200
-/adm/*    /index.html   200
+# /adm is not rewritten either — Pages normalises a rewrite to /index.html into
+# a 308 back to /, which broke the portal. scripts/postbuild.mjs emits
+# dist/adm/index.html as a real file instead.

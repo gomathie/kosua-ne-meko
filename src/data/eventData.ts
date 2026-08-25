@@ -310,7 +310,7 @@ export const VENDORS: Vendor[] = [
     category: 'corporate',
     description: 'Cutting-edge technology solutions that optimize business processes for maximum efficiency and growth.',
     specialty: 'Process Optimization & Tech Solutions',
-    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
   },
   {
     id: 'v-industrialcoatings',
@@ -319,7 +319,7 @@ export const VENDORS: Vendor[] = [
     category: 'corporate',
     description: 'Providing premium industrial coatings, advanced surface protection, and professional painting solutions across Africa.',
     specialty: 'Industrial Surface Protection',
-    imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?auto=format&fit=crop&w=800&q=80',
   },
   {
     id: 'v-wevegotit',

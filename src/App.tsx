@@ -192,8 +192,8 @@ export default function App() {
         <UpcomingEventsSection events={data.eventsList} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
         <LocationMap eventDetails={data.eventDetails} />
-        <OrganizerSection />
-        <FaqSection />
+        <OrganizerSection eventDetails={data.eventDetails} />
+        <FaqSection eventDetails={data.eventDetails} />
       </main>
 
       {/* Footer */}
@@ -246,6 +246,7 @@ export default function App() {
         onClose={() => setIsMyTicketsOpen(false)}
         tickets={tickets}
         onClearTickets={handleClearTickets}
+        eventDetails={data.eventDetails}
       />
 
     </div>

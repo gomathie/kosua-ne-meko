@@ -47,13 +47,13 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
         <div className="text-center space-y-3 mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
             <Calendar className="w-4 h-4 text-emerald-700" />
-            <span>SATURDAY 5TH SEPT 2026 TIMELINE</span>
+            <span>{dateString || 'EVENT DAY'} TIMELINE</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-display text-stone-900 tracking-tight uppercase">
             EVENT DAY <span className="text-orange-600">SCHEDULE</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base max-w-xl mx-auto">
-            From doors open at 10 AM to the night bonfire after-party, plan your day at Cencor Venue!
+            From doors open to the night bonfire after-party, plan your day at {locationName || 'the venue'}!
           </p>
 
           {/* Filter Pills */}

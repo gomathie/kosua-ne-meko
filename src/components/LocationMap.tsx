@@ -32,7 +32,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
             FIND US AT <span className="text-emerald-800">NORTH DZORWULU</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base">
-            Easily accessible from anywhere in Accra. Located right on Cencor Venue with secure parking and ride-hailing drop-offs.
+            Easily accessible from anywhere in {eventDetails.city}. Located at {eventDetails.locationName} with secure parking and ride-hailing drop-offs.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
                   </div>
                   <div>
                     <h4 className="text-xs font-black text-stone-200 uppercase">Uber & Bolt Drop-off</h4>
-                    <p className="text-xs text-stone-400">Set destination to "Cencor Venue, Dzorwulu". Dedicated drop-off zone at Main Gate 1.</p>
+                    <p className="text-xs text-stone-400">Set destination to "{eventDetails.locationName}". Dedicated drop-off zone at Main Gate 1.</p>
                   </div>
                 </div>
 
@@ -141,7 +141,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
                   ACCRA EVENT HUB
                 </span>
                 <span className="text-sm font-extrabold">
-                  Cencor Venue, North Dzorwulu
+                  {eventDetails.locationName}
                 </span>
               </div>
               <a

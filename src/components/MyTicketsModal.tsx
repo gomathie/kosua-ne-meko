@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Ticket, QrCode, Trash2, MapPin, Calendar, Download } from 'lucide-react';
-import { UserTicket } from '../types';
+import { EventDetails, UserTicket } from '../types';
 import { EVENT_DETAILS } from '../data/eventData';
 import { downloadTicketImage } from '../utils/downloadTicket';
 import { sanitizeImageUrl } from '../utils/sanitize';
@@ -9,6 +9,7 @@ interface MyTicketsModalProps {
   isOpen: boolean;
   onClose: () => void;
   tickets: UserTicket[];
+  eventDetails?: EventDetails;
   onClearTickets: () => void;
 }
 
@@ -17,6 +18,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
   onClose,
   tickets,
   onClearTickets,
+  eventDetails,
 }) => {
   if (!isOpen) return null;
 
@@ -87,11 +89,11 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
                       </p>
                       <p className="text-amber-300 flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
-                        <span>{EVENT_DETAILS.dateString}</span>
+                        <span>{(eventDetails ?? EVENT_DETAILS).dateString}</span>
                       </p>
                       <p className="text-stone-300 flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{EVENT_DETAILS.locationName}</span>
+                        <span>{(eventDetails ?? EVENT_DETAILS).locationName}</span>
                       </p>
                       <p className="text-orange-400 font-semibold">
                         Meko: {t.mekoLevel}

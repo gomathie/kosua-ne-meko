@@ -1,8 +1,14 @@
 import React from 'react';
 import { Egg, HeartHandshake, Sparkles, CheckCircle2, Play, Film, ExternalLink } from 'lucide-react';
 import { EVENT_DETAILS } from '../data/eventData';
+import { EventDetails } from '../types';
 
-export const OrganizerSection: React.FC = () => {
+interface OrganizerSectionProps {
+  eventDetails?: EventDetails;
+}
+
+export const OrganizerSection: React.FC<OrganizerSectionProps> = ({ eventDetails }) => {
+  const ev = eventDetails ?? EVENT_DETAILS;
   return (
     <section className="py-16 bg-gradient-to-br from-amber-900 via-stone-900 to-emerald-950 text-white relative overflow-hidden">
       
@@ -44,7 +50,7 @@ export const OrganizerSection: React.FC = () => {
                   <h4 className="text-lg font-black text-amber-300 font-display">
                     EKOW SAM FARMS
                   </h4>
-                  <p className="text-xs text-stone-400">{EVENT_DETAILS.organizerTagline}</p>
+                  <p className="text-xs text-stone-400">{ev.organizerTagline}</p>
                 </div>
               </div>
 
@@ -91,11 +97,11 @@ export const OrganizerSection: React.FC = () => {
                     <h4 className="text-lg font-black text-orange-400 font-display">
                       PEBBLE
                     </h4>
-                    <p className="text-xs text-stone-400">{EVENT_DETAILS.collaboratorTagline}</p>
+                    <p className="text-xs text-stone-400">{ev.collaboratorTagline}</p>
                   </div>
                 </div>
                 <a
-                  href={EVENT_DETAILS.collaboratorUrl}
+                  href={ev.collaboratorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-2 rounded-lg bg-orange-500/20 border border-orange-500/30 text-orange-400 hover:bg-orange-500/30 transition-colors"
@@ -123,7 +129,7 @@ export const OrganizerSection: React.FC = () => {
               </div>
 
               <a
-                href={EVENT_DETAILS.collaboratorUrl}
+                href={ev.collaboratorUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center py-3 rounded-xl bg-orange-500/20 border border-orange-500/30 text-orange-400 font-extrabold text-sm hover:bg-orange-500/30 transition-colors"

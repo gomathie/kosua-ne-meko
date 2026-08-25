@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
-import { FAQS } from '../data/eventData';
+import { FAQS, EVENT_DETAILS } from '../data/eventData';
+import { EventDetails } from '../types';
 
-export const FaqSection: React.FC = () => {
+interface FaqSectionProps {
+  eventDetails?: EventDetails;
+}
+
+export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
+  const ev = eventDetails ?? EVENT_DETAILS;
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFaq = (index: number) => {
@@ -23,7 +29,7 @@ export const FaqSection: React.FC = () => {
             FREQUENTLY ASKED <span className="text-orange-600">QUESTIONS</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base">
-            Everything you need to know about Kosua Ne Meko Hangout 2.0 at Cencor Venue.
+            Everything you need to know about {ev.shortTitle || ev.title} at {ev.locationName}.
           </p>
         </div>
 

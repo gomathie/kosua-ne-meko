@@ -71,6 +71,9 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
   if (!isOpen) return null;
 
+  // Live event data when available, seed only as a last resort — reading the
+  // static seed directly is what made admin edits fail to appear here.
+  const ev = eventDetails ?? EVENT_DETAILS;
   const isBookingClosed = eventDetails?.isBookingOpen === false;
   // Only gate on Turnstile when it is actually configured, so a deployment
   // without a site key still works locally.
@@ -194,7 +197,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 RSVP — FREE ENTRY
               </h3>
               <p className="text-xs text-amber-400 font-semibold">
-                {EVENT_DETAILS.title} • {EVENT_DETAILS.dateString}
+                {ev.title} • {ev.dateString}
               </p>
             </div>
           </div>
@@ -427,7 +430,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 PASS CONFIRMED!
               </h3>
               <p className="text-xs text-stone-600 max-w-sm mx-auto">
-                Your ticket for Kosua Ne Meko Hangout 2.0 is saved! Present this QR code pass at the entrance on Sept 5.
+                Your ticket for {ev.shortTitle || ev.title} is saved! Present this QR code pass at the entrance on {ev.dateString}.
               </p>
 
               {confirmStatus.state === 'sending' && (
@@ -487,11 +490,11 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <span className="text-stone-400 block text-[10px] uppercase font-bold">DATE & TIME</span>
-                      <span className="font-bold text-amber-300">{EVENT_DETAILS.dateString}</span>
+                      <span className="font-bold text-amber-300">{ev.dateString}</span>
                     </div>
                     <div>
                       <span className="text-stone-400 block text-[10px] uppercase font-bold">LOCATION</span>
-                      <span className="font-bold text-stone-200">North Dzorwulu</span>
+                      <span className="font-bold text-stone-200">{ev.locationName}</span>
                     </div>
                   </div>
 

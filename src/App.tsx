@@ -55,6 +55,7 @@ export default function App() {
     addFaq,
     updateFaq,
     deleteFaq,
+    restoreMissing,
     addCategory,
     deleteCategory,
     resetAll,
@@ -171,6 +172,7 @@ export default function App() {
           categories={data.categories}
           onAddCategory={addCategory}
           onDeleteCategory={deleteCategory}
+          onRestoreMissing={restoreMissing}
           onResetAll={resetAll}
         />
       </div>

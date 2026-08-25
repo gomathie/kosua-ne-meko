@@ -79,6 +79,7 @@ interface AdminPortalProps {
   categories: EventCategories;
   onAddCategory: (kind: CategoryKind, label: string) => string | null;
   onDeleteCategory: (kind: CategoryKind, category: string) => void;
+  onRestoreMissing: () => void;
   onResetAll: () => void;
 }
 
@@ -251,6 +252,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   categories,
   onAddCategory,
   onDeleteCategory,
+  onRestoreMissing,
   onResetAll,
 }) => {
   const [newFaq, setNewFaq] = useState<FAQItem>({ question: '', answer: '' });
@@ -974,6 +976,24 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   repo cannot know what an admin removed here, so this is how a
                   live configuration gets handed back to a developer to bake in.
                 */}
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        'Bring back any built-in items that are missing?
+
+Your own additions and edits are kept. Built-in items you deleted on purpose will come back.',
+                      )
+                    ) {
+                      onRestoreMissing();
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl bg-stone-800 text-stone-200 hover:bg-stone-700 border border-stone-700 text-xs font-extrabold flex items-center gap-1.5"
+                  title="Re-check the built-in content and restore anything missing"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Restore Missing</span>
+                </button>
                 <button
                   onClick={handleExportData}
                   className="px-3 py-2 rounded-xl bg-stone-800 text-stone-200 hover:bg-stone-700 border border-stone-700 text-xs font-extrabold flex items-center gap-1.5"

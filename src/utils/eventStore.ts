@@ -182,6 +182,28 @@ export function saveStoredEventData(data: FullEventData): void {
   }
 }
 
+/**
+ * Forces a re-reconciliation against the seed.
+ *
+ * Unlike resetEventDataToDefault this keeps everything the admin has added or
+ * edited — it only clears the record of which seed entries have been offered,
+ * so anything from the seed that is currently missing comes back on the next
+ * read. The one cost is that deliberately deleted seed entries return too,
+ * which is the point: it is the escape hatch for 'something is missing'.
+ */
+export function restoreMissingSeedItems(): void {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    delete parsed.knownSeedKeys;
+    delete parsed.seedRecordVersion;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    window.dispatchEvent(new Event(EVENT_CHANGE_NOTIFICATION));
+  } catch (err) {
+    console.error('Failed to restore missing seed items', err);
+  }
+}
 export function resetEventDataToDefault(): FullEventData {
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -220,6 +242,7 @@ export function useEventData(): {
   deleteFaq: (index: number) => void;
   addCategory: (kind: CategoryKind, label: string) => string | null;
   deleteCategory: (kind: CategoryKind, category: string) => void;
+  restoreMissing: () => void;
   resetAll: () => void;
 } {
   const [data, setData] = useState<FullEventData>(getStoredEventData());
@@ -567,6 +590,10 @@ export function useEventData(): {
     saveStoredEventData({ ...data, faqs: data.faqs.filter((_, i) => i !== index) });
   };
 
+  const restoreMissing = () => {
+    restoreMissingSeedItems();
+  };
+
   const resetAll = () => {
     resetEventDataToDefault();
   };
@@ -599,6 +626,7 @@ export function useEventData(): {
     deleteFaq,
     addCategory,
     deleteCategory,
+    restoreMissing,
     resetAll,
   };
 }

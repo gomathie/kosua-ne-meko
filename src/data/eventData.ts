@@ -346,7 +346,7 @@ export const VENDORS: Vendor[] = [
     category: 'farm-fresh',
     description: 'Home of the authentic Kelewele Spice Mix and other premium Ghanaian spice blends.',
     specialty: 'Kelewele Spice Mix',
-    imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/logos/kelewele-dish.jpg',
     badge: 'New Arrival',
   },
   {

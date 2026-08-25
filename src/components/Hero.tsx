@@ -4,8 +4,6 @@ import { EventDetails } from '../types';
 import { sanitizeUrl } from '../utils/sanitize';
 
 import chiliPepperSvg from '../assets/peppers/chili-pepper.svg';
-import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
-import greenPepperSvg from '../assets/peppers/green-pepper-svgrepo-com.svg';
 import chiliPepperFancySvg from '../assets/peppers/chilipepper-svgrepo-com.svg';
 
 interface HeroProps {
@@ -165,56 +163,30 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
 
             </div>
 
-            {/* Right Side: Giant Egg Pin Location Graphic & Location Badge (Recreating Flyer Centerpiece) */}
+            {/* Right Side: the official event flyer */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-              
-              {/* Giant Egg Location Pin Visual */}
-              <div className="relative w-44 h-56 sm:w-72 sm:h-96 flex flex-col items-center justify-center group cursor-pointer scale-90 sm:scale-100 transition-transform" onClick={onOpenTickets}>
-                
-                {/* Glow aura */}
-                <div className="absolute inset-0 bg-amber-400/40 rounded-full blur-3xl group-hover:bg-orange-500/50 transition-all animate-pulse" />
 
-                {/* SVG Egg Location Pin */}
-                <div className="relative z-10 filter drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-300 w-36 h-48 sm:w-auto sm:h-auto flex items-center justify-center">
-                  <svg className="w-full h-full sm:w-[240px] sm:h-[310px]" viewBox="0 0 240 310" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    
-                    {/* Pin Outer Shell (White Boiled Egg Shape) */}
-                    <path 
-                      d="M120 10 C 60 10, 20 60, 20 120 C 20 190, 105 285, 120 300 C 135 285, 220 190, 220 120 C 220 60, 180 10, 120 10 Z" 
-                      fill="url(#eggWhiteGradient)" 
-                      stroke="#FFFFFF" 
-                      strokeWidth="6"
-                    />
+              <button
+                type="button"
+                onClick={onOpenTickets}
+                aria-label="Get your free ticket"
+                className="relative group w-full max-w-sm focus:outline-none focus-visible:ring-4 focus-visible:ring-orange-500 rounded-3xl"
+              >
+                {/* Warm glow behind the poster, echoing the page palette. */}
+                <div className="absolute -inset-3 bg-amber-400/40 rounded-[2rem] blur-3xl group-hover:bg-orange-500/50 transition-all" />
 
-                    {/* Top Hole Effect for Location Pin */}
-                    <ellipse cx="120" cy="70" rx="35" ry="25" fill="#38bdf8" opacity="0.3" />
-
-                    {/* Yolk Inner Center */}
-                    <ellipse cx="120" cy="180" rx="42" ry="48" fill="url(#yolkGradient)" />
-                    
-                    {/* Yolk Highlight */}
-                    <ellipse cx="108" cy="165" rx="14" ry="8" fill="#FFFFFF" opacity="0.6" />
-
-                    {/* Gradients */}
-                    <defs>
-                      <linearGradient id="eggWhiteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FFFFFF" />
-                        <stop offset="70%" stopColor="#FFF8F0" />
-                        <stop offset="100%" stopColor="#FFEAD2" />
-                      </linearGradient>
-                      <linearGradient id="yolkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#FDBA74" />
-                        <stop offset="40%" stopColor="#F97316" />
-                        <stop offset="100%" stopColor="#EA580C" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-
-                {/* Floating Peppers around egg pin */}
-                <img src={chiliPepperSnSvg} alt="Red Chili" className="absolute -top-3 -left-3 sm:-left-6 w-10 h-10 sm:w-12 sm:h-12 animate-bounce drop-shadow-xl" />
-                <img src={greenPepperSvg} alt="Green Pepper" className="absolute top-8 sm:top-12 -right-4 sm:-right-8 w-11 h-11 sm:w-14 sm:h-14 animate-pulse drop-shadow-xl" />
-              </div>
+                <img
+                  src="/hero-flyer.jpg"
+                  alt="Kosua Ne Meko Hangout 2.0 flyer: Saturday 5th September, 2:00 PM at Cencor Venue, North Dzorwulu, Accra. Presented by Ekow Sam Farms in collaboration with Pebble."
+                  width={1024}
+                  height={1280}
+                  loading="eager"
+                  /* fetchPriority tells the browser this is the largest paint
+                     element, so it is fetched ahead of below-the-fold images. */
+                  fetchPriority="high"
+                  className="relative z-10 w-full h-auto rounded-3xl border-4 border-white shadow-2xl transform group-hover:scale-[1.02] transition-transform duration-300"
+                />
+              </button>
 
               {/* Location Badge */}
               <div className="w-full max-w-sm mt-4 transform hover:scale-102 transition-transform">

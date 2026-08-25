@@ -356,8 +356,8 @@ export const VENDORS: Vendor[] = [
     category: 'eggs-pepper',
     description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
     specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
-    imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
-    badge: 'Official Host',
+    imageUrl: '/logos/kosua-ne-meko-dish.jpg',
+    badge: 'Festival Favorite',
   },
   {
     id: 'v2',

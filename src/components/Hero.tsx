@@ -76,7 +76,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
             aria-hidden="true"
             className="absolute inset-0 bg-cover bg-center opacity-25 blur-2xl scale-110"
             style={{
-              backgroundImage: `url('/hero-flyer.jpg')`,
+              backgroundImage: `url('/hero-flyer.webp')`,
             }}
           />
 
@@ -184,7 +184,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
                 <div className="absolute -inset-3 bg-amber-400/40 rounded-[2rem] blur-3xl group-hover:bg-orange-500/50 transition-all" />
 
                 <img
-                  src="/hero-flyer.jpg"
+                  src="/hero-flyer.webp"
                   alt="Kosua Ne Meko Hangout 2.0 flyer: Saturday 5th September, 2:00 PM at Cencor Venue, North Dzorwulu, Accra. Presented by Ekow Sam Farms in collaboration with Pebble."
                   width={1024}
                   height={1280}

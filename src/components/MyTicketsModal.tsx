@@ -114,7 +114,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
                   </div>
 
                   <button
-                    onClick={() => downloadTicketImage(t)}
+                    onClick={() => downloadTicketImage(t, eventDetails)}
                     className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
                     <Download className="w-4 h-4" />

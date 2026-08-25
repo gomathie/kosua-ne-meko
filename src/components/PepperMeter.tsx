@@ -174,7 +174,7 @@ export const PepperMeter: React.FC = () => {
                 </div>
 
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-stone-400">
-                  <span>Available at all Meko Stations on Sept 5</span>
+                  <span>Available at all Meko Stations on event day</span>
                   <a href="#schedule" className="text-orange-400 font-extrabold hover:underline flex items-center gap-1">
                     <span>Watch Meko Championship Schedule</span> &rarr;
                   </a>

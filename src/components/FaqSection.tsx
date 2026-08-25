@@ -9,6 +9,13 @@ interface FaqSectionProps {
 
 export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
   const ev = eventDetails ?? EVENT_DETAILS;
+
+  /**
+   * FAQ copy is seed content, so it cannot hardcode the venue — a venue change
+   * in the portal would leave the answers contradicting the rest of the page.
+   */
+  const fill = (text: string) =>
+    text.replace(/{venue}/g, ev.locationName).replace(/{city}/g, ev.city).replace(/{date}/g, ev.dateString);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const toggleFaq = (index: number) => {
@@ -46,7 +53,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
                   onClick={() => toggleFaq(index)}
                   className="w-full p-5 text-left flex items-center justify-between gap-4 font-extrabold text-stone-900 text-base sm:text-lg hover:text-orange-600 transition-colors"
                 >
-                  <span>{faq.question}</span>
+                  <span>{fill(faq.question)}</span>
                   <ChevronDown
                     className={`w-5 h-5 text-stone-400 shrink-0 transition-transform duration-200 ${
                       isOpen ? 'rotate-180 text-orange-600' : ''
@@ -55,7 +62,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
                 </button>
                 {isOpen && (
                   <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100">
-                    {faq.answer}
+                    {fill(faq.answer)}
                   </div>
                 )}
               </div>

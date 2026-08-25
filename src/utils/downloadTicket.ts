@@ -1,7 +1,10 @@
-import { UserTicket } from '../types';
+import { EventDetails, UserTicket } from '../types';
 import { EVENT_DETAILS } from '../data/eventData';
 
-export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
+export async function downloadTicketImage(ticket: UserTicket, eventDetails?: EventDetails): Promise<void> {
+  // Live event data when supplied; the seed is only a fallback. Baking the
+  // seeded venue in here meant a downloaded pass contradicted the site.
+  const ev = eventDetails ?? EVENT_DETAILS;
   const canvas = document.createElement('canvas');
   const W = 1080;
   const H = 1920;
@@ -110,7 +113,7 @@ export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
   ctx.fillText('DATE & TIME', colLeft, y);
   ctx.fillStyle = '#fcd34d';
   ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-  ctx.fillText(EVENT_DETAILS.dateString, colLeft, y + 40);
+  ctx.fillText(ev.dateString, colLeft, y + 40);
 
   // Location
   ctx.fillStyle = '#78716c';
@@ -118,7 +121,7 @@ export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
   ctx.fillText('LOCATION', colRight, y);
   ctx.fillStyle = '#d6d3d1';
   ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-  ctx.fillText('North Dzorwulu, Accra', colRight, y + 40);
+  ctx.fillText(ev.city, colRight, y + 40);
 
   y += 100;
 
@@ -128,7 +131,7 @@ export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
   ctx.fillText('VENUE', colLeft, y);
   ctx.fillStyle = '#d6d3d1';
   ctx.font = 'bold 30px system-ui, -apple-system, sans-serif';
-  ctx.fillText('Cencor Venue', colLeft, y + 40);
+  ctx.fillText(ev.locationName, colLeft, y + 40);
 
   // Meko Choice
   ctx.fillStyle = '#78716c';
@@ -231,7 +234,7 @@ export async function downloadTicketImage(ticket: UserTicket): Promise<void> {
 
   ctx.fillStyle = '#57534e';
   ctx.font = '18px system-ui, -apple-system, sans-serif';
-  ctx.fillText(`FREE ENTRY  \u2022  ${EVENT_DETAILS.time}  \u2022  ${EVENT_DETAILS.city}`, W / 2, footerY + 75);
+  ctx.fillText(`FREE ENTRY  \u2022  ${ev.time}  \u2022  ${ev.city}`, W / 2, footerY + 75);
 
   // --- Trigger download ---
   const link = document.createElement('a');

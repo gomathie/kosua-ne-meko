@@ -527,7 +527,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
             <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => downloadTicketImage(bookedTicket)}
+                onClick={() => downloadTicketImage(bookedTicket, ev)}
                 className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-sm shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 <Download className="w-5 h-5" />

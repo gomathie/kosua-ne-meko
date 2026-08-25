@@ -392,15 +392,15 @@ export const VENDORS: Vendor[] = [
 export const FAQS: FAQItem[] = [
   {
     question: 'Where exactly is the event located in Dzorwulu?',
-    answer: 'The event takes place at Cencor Venue, North Dzorwulu, Accra. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the Dzorwulu traffic light junction.',
+    answer: 'The event takes place at {venue}, {city}. Look out for the Ekow Sam Farms banners and the giant Kosua pin near the venue entrance.',
   },
   {
     question: 'Is the event really free?',
     answer: 'Yes! Entry to Kosua Ne Meko Hangout 2.0 is completely FREE. Simply register for your RSVP pass and show up. Food, drinks, and other items are available for purchase from our amazing vendors on-site.',
   },
   {
-    question: 'Is parking available at Cencor Venue?',
-    answer: 'Yes! Dedicated secure parking is available on Cencor Venue with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
+    question: 'Is parking available at {venue}?',
+    answer: 'Yes! Dedicated secure parking is available at {venue} with security personnel. We also recommend Uber / Bolt drop-offs right at the entrance gate.',
   },
   {
     question: 'Can I bring children or families?',

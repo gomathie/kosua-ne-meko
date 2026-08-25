@@ -3,17 +3,25 @@ import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponso
 import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS, INITIAL_CATEGORIES, FAQS } from '../data/eventData';
 import { sanitizeFullEventData, sanitizeCategory } from './sanitize';
 
-// Bump when the stored shape changes, or when seed content must reach browsers
-// that already hold a copy — a returning visitor reads their stored blob, so new
-// seed data is invisible to them until the key changes. Admin credentials are
-// exempt: applyEnvAdmins below re-applies them on every read.
-// v4 retired the seeded passcodes; v5 moved sign-in to email + password;
-// v6 removed the second admin and moved credentials to .env;
-// v7 added the Industrial Coatings Africa and Hitrace Solutions collaborators;
-// v8 moved those two to Silver sponsors and added admin-managed categories;
-// v9 added vendor groups (food-drinks vs other) and admin-editable FAQs;
-// v10 replaced the schedule with the flexible line-up;
-// v11 dropped the host and collaborator from the sponsor list.
+/**
+ * DO NOT BUMP THIS TO PUBLISH CONTENT CHANGES.
+ *
+ * Bumping abandons every browser's stored blob and restores the seed — which
+ * silently undoes everything an admin has done, deletions included. That is why
+ * items "deleted by the admin" kept reappearing after a deploy: each bump below
+ * reset them.
+ *
+ * New fields do not need a bump. sanitizeFullEventData falls back per key, so a
+ * blob written before a field existed simply picks that field up from the seed
+ * while keeping the admin's own lists intact.
+ *
+ * Bump only for a genuinely incompatible shape change that the sanitizer cannot
+ * migrate, and treat it as destroying admin data — because it does.
+ *
+ * History: v4 retired the seeded passcodes; v5 moved sign-in to email+password;
+ * v6 removed the second admin; v7-v8 partner changes; v9 vendor groups and
+ * editable FAQs; v10 the flexible line-up; v11 partner roles.
+ */
 const STORAGE_KEY = 'kosua_event_data_v11';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 

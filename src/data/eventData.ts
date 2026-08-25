@@ -112,25 +112,10 @@ export const INITIAL_SPONSORS: Sponsor[] = [
   // both are credited in their own sections. Listing them here overstated the
   // sponsor roster and misrepresented who is backing the event.
   {
-    id: 'spon-3',
-    name: 'Accra Craft Brewery',
-    tier: 'Gold',
-    logoUrl: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://example.com',
-  },
-  {
-    id: 'spon-4',
-    name: 'Dzorwulu Community Sports Hub',
-    tier: 'Silver',
-    logoUrl: 'https://images.unsplash.com/photo-1511886929837-354d827aae26?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://example.com',
-  },
-  {
     id: 'spon-5',
     name: 'Industrial Coatings Africa',
     tier: 'Silver',
-    // Real mark, self-hosted from public/logos. This entry previously carried a
-    // stock photo and an example.com link, which misrepresented a real sponsor.
+    // Real mark, self-hosted from public/logos rather than a stock photo.
     logoUrl: '/logos/industrial-coatings-africa.png',
     websiteUrl: 'https://industrialcoatingsafrica.com',
   },

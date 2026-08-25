@@ -558,6 +558,32 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
+  /**
+   * Downloads everything this browser has stored, so a live configuration can
+   * be handed back and baked into the seed. Without it there is no way to know
+   * which items an admin removed — that state never leaves their device.
+   */
+  const handleExportData = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      eventDetails,
+      eventsList,
+      categories,
+      faqs,
+      vendors,
+      schedule,
+      collaborators,
+      sponsors,
+      gallery,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kosua-event-data-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
   const handleCreateFaq = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = sanitizeFaqItem(newFaq);
@@ -905,18 +931,34 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
               </div>
 
-              <button
-                onClick={() => {
-                  if (confirm('Reset all event data to original defaults?')) {
-                    onResetAll();
-                    setFormData(eventDetails);
-                  }
-                }}
-                className="px-3 py-2 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-800/50 border border-red-700/50 text-xs font-extrabold flex items-center gap-1.5"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Defaults</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {/*
+                  Exports exactly what this browser has stored. The seed in the
+                  repo cannot know what an admin removed here, so this is how a
+                  live configuration gets handed back to a developer to bake in.
+                */}
+                <button
+                  onClick={handleExportData}
+                  className="px-3 py-2 rounded-xl bg-stone-800 text-stone-200 hover:bg-stone-700 border border-stone-700 text-xs font-extrabold flex items-center gap-1.5"
+                  title="Download the current configuration as JSON"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Data</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (confirm('Reset all event data to original defaults? This discards every change made here, including deletions.')) {
+                      onResetAll();
+                      setFormData(eventDetails);
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl bg-red-900/40 text-red-300 hover:bg-red-800/50 border border-red-700/50 text-xs font-extrabold flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Defaults</span>
+                </button>
+              </div>
             </div>
 
             {/* TAB 1: Event & Venue Details */}

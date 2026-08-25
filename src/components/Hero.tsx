@@ -64,11 +64,19 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
         {/* Main Banner Poster Canvas Frame */}
         <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 via-sky-200 to-emerald-800 shadow-2xl border-4 border-white/80 p-6 sm:p-10 md:p-14 text-stone-900">
           
-          {/* Backdrop Image Overlay simulating the flyer aerial view */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay"
+          {/*
+            Backdrop is the flyer itself, blurred right down. It was a stock
+            aerial photo chosen to *simulate* a flyer; with the real one now in
+            the hero, that stood in for something already on screen and cost an
+            extra cross-origin request on the critical path. Reusing the same
+            file is free — the browser has already fetched it at high priority.
+            scale-110 hides the soft edges blur leaves at the boundary.
+          */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-cover bg-center opacity-25 blur-2xl scale-110"
             style={{
-              backgroundImage: `url('https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=1920&q=80')`,
+              backgroundImage: `url('/hero-flyer.jpg')`,
             }}
           />
 

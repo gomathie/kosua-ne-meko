@@ -10,7 +10,7 @@ interface VendorsProps {
 }
 
 const GROUPS: { id: VendorGroup; heading: string; blurb: string }[] = [
-  { id: 'food-drinks', heading: 'Food & Drinks', blurb: 'Eat, sip and take home' },
+  { id: 'food-drinks', heading: 'Food Vendors', blurb: 'Eat, sip and take home' },
   { id: 'other', heading: 'Other Stalls', blurb: 'Everything that is not food' },
 ];
 

@@ -310,6 +310,16 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
+    id: 'v0',
+    name: 'Nellma Foods',
+    group: 'food-drinks',
+    category: 'farm-fresh',
+    description: 'Home of the authentic Kelewele Spice Mix and other premium Ghanaian spice blends.',
+    specialty: 'Kelewele Spice Mix',
+    imageUrl: 'https://images.unsplash.com/photo-1596649281729-234b07c80538?auto=format&fit=crop&w=800&q=80',
+    badge: 'New Arrival',
+  },
+  {
     id: 'v1',
     name: 'Ekow Sam Eggs & Meko Hub',
     group: 'food-drinks',

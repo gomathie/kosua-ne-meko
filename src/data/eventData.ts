@@ -310,7 +310,7 @@ export const VENDORS: Vendor[] = [
     category: 'corporate',
     description: 'Telematics and IoT for fleets: GPS vehicle tracking, fuel monitoring and connected-device solutions that put you in control of your operations.',
     specialty: 'Process Optimization & IoT Solutions',
-    imageUrl: '/logos/hitrace-telematics.jpg',
+    imageUrl: '/logos/hitrace-telematics.webp',
   },
   {
     id: 'v-industrialcoatings',
@@ -319,7 +319,7 @@ export const VENDORS: Vendor[] = [
     category: 'corporate',
     description: 'Supplying high-performance industrial maintenance, protective coatings, and oil refinery process chemicals to protect infrastructure against severe environmental stressors.',
     specialty: 'Mining & Oil/Gas Surface Protection',
-    imageUrl: '/logos/industrial-oil-gas.jpg',
+    imageUrl: '/logos/industrial-oil-gas.webp',
   },
   {
     id: 'v-wevegotit',
@@ -346,7 +346,7 @@ export const VENDORS: Vendor[] = [
     category: 'farm-fresh',
     description: 'Home of the authentic Kelewele Spice Mix and other premium Ghanaian spice blends.',
     specialty: 'Kelewele Spice Mix',
-    imageUrl: '/logos/kelewele-dish.jpg',
+    imageUrl: '/logos/kelewele-dish.webp',
     badge: 'New Arrival',
   },
   {
@@ -356,7 +356,7 @@ export const VENDORS: Vendor[] = [
     category: 'eggs-pepper',
     description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
     specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
-    imageUrl: '/logos/kosua-ne-meko-dish.jpg',
+    imageUrl: '/logos/kosua-ne-meko-dish.webp',
     badge: 'Festival Favorite',
   },
   {

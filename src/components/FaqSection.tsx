@@ -9,7 +9,9 @@ interface FaqSectionProps {
 }
 
 export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails, faqs }) => {
-  const items = faqs && faqs.length > 0 ? faqs : FAQS;
+  // `faqs ?? FAQS`, not a truthiness check on length: an empty array means the
+  // admin deleted them all, and must not be mistaken for "none supplied".
+  const items = faqs ?? FAQS;
   const ev = eventDetails ?? EVENT_DETAILS;
 
   /**
@@ -20,6 +22,9 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails, faqs }) =>
     text.replace(/{venue}/g, ev.locationName).replace(/{city}/g, ev.city).replace(/{date}/g, ev.dateString);
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
+  // With every FAQ deleted there is nothing to introduce, so the whole
+  // section is dropped rather than rendering a heading over an empty list.
+  if (items.length === 0) return null;
   const toggleFaq = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };

@@ -198,7 +198,9 @@ export function sanitizeCategoryList(value: unknown, fallback: string[]): string
     const slug = sanitizeCategory(entry);
     if (slug) seen.add(slug);
   }
-  return seen.size > 0 ? [...seen] : fallback;
+  // An empty result is a deliberate empty list, not a missing one — the
+  // `!Array.isArray` check above already covers genuinely absent data.
+  return [...seen];
 }
 
 /** Pins a value to one of `allowed`, falling back when it is anything else. */

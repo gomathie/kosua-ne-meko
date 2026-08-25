@@ -338,6 +338,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v1',
     name: 'Ekow Sam Eggs & Meko Hub',
+    group: 'food-drinks',
     category: 'eggs-pepper',
     description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
     specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
@@ -347,6 +348,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v2',
     name: 'Auntie Muni Street Bites',
+    group: 'food-drinks',
     category: 'street-food',
     description: 'Famous Accra street eats including spicy waakye, kelewele, hot fried yam with turkey tail and fresh pepper.',
     specialty: 'Kelewele & Spicy Egg Kebabs',
@@ -356,6 +358,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v3',
     name: 'Akwaaba Palm Wine & Juice Bar',
+    group: 'food-drinks',
     category: 'drinks',
     description: 'Freshly tapped natural palm wine, chilled hibiscus (sobolo), ginger brew, and coconut water served in shell calabashes.',
     specialty: 'Iced Sobolo & Ginger Punch',
@@ -365,6 +368,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v4',
     name: 'Dzorwulu Suya & Tilapia Grill',
+    group: 'food-drinks',
     category: 'street-food',
     description: 'Charcoal grilled spicy tilapia fish, suya steak skewers, and grilled boiled eggs wrapped in smoked banana leaf.',
     specialty: 'Grilled Pepper Eggs & Beef Suya',
@@ -373,6 +377,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v5',
     name: 'Ekow Sam Organic Poultry Market',
+    group: 'food-drinks',
     category: 'farm-fresh',
     description: 'Take home fresh crate farm eggs, local spice blends, organic peppers, and artisan earthenware asanka bowls.',
     specialty: 'Farm Fresh Egg Crates & Asanka Kits',
@@ -381,6 +386,7 @@ export const VENDORS: Vendor[] = [
   {
     id: 'v6',
     name: 'Pebble Entertainment Lounge',
+    group: 'other',
     category: 'entertainment',
     description: 'Chill in the Pebble lounge with outdoor screenings of authentic African movies, short films, and documentaries — powered by trypebble.com.',
     specialty: 'Outdoor Cinema & Content Premieres',

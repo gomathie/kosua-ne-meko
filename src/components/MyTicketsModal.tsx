@@ -58,7 +58,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
               </div>
               <h4 className="text-lg font-bold text-stone-700">No Tickets Reserved Yet</h4>
               <p className="text-xs text-stone-500 max-w-xs mx-auto">
-                Click "Get RSVP Pass" on the main page to reserve your tickets for Kosua Ne Meko Hangout 2.0.
+                Click "Get Free Ticket" on the main page to reserve your tickets for Kosua Ne Meko Hangout 2.0.
               </p>
             </div>
           ) : (

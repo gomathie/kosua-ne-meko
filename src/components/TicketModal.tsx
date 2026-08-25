@@ -414,7 +414,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 }`}
               >
                 <ShoppingCart className="w-4 h-4" />
-                <span>{isBookingClosed ? 'PRE-BOOKING INACTIVE' : 'CONFIRM FREE RSVP'}</span>
+                <span>{isBookingClosed ? 'PRE-BOOKING INACTIVE' : 'CONFIRM FREE TICKET'}</span>
               </button>
             </div>
 

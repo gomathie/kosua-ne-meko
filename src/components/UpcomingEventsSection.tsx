@@ -74,7 +74,7 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({ ev
                       : 'bg-stone-900 text-stone-500 border border-stone-800 cursor-not-allowed'
                   }`}
                 >
-                  <span>{event.allowPrebooking ? 'Pre-Register / Get Pass' : '🔴 RSVP Opening Soon'}</span>
+                  <span>{event.allowPrebooking ? 'Pre-Register / Get Free Ticket' : '🔴 RSVP Opening Soon'}</span>
                   {event.allowPrebooking && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>

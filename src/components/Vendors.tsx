@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Utensils, Search, Award } from 'lucide-react';
-import { Vendor } from '../types';
+import { Vendor, VendorGroup } from '../types';
 import { sanitizeImageUrl, formatCategoryLabel } from '../utils/sanitize';
 
 interface VendorsProps {
@@ -8,6 +8,11 @@ interface VendorsProps {
   /** Admin-managed list, so new categories appear as filters automatically. */
   categories?: string[];
 }
+
+const GROUPS: { id: VendorGroup; heading: string; blurb: string }[] = [
+  { id: 'food-drinks', heading: 'Food & Drinks', blurb: 'Eat, sip and take home' },
+  { id: 'other', heading: 'Other Stalls', blurb: 'Everything that is not food' },
+];
 
 export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -78,9 +83,26 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) =>
           </div>
         </div>
 
-        {/* Vendors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVendors.map((vendor) => (
+        {/*
+          Two groups rather than one flat grid: not every stall sells food, and
+          burying a non-food stall among the food ones misleads visitors. The
+          split uses the explicit `group` field, not the category, so it stays
+          correct when admins add categories.
+        */}
+        {GROUPS.map(({ id, heading, blurb }) => {
+          const groupVendors = filteredVendors.filter((v) => v.group === id);
+          if (groupVendors.length === 0) return null;
+          return (
+            <div key={id} className="mb-12 last:mb-0">
+              <div className="flex items-baseline gap-3 mb-5 pb-3 border-b-2 border-stone-200">
+                <h3 className="text-xl sm:text-2xl font-black font-display text-stone-900 uppercase tracking-tight">
+                  {heading}
+                </h3>
+                <span className="text-xs font-bold text-stone-500">{blurb}</span>
+                <span className="ml-auto text-xs font-black text-orange-600">{groupVendors.length}</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {groupVendors.map((vendor) => (
             <div
               key={vendor.id}
               className="bg-white rounded-3xl overflow-hidden border border-stone-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
@@ -125,7 +147,10 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) =>
               </div>
             </div>
           ))}
-        </div>
+              </div>
+            </div>
+          );
+        })}
 
       </div>
     </section>

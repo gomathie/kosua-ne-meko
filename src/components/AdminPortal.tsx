@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
-import { EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind } from '../types';
+import { EventDetails, Vendor, VendorGroup, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind, FAQItem } from '../types';
 import {
   LIMITS,
   sanitizeEmail,
@@ -18,6 +18,7 @@ import {
   sanitizeSponsor,
   sanitizeGalleryInput,
   sanitizeImageUrl,
+  sanitizeFaqItem,
   formatCategoryLabel,
 } from '../utils/sanitize';
 
@@ -71,6 +72,10 @@ interface AdminPortalProps {
   onDeleteSponsor: (id: string) => void;
   onAddGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   onDeleteGalleryItem: (id: string) => void;
+  faqs: FAQItem[];
+  onAddFaq: (faq: FAQItem) => void;
+  onUpdateFaq: (index: number, faq: FAQItem) => void;
+  onDeleteFaq: (index: number) => void;
   categories: EventCategories;
   onAddCategory: (kind: CategoryKind, label: string) => string | null;
   onDeleteCategory: (kind: CategoryKind, category: string) => void;
@@ -199,11 +204,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   onDeleteSponsor,
   onAddGalleryItem,
   onDeleteGalleryItem,
+  faqs,
+  onAddFaq,
+  onUpdateFaq,
+  onDeleteFaq,
   categories,
   onAddCategory,
   onDeleteCategory,
   onResetAll,
 }) => {
+  const [newFaq, setNewFaq] = useState<FAQItem>({ question: '', answer: '' });
+  const [editingFaqIndex, setEditingFaqIndex] = useState<number | null>(null);
+  const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
   const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -216,7 +228,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [rsvps, setRsvps] = useState<RsvpRow[]>([]);
   const [rsvpState, setRsvpState] = useState<'idle' | 'loading' | 'error'>('idle');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'rsvps'>('event');
+  const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'faqs' | 'rsvps'>('event');
 
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
@@ -248,6 +260,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   // New Vendor Form State
   const [newVendor, setNewVendor] = useState({
     name: '',
+    group: 'food-drinks' as VendorGroup,
     category: 'street-food' as Vendor['category'],
     description: '',
     specialty: '',
@@ -463,6 +476,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
+  const handleCreateFaq = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = sanitizeFaqItem(newFaq);
+    if (!clean.question || !clean.answer) {
+      alert('A FAQ needs both a question and an answer.');
+      return;
+    }
+    onAddFaq(clean);
+    setNewFaq({ question: '', answer: '' });
+  };
+
   const handleCreateVendor = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = sanitizeVendorInput(newVendor, FALLBACK_VENDOR_IMAGE);
@@ -473,6 +497,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     onAddVendor(clean);
     setNewVendor({
       name: '',
+      group: 'food-drinks',
       category: 'street-food',
       description: '',
       specialty: '',
@@ -1234,6 +1259,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </div>
 
                     <div>
+                      {/* Not every stall sells food; this drives the split on the public page. */}
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">Stall Type *</label>
+                      <select
+                        value={newVendor.group}
+                        onChange={(e) => setNewVendor({ ...newVendor, group: e.target.value as VendorGroup })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                      >
+                        <option value="food-drinks">Food &amp; Drinks</option>
+                        <option value="other">Other (does not sell food)</option>
+                      </select>
+                    </div>
+                    <div>
                       <label className="text-[11px] font-bold text-stone-300 block mb-1">Category</label>
                       <select
                         value={newVendor.category}
@@ -1312,6 +1349,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
                               placeholder="Vendor Name"
                             />
+                            <select
+                              value={editingVendor.group}
+                              onChange={(e) => setEditingVendor({ ...editingVendor, group: e.target.value as VendorGroup })}
+                              className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
+                            >
+                              <option value="food-drinks">Food &amp; Drinks</option>
+                              <option value="other">Other (does not sell food)</option>
+                            </select>
                             <input
                               type="text"
                               maxLength={LIMITS.shortText}

@@ -1,4 +1,4 @@
-import { Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails, EventItem, AdminUser, UserTicket, FullEventData } from '../types';
+import { Vendor, VendorGroup, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventDetails, EventItem, AdminUser, UserTicket, FAQItem, FullEventData } from '../types';
 
 /**
  * Central input sanitization for every untrusted string that enters the app:
@@ -229,6 +229,7 @@ export function sanitizeIsoDate(value: unknown, fallback: string = ''): string {
   return Number.isNaN(Date.parse(text)) ? fallback : text;
 }
 
+const VENDOR_GROUPS: readonly VendorGroup[] = ['food-drinks', 'other'];
 const SPONSOR_TIERS: readonly Sponsor['tier'][] = ['Headline', 'Gold', 'Silver', 'Partner'];
 const EVENT_STATUSES: readonly EventItem['status'][] = ['active', 'upcoming', 'past'];
 const ADMIN_ROLES: readonly AdminUser['role'][] = ['Super Admin', 'Event Manager', 'Staff'];
@@ -244,6 +245,13 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 export function sanitizeVendorInput(input: Omit<Vendor, 'id'>, fallbackImage = ''): Omit<Vendor, 'id'> {
   return {
     name: sanitizeText(input.name, LIMITS.name),
+    // Stored vendors predate this field, so fall back to inferring it once:
+    // only 'entertainment' was ever a non-food category in the seed data.
+    group: sanitizeEnum(
+      input.group,
+      VENDOR_GROUPS,
+      sanitizeCategory(input.category) === 'entertainment' ? 'other' : 'food-drinks',
+    ),
     category: sanitizeCategory(input.category, 'street-food'),
     description: sanitizeText(input.description, LIMITS.description),
     specialty: sanitizeText(input.specialty, LIMITS.shortText),
@@ -321,6 +329,15 @@ export function sanitizeAdminUser(input: AdminUser): AdminUser {
     ...sanitizeAdminUserInput(input),
     id: sanitizeText(input.id, LIMITS.id),
     createdDate: sanitizeText(input.createdDate, 40),
+  };
+}
+
+/** FAQ copy is admin-editable, so it gets the same treatment as every other field. */
+export function sanitizeFaqItem(input: FAQItem): FAQItem {
+  return {
+    question: sanitizeText(input.question, LIMITS.title),
+    answer: sanitizeText(input.answer, LIMITS.description * 2),
+    category: sanitizeCategory(input.category) || undefined,
   };
 }
 
@@ -415,6 +432,9 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
       schedule: sanitizeCategoryList(storedCategories.schedule, fallback.categories.schedule),
       gallery: sanitizeCategoryList(storedCategories.gallery, fallback.categories.gallery),
     },
+    faqs: Array.isArray(parsed.faqs)
+      ? parsed.faqs.filter(isRecord).map((f) => sanitizeFaqItem(f as unknown as FAQItem))
+      : fallback.faqs,
     eventDetails: sanitizeEventDetails({
       ...fallback.eventDetails,
       ...(isRecord(parsed.eventDetails) ? (parsed.eventDetails as Partial<EventDetails>) : {}),

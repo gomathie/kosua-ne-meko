@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, CategoryKind } from '../types';
-import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS, INITIAL_CATEGORIES } from '../data/eventData';
+import { FullEventData, EventDetails, Vendor, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, CategoryKind, FAQItem } from '../types';
+import { EVENT_DETAILS, VENDORS, SCHEDULE_ITEMS, INITIAL_COLLABORATORS, INITIAL_SPONSORS, INITIAL_GALLERY, INITIAL_EVENTS_LIST, INITIAL_ADMIN_USERS, INITIAL_CATEGORIES, FAQS } from '../data/eventData';
 import { sanitizeFullEventData, sanitizeCategory } from './sanitize';
 
 // Bump when the stored shape changes, or when seed content must reach browsers
@@ -16,6 +16,7 @@ const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {
   categories: INITIAL_CATEGORIES,
+  faqs: FAQS,
   eventDetails: EVENT_DETAILS,
   eventsList: INITIAL_EVENTS_LIST,
   adminUsers: INITIAL_ADMIN_USERS,
@@ -102,6 +103,9 @@ export function useEventData(): {
   deleteSponsor: (id: string) => void;
   addGalleryItem: (item: Omit<GalleryItem, 'id'>) => void;
   deleteGalleryItem: (id: string) => void;
+  addFaq: (faq: FAQItem) => void;
+  updateFaq: (index: number, faq: FAQItem) => void;
+  deleteFaq: (index: number) => void;
   addCategory: (kind: CategoryKind, label: string) => string | null;
   deleteCategory: (kind: CategoryKind, category: string) => void;
   resetAll: () => void;
@@ -437,6 +441,20 @@ export function useEventData(): {
     saveStoredEventData(updated);
   };
 
+  const addFaq = (faq: FAQItem) => {
+    saveStoredEventData({ ...data, faqs: [...data.faqs, faq] });
+  };
+
+  const updateFaq = (index: number, faq: FAQItem) => {
+    const faqs = [...data.faqs];
+    faqs[index] = faq;
+    saveStoredEventData({ ...data, faqs });
+  };
+
+  const deleteFaq = (index: number) => {
+    saveStoredEventData({ ...data, faqs: data.faqs.filter((_, i) => i !== index) });
+  };
+
   const resetAll = () => {
     resetEventDataToDefault();
   };
@@ -464,6 +482,9 @@ export function useEventData(): {
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,
+    addFaq,
+    updateFaq,
+    deleteFaq,
     addCategory,
     deleteCategory,
     resetAll,

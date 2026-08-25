@@ -150,7 +150,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
                   }`}
                 >
                   <Ticket className="w-5 h-5 sm:w-6 sm:h-6 group-hover:rotate-12 transition-transform" />
-                  <span>{eventDetails.isBookingOpen === false ? '🔴 RSVP COMING SOON' : 'FREE RSVP — REGISTER NOW'}</span>
+                  <span>{eventDetails.isBookingOpen === false ? '🔴 RSVP COMING SOON' : 'GET FREE TICKET'}</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </button>
 

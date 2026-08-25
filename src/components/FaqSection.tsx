@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { FAQS, EVENT_DETAILS } from '../data/eventData';
-import { EventDetails } from '../types';
+import { EventDetails, FAQItem } from '../types';
 
 interface FaqSectionProps {
   eventDetails?: EventDetails;
+  faqs?: FAQItem[];
 }
 
-export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
+export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails, faqs }) => {
+  const items = faqs && faqs.length > 0 ? faqs : FAQS;
   const ev = eventDetails ?? EVENT_DETAILS;
 
   /**
@@ -42,7 +44,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails }) => {
 
         {/* Accordion */}
         <div className="space-y-4">
-          {FAQS.map((faq, index) => {
+          {items.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
               <div

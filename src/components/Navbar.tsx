@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="relative inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-md shadow-orange-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Ticket className="w-4 h-4" />
-              <span>Get RSVP Pass</span>
+              <span>Get Free Ticket</span>
             </button>
           </div>
 

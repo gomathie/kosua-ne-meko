@@ -21,9 +21,13 @@ export interface UserTicket {
   qrCodeUrl: string;
 }
 
+/** Top-level split on the stalls listing. Not every stall sells food. */
+export type VendorGroup = 'food-drinks' | 'other';
+
 export interface Vendor {
   id: string;
   name: string;
+  group: VendorGroup;
   /** Category slug. Free-form so admins can add their own — see EventCategories. */
   category: string;
   description: string;
@@ -147,6 +151,7 @@ export type CategoryKind = keyof EventCategories;
 
 export interface FullEventData {
   categories: EventCategories;
+  faqs: FAQItem[];
   eventDetails: EventDetails;
   eventsList: EventItem[];
   adminUsers: AdminUser[];
@@ -155,7 +160,6 @@ export interface FullEventData {
   collaborators: Collaborator[];
   sponsors: Sponsor[];
   gallery: GalleryItem[];
-  faqs?: FAQItem[];
 }
 
 

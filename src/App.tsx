@@ -52,6 +52,9 @@ export default function App() {
     deleteSponsor,
     addGalleryItem,
     deleteGalleryItem,
+    addFaq,
+    updateFaq,
+    deleteFaq,
     addCategory,
     deleteCategory,
     resetAll,
@@ -161,6 +164,10 @@ export default function App() {
           onDeleteSponsor={deleteSponsor}
           onAddGalleryItem={addGalleryItem}
           onDeleteGalleryItem={deleteGalleryItem}
+          faqs={data.faqs}
+          onAddFaq={addFaq}
+          onUpdateFaq={updateFaq}
+          onDeleteFaq={deleteFaq}
           categories={data.categories}
           onAddCategory={addCategory}
           onDeleteCategory={deleteCategory}
@@ -193,7 +200,7 @@ export default function App() {
         <SponsorsSection collaborators={data.collaborators} sponsors={data.sponsors} />
         <LocationMap eventDetails={data.eventDetails} />
         <OrganizerSection eventDetails={data.eventDetails} />
-        <FaqSection eventDetails={data.eventDetails} />
+        <FaqSection eventDetails={data.eventDetails} faqs={data.faqs} />
       </main>
 
       {/* Footer */}
@@ -228,7 +235,7 @@ export default function App() {
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 flex items-center gap-2 transition-transform active:scale-95"
           >
             <Ticket className="w-4 h-4" />
-            <span>Get Pass</span>
+            <span>Get Free Ticket</span>
           </button>
         </div>
       </div>

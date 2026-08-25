@@ -980,9 +980,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   onClick={() => {
                     if (
                       confirm(
-                        'Bring back any built-in items that are missing?
-
-Your own additions and edits are kept. Built-in items you deleted on purpose will come back.',
+                        'Bring back any built-in items that are missing? Your own additions and edits are kept, but built-in items you deleted on purpose will come back.',
                       )
                     ) {
                       onRestoreMissing();

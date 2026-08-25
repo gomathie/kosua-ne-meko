@@ -196,14 +196,31 @@ export function restoreMissingSeedItems(): void {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
     const parsed = JSON.parse(raw);
+
+    // Drop every entry that came from the seed, then clear the record. The
+    // merge on the next read puts them back at their current values, which is
+    // what refreshes a stale one — an entry whose image or text changed in the
+    // seed is already present, so merging alone would never update it.
+    // Admin-created entries have keys the seed does not know, so they survive.
+    for (const { kind, items, keyOf } of SEED_SOURCES) {
+      const listName = LIST_FOR[kind];
+      const seedKeys = new Set(items.map((i) => (keyOf as (x: unknown) => string)(i)));
+      const list = parsed[listName];
+      if (!Array.isArray(list)) continue;
+      parsed[listName] = list.filter(
+        (entry: unknown) => !seedKeys.has((keyOf as (x: unknown) => string)(entry)),
+      );
+    }
+
     delete parsed.knownSeedKeys;
     delete parsed.seedRecordVersion;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
     window.dispatchEvent(new Event(EVENT_CHANGE_NOTIFICATION));
   } catch (err) {
-    console.error('Failed to restore missing seed items', err);
+    console.error('Failed to restore built-in content', err);
   }
 }
+
 export function resetEventDataToDefault(): FullEventData {
   try {
     localStorage.removeItem(STORAGE_KEY);

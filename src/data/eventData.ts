@@ -196,24 +196,18 @@ export const TICKET_PASSES: TicketPass[] = [
     perks: [
       'Fast-track VIP Lounge & Reserved Seating',
       'Priority access to all activities & workshops',
-      'Official Kosua Ne Meko 2.0 Souvenir Apron & Sticker Pack',
-      'VIP Photo Booth Priority Access',
-      'Early access to Pepper Eating Challenge registration',
+      'Early access to Pepper Challenge ',
       'Best viewing area for live performances',
     ],
   },
   {
-    id: 'squad-pack',
-    name: 'Squad Hangout Pack (5 Passes)',
+    id: 'family-pass',
+    name: 'Family Ticket',
     priceGHS: 0,
-    description: 'Bring the squad! Free group admission for 5 people with reserved seating and group activity access.',
-    perks: [
-      'Entry for 5 Friends',
-      'Reserved Squad Table Zone (first-come basis)',
-      'Group entry to Ludo & Oware Tournament',
-      'Group photo at the Kosua Ne Meko Photo Wall',
-      'All live music & entertainment access',
-    ],
+    // Party size is entered on the form rather than fixed here, so one
+    // ticket covers a household of any size.
+    description: 'One free ticket for the whole family — tell us how many are coming.',
+    perks: [],
   },
 ];
 

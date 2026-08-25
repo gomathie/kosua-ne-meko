@@ -1,5 +1,5 @@
 import { WorkerMailer } from 'worker-mailer';
-import { sanitizeText, sanitizePhone, sanitizeEmail, sanitizeInt, isValidPhone, isValidEmail, LIMITS } from '../../src/utils/sanitize';
+import { sanitizeText, sanitizePhone, sanitizeEmail, sanitizeInt, isValidPhone, isValidEmail, LIMITS, MAX_PARTY_SIZE } from '../../src/utils/sanitize';
 import type { D1Database } from '../_shared/d1';
 import { verifyTurnstile, findExceededLimit, recordRateLimitHits, RATE_LIMITS } from '../_shared/guards';
 
@@ -184,7 +184,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const email = sanitizeEmail(payload.email);
   const ticketId = sanitizeText(payload.ticketId, LIMITS.id);
   const passName = sanitizeText(payload.passName, 40);
-  const quantity = sanitizeInt(payload.quantity, 1, 10, 1);
+  const quantity = sanitizeInt(payload.quantity, 1, MAX_PARTY_SIZE, 1);
   const mekoLevel = sanitizeText(payload.mekoLevel, LIMITS.shortText);
   const eventTitle = sanitizeText(payload.eventTitle, LIMITS.title);
   const eventDate = sanitizeText(payload.eventDate, 40);

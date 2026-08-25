@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import { TICKET_PASSES, EVENT_DETAILS, PEPPER_LEVELS } from '../data/eventData';
 import { EventDetails, TicketPass, UserTicket } from '../types';
 import { downloadTicketImage } from '../utils/downloadTicket';
-import { LIMITS, sanitizeText, sanitizeEmail, sanitizePhone, sanitizeInt, isValidEmail, isValidPhone } from '../utils/sanitize';
+import { LIMITS, MAX_PARTY_SIZE, sanitizeText, sanitizeEmail, sanitizePhone, sanitizeInt, isValidEmail, isValidPhone } from '../utils/sanitize';
 
 interface TicketModalProps {
   isOpen: boolean;
@@ -79,6 +79,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
   // without a site key still works locally.
   const needsTurnstile = Boolean(turnstileSiteKey);
 
+  const isFamilyPass = selectedPass.id === 'family-pass';
   const totalGHS = selectedPass.priceGHS * quantity;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,12 +90,13 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
     const cleanName = sanitizeText(customerName, LIMITS.name);
     const cleanEmail = sanitizeEmail(email);
     const cleanPhone = sanitizePhone(phone);
-    const cleanQuantity = sanitizeInt(quantity, 1, 10, 1);
+    const cleanQuantity = sanitizeInt(quantity, 1, MAX_PARTY_SIZE, 1);
     const cleanMeko = sanitizeText(mekoPreference, LIMITS.shortText);
 
     const nextErrors: typeof errors = {};
     if (cleanName.length < 2) nextErrors.name = 'Please enter your full name.';
-    if (!isValidEmail(email)) nextErrors.email = 'Please enter a valid email address.';
+    // Optional: only complain when something was typed and it is malformed.
+    if (email.trim() && !isValidEmail(email)) nextErrors.email = 'That email address is not valid.';
     if (!isValidPhone(phone)) nextErrors.phone = 'Enter a valid Ghana number, e.g. 024 123 4567.';
 
     setErrors(nextErrors);
@@ -252,20 +254,6 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 })}
               </div>
 
-              {/* Selected Pass Perks */}
-              <div className="bg-stone-50 p-3.5 rounded-xl border border-stone-200 text-xs space-y-1">
-                <span className="font-black text-stone-700 uppercase block text-[10px]">
-                  INCLUDED WITH {selectedPass.name}:
-                </span>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-stone-600">
-                  {selectedPass.perks.map((perk, i) => (
-                    <li key={i} className="flex items-center gap-1.5 font-medium">
-                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>{perk}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
 
             {/* Step 2: Contact Details */}
@@ -298,16 +286,15 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-700 block mb-1">Email Address *</label>
+                  <label className="text-xs font-bold text-stone-700 block mb-1">Email Address <span className="font-normal text-stone-400">(optional)</span></label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
                     <input
                       type="email"
-                      required
                       maxLength={LIMITS.email}
                       autoComplete="email"
                       aria-invalid={Boolean(errors.email)}
-                      placeholder="kwame@example.com"
+                      placeholder="kwame@example.com (optional)"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
@@ -343,18 +330,38 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-stone-700 block mb-1">Quantity</label>
-                  <select
-                    value={quantity}
-                    onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, 10, 1))}
-                    className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <option key={num} value={num}>
-                        {num} {num === 1 ? 'Pass' : 'Passes'}
-                      </option>
-                    ))}
-                  </select>
+                  {/*
+                    The family ticket covers a household of any size, so the
+                    count is typed rather than picked from a fixed list. Other
+                    passes keep the simple dropdown.
+                  */}
+                  <label className="text-xs font-bold text-stone-700 block mb-1">
+                    {isFamilyPass ? 'How many people? *' : 'Quantity'}
+                  </label>
+                  {isFamilyPass ? (
+                    <input
+                      type="number"
+                      required
+                      min={1}
+                      max={MAX_PARTY_SIZE}
+                      inputMode="numeric"
+                      value={quantity}
+                      onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, MAX_PARTY_SIZE, 1))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                    />
+                  ) : (
+                    <select
+                      value={quantity}
+                      onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, MAX_PARTY_SIZE, 1))}
+                      className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <option key={num} value={num}>
+                          {num} {num === 1 ? 'Pass' : 'Passes'}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -475,7 +482,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   </h4>
                 </div>
                 <div className="bg-orange-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {bookedTicket.quantity} x Pass
+                  {bookedTicket.quantity} {bookedTicket.passId === 'family-pass' ? (bookedTicket.quantity === 1 ? 'person' : 'people') : 'x Pass'}
                 </div>
               </div>
 

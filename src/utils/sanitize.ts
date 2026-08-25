@@ -58,6 +58,9 @@ const SAFE_DATA_IMAGE = /^data:image\/(png|jpe?g|gif|webp|avif);base64,[A-Za-z0-
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/;
 
+/** Largest single booking. The family ticket makes this a real number, not a formality. */
+export const MAX_PARTY_SIZE = 20;
+
 export const LIMITS = {
   id: 64,
   name: 80,
@@ -402,7 +405,7 @@ export function sanitizeUserTicket(input: UserTicket): UserTicket {
     customerName: sanitizeText(input.customerName, LIMITS.name),
     email: sanitizeEmail(input.email),
     phone: sanitizePhone(input.phone),
-    quantity: sanitizeInt(input.quantity, 1, 10, 1),
+    quantity: sanitizeInt(input.quantity, 1, MAX_PARTY_SIZE, 1),
     totalGHS: sanitizeNumber(input.totalGHS, 0, 1_000_000, 0),
     mekoLevel: sanitizeText(input.mekoLevel, LIMITS.shortText),
     purchaseDate: sanitizeText(input.purchaseDate, 40),

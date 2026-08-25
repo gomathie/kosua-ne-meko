@@ -317,9 +317,9 @@ export const VENDORS: Vendor[] = [
     name: 'Industrial Coatings Africa',
     group: 'other',
     category: 'corporate',
-    description: 'Providing premium industrial coatings and advanced surface protection tailored for the demanding environments of the mining, oil, and gas sectors.',
+    description: 'Supplying high-performance industrial maintenance, protective coatings, and oil refinery process chemicals to protect infrastructure against severe environmental stressors.',
     specialty: 'Mining & Oil/Gas Surface Protection',
-    imageUrl: 'https://images.unsplash.com/photo-1598440539660-589fc284dc86?auto=format&fit=crop&w=800&q=80',
+    imageUrl: '/logos/industrial-oil-gas.jpg',
   },
   {
     id: 'v-wevegotit',

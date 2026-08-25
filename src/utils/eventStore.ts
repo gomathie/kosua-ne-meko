@@ -11,8 +11,9 @@ import { sanitizeFullEventData, sanitizeCategory } from './sanitize';
 // v6 removed the second admin and moved credentials to .env;
 // v7 added the Industrial Coatings Africa and Hitrace Solutions collaborators;
 // v8 moved those two to Silver sponsors and added admin-managed categories;
-// v9 added vendor groups (food-drinks vs other) and admin-editable FAQs.
-const STORAGE_KEY = 'kosua_event_data_v9';
+// v9 added vendor groups (food-drinks vs other) and admin-editable FAQs;
+// v10 replaced the schedule with the flexible line-up.
+const STORAGE_KEY = 'kosua_event_data_v10';
 const EVENT_CHANGE_NOTIFICATION = 'kosua_event_data_changed';
 
 const defaultData: FullEventData = {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { HelpCircle, X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Eye, EyeOff, HelpCircle, X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
 import { EventDetails, Vendor, VendorGroup, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind, FAQItem } from '../types';
 import {
   LIMITS,
@@ -272,6 +272,18 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [authError, setAuthError] = useState('');
   const [activeTab, setActiveTab] = useState<'event' | 'eventsList' | 'admins' | 'vendors' | 'partners' | 'schedule' | 'gallery' | 'faqs' | 'rsvps'>('event');
 
+  // Restores a remembered sign-in. Runs once on mount, before anything is shown,
+  // so a returning admin lands straight in the portal instead of the login form.
+  useEffect(() => {
+    const remembered = readRememberedSession();
+    if (!remembered) return;
+    setSessionToken(remembered.token);
+    setLoginEmail(remembered.email);
+    setIsAuthenticated(true);
+    setFormData(eventDetails);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Event Form State
   const [formData, setFormData] = useState<EventDetails>(eventDetails);
 
@@ -375,12 +387,31 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       });
 
       if (response.ok) {
-        const body = (await response.json()) as { token?: string };
+        const body = (await response.json()) as { token?: string; expiresIn?: number };
         setSessionToken(body.token ?? null);
         setIsAuthenticated(true);
         setAuthError('');
         setPasscode('');
         setFormData(eventDetails);
+
+        // Remember the session, never the password. Store only for as long as
+        // the server says the token is valid.
+        if (rememberMe && body.token) {
+          try {
+            localStorage.setItem(
+              REMEMBER_KEY,
+              JSON.stringify({
+                token: body.token,
+                email: cleanEmail,
+                expiresAt: Date.now() + (body.expiresIn ?? 0) * 1000,
+              }),
+            );
+          } catch {
+            /* storage full or blocked — sign-in still succeeded for this tab */
+          }
+        } else {
+          clearRememberedSession();
+        }
         return;
       }
 
@@ -508,6 +539,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
    * The admin list is now the only way in, so the last account must survive —
    * deleting it would lock everyone out of the portal permanently.
    */
+  /** Ends the session everywhere it is held, then returns to the site. */
+  const handleSignOut = () => {
+    clearRememberedSession();
+    setSessionToken(null);
+    setIsAuthenticated(false);
+    setPasscode('');
+    onClose();
+  };
+
   const handleDeleteAdminUser = (user: AdminUser) => {
     if (adminUsers.length <= 1) {
       alert('You cannot remove the only admin account — you would be locked out of the portal.');
@@ -657,13 +697,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-extrabold flex items-center gap-1.5 shrink-0"
-          >
-            <X className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to site</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Back to site leaves the session intact; signing out ends it. */}
+            {isAuthenticated && (
+              <button
+                onClick={handleSignOut}
+                className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-red-900/60 text-stone-200 hover:text-red-200 text-xs font-extrabold flex items-center gap-1.5"
+              >
+                <Lock className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign out</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-extrabold flex items-center gap-1.5"
+            >
+              <X className="w-4 h-4" />
+              <span className="hidden sm:inline">Back to site</span>
+            </button>
+          </div>
         </div>
       </header>
 

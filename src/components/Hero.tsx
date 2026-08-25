@@ -46,7 +46,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
   }, [eventDetails.targetDateISO]);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-emerald-900/10 pt-8 pb-16 lg:py-20">
+    <section className="relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-emerald-900/10 pt-4 pb-10 sm:pt-8 sm:pb-16 lg:py-20">
       
       {/* Background Aerial Landscape Styling & Clouds */}
       <div className="absolute inset-0 z-0 opacity-40 mix-blend-multiply pointer-events-none bg-[radial-gradient(#059669_1px,transparent_1px)] [background-size:24px_24px]"></div>
@@ -62,7 +62,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Main Banner Poster Canvas Frame */}
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 via-sky-200 to-emerald-800 shadow-2xl border-4 border-white/80 p-6 sm:p-10 md:p-14 text-stone-900">
+        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-sky-400 via-sky-200 to-emerald-800 shadow-2xl border-4 border-white/80 p-4 sm:p-10 md:p-14 text-stone-900">
           
           {/*
             Backdrop is the flyer itself, blurred right down. It was a stock
@@ -81,8 +81,8 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
           />
 
           {/* Organizer Header Tag */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur border border-amber-200 shadow-sm text-stone-800 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="hidden sm:inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur border border-amber-200 shadow-sm text-stone-800 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-orange-600 animate-ping" />
               <span>OFFICIAL EVENT LANDING PAGE</span>
               <span className="text-stone-300">|</span>
@@ -112,10 +112,10 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
           </div>
 
           {/* Hero Content Grid */}
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
             
             {/* Left Title & Date Details */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-5 sm:space-y-6 order-2 lg:order-none">
               
               {/* Event Main Typography */}
               <div className="space-y-1">
@@ -141,7 +141,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
               </div>
 
               {/* Tagline */}
-              <p className="text-stone-800 text-base sm:text-lg font-semibold max-w-xl leading-relaxed bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-white/60">
+              <p className="hidden sm:block text-stone-800 text-base sm:text-lg font-semibold max-w-xl leading-relaxed bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-white/60">
                 Boiled farm eggs, freshly ground hot meko pepper salsa, live music, Ludo games & Accra street food culture! Join us for the most flavorful hangout of 2026.
               </p>
 
@@ -172,7 +172,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
             </div>
 
             {/* Right Side: the official event flyer */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+            <div className="lg:col-span-5 flex flex-col items-center justify-center relative order-1 lg:order-none">
 
               <button
                 type="button"

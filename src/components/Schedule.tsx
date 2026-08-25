@@ -50,10 +50,10 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
             <span>{dateString || 'EVENT DAY'} TIMELINE</span>
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-display text-stone-900 tracking-tight uppercase">
-            EVENT DAY <span className="text-orange-600">SCHEDULE</span>
+            FLEXIBLE EVENT <span className="text-orange-600">LINE-UP</span>
           </h2>
           <p className="text-stone-600 text-sm sm:text-base max-w-xl mx-auto">
-            From doors open to the night bonfire after-party, plan your day at {locationName || 'the venue'}!
+            Timings are a guide, not a schedule — come when you can and stay as long as you like at {locationName || 'the venue'}.
           </p>
 
           {/* Filter Pills */}
@@ -103,18 +103,22 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
                     <span>{item.time}</span>
                   </div>
                   {getCategoryBadge(item.category)}
-                  <div className="text-xs font-bold text-stone-500 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>{item.location}</span>
-                  </div>
+                  {item.location && (
+                    <div className="text-xs font-bold text-stone-500 flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>{item.location}</span>
+                    </div>
+                  )}
                 </div>
 
                 <h3 className="text-lg sm:text-xl font-extrabold font-display text-stone-900">
                   {item.title}
                 </h3>
-                <p className="text-stone-600 text-xs sm:text-sm mt-1 leading-relaxed">
-                  {item.description}
-                </p>
+                {item.description && (
+                  <p className="text-stone-600 text-xs sm:text-sm mt-1 leading-relaxed">
+                    {item.description}
+                  </p>
+                )}
               </div>
 
             </div>

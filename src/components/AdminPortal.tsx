@@ -173,6 +173,46 @@ const CategoryManager: React.FC<{
   );
 };
 
+/**
+ * Where a remembered session lives. The token is a signed, expiring credential,
+ * not the password — the password is never stored anywhere on the device.
+ *
+ * This only restores the portal UI. Every request for real data still carries
+ * the token to the server, which re-verifies it, so a tampered entry here
+ * unlocks nothing.
+ */
+const REMEMBER_KEY = 'kosua_admin_session';
+
+interface RememberedSession {
+  token: string;
+  email: string;
+  expiresAt: number;
+}
+
+function readRememberedSession(): RememberedSession | null {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<RememberedSession>;
+    if (typeof parsed.token !== 'string' || typeof parsed.expiresAt !== 'number') return null;
+    // Expired sessions are cleared rather than offered back.
+    if (Date.now() >= parsed.expiresAt) {
+      localStorage.removeItem(REMEMBER_KEY);
+      return null;
+    }
+    return { token: parsed.token, email: String(parsed.email ?? ''), expiresAt: parsed.expiresAt };
+  } catch {
+    return null;
+  }
+}
+
+function clearRememberedSession(): void {
+  try {
+    localStorage.removeItem(REMEMBER_KEY);
+  } catch {
+    /* storage unavailable — nothing to clear */
+  }
+}
 export const AdminPortal: React.FC<AdminPortalProps> = ({
   onClose,
   eventDetails,
@@ -216,6 +256,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [newFaq, setNewFaq] = useState<FAQItem>({ question: '', answer: '' });
   const [editingFaqIndex, setEditingFaqIndex] = useState<number | null>(null);
   const [editingFaq, setEditingFaq] = useState<FAQItem | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [loginEmail, setLoginEmail] = useState('');
   const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -673,18 +715,40 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               <div className="space-y-2">
                 <label htmlFor="admin-password" className="text-xs font-bold text-stone-300 block">Password</label>
-                <input
-                  id="admin-password"
-                  type="password"
-                  required
-                  autoComplete="current-password"
-                  placeholder="Enter your admin password"
-                  maxLength={LIMITS.passcode}
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
+                <div className="relative">
+                  <input
+                    id="admin-password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    placeholder="Enter your admin password"
+                    maxLength={LIMITS.passcode}
+                    value={passcode}
+                    onChange={(e) => setPasscode(e.target.value)}
+                    className="w-full px-4 py-3 pr-12 rounded-xl bg-stone-800 border border-stone-700 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-stone-400 hover:text-white hover:bg-stone-700 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
+
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-stone-600 bg-stone-800 text-orange-600 focus:ring-orange-500 focus:ring-offset-0"
+                />
+                <span className="text-xs font-semibold text-stone-300">Keep me signed in on this device</span>
+              </label>
 
               {authError && <p className="text-xs font-bold text-red-400" role="alert">{authError}</p>}
             </div>

@@ -78,8 +78,25 @@ const LIST_FOR: Record<string, keyof FullEventData> = {
 };
 
 function mergeNewSeedEntries(data: FullEventData): FullEventData {
-  const known = new Set(data.knownSeedKeys ?? []);
   const firstRun = data.knownSeedKeys === undefined;
+  const known = new Set(data.knownSeedKeys ?? []);
+
+  if (firstRun) {
+    // A blob written before this record existed. Deriving the record from what
+    // the browser actually holds — rather than from the whole seed — is what
+    // lets genuinely new entries still arrive. The cost is that a seed entry
+    // deleted before this record existed is indistinguishable from one never
+    // seen, so it returns once; deleting it now is permanent.
+    for (const { kind, items, keyOf } of SEED_SOURCES) {
+      const stored = (data[LIST_FOR[kind]] ?? []) as unknown[];
+      const storedKeys = new Set(stored.map((i) => (keyOf as (x: unknown) => string)(i)));
+      for (const item of items) {
+        const key = (keyOf as (x: unknown) => string)(item);
+        if (storedKeys.has(key)) known.add(kind + ':' + key);
+      }
+    }
+  }
+
   const merged: FullEventData = { ...data };
   const nextKnown = new Set(known);
   let changed = false;
@@ -91,11 +108,7 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
       nextKnown.add(key);
       if (known.has(key)) continue;
 
-      // First run has no record, so treat everything currently seeded as already
-      // offered. Adding it now would resurrect anything the admin had deleted.
-      if (firstRun) continue;
-
-      (merged[listName] as unknown[]) = [...(merged[listName] as unknown[]), item];
+      (merged[listName] as unknown[]) = [...((merged[listName] ?? []) as unknown[]), item];
       changed = true;
     }
   }

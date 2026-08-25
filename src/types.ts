@@ -150,6 +150,12 @@ export interface EventCategories {
 export type CategoryKind = keyof EventCategories;
 
 export interface FullEventData {
+  /**
+   * Seed entries this browser has already been shown. Anything in the seed
+   * but absent here is genuinely new and gets merged in; anything listed here
+   * but missing from the lists was deleted on purpose and stays deleted.
+   */
+  knownSeedKeys?: string[];
   categories: EventCategories;
   faqs: FAQItem[];
   eventDetails: EventDetails;

@@ -39,6 +39,80 @@ const defaultData: FullEventData = {
 };
 
 /**
+ * Reconciles new seed content with what a browser already has stored.
+ *
+ * The two obvious approaches are both wrong. Bumping STORAGE_KEY publishes new
+ * seed content but wipes every admin edit and deletion. Never merging keeps
+ * admin work safe but means new seed entries never reach anyone who has
+ * visited before — which is why vendors added to eventData.ts appeared only
+ * for first-time visitors.
+ *
+ * So each browser records which seed entries it has already been offered. A
+ * seed entry missing from that record is genuinely new and gets merged in; one
+ * that is recorded but absent from the list was deleted on purpose and stays
+ * deleted. Admin-created entries are untouched either way.
+ */
+type SeedSource = { kind: string; items: readonly unknown[]; keyOf: (item: never) => string };
+
+const byId = (item: { id: string }) => item.id;
+
+const SEED_SOURCES: SeedSource[] = [
+  { kind: 'vendor', items: VENDORS, keyOf: byId as never },
+  { kind: 'sponsor', items: INITIAL_SPONSORS, keyOf: byId as never },
+  { kind: 'collaborator', items: INITIAL_COLLABORATORS, keyOf: byId as never },
+  { kind: 'gallery', items: INITIAL_GALLERY, keyOf: byId as never },
+  { kind: 'event', items: INITIAL_EVENTS_LIST, keyOf: byId as never },
+  // These two have no ids, so identity comes from their content.
+  { kind: 'faq', items: FAQS, keyOf: ((f: FAQItem) => f.question) as never },
+  { kind: 'activity', items: SCHEDULE_ITEMS, keyOf: ((s: ScheduleItem) => s.time + '|' + s.title) as never },
+];
+
+const LIST_FOR: Record<string, keyof FullEventData> = {
+  vendor: 'vendors',
+  sponsor: 'sponsors',
+  collaborator: 'collaborators',
+  gallery: 'gallery',
+  event: 'eventsList',
+  faq: 'faqs',
+  activity: 'schedule',
+};
+
+function mergeNewSeedEntries(data: FullEventData): FullEventData {
+  const known = new Set(data.knownSeedKeys ?? []);
+  const firstRun = data.knownSeedKeys === undefined;
+  const merged: FullEventData = { ...data };
+  const nextKnown = new Set(known);
+  let changed = false;
+
+  for (const { kind, items, keyOf } of SEED_SOURCES) {
+    const listName = LIST_FOR[kind];
+    for (const item of items) {
+      const key = kind + ':' + (keyOf as (i: unknown) => string)(item);
+      nextKnown.add(key);
+      if (known.has(key)) continue;
+
+      // First run has no record, so treat everything currently seeded as already
+      // offered. Adding it now would resurrect anything the admin had deleted.
+      if (firstRun) continue;
+
+      (merged[listName] as unknown[]) = [...(merged[listName] as unknown[]), item];
+      changed = true;
+    }
+  }
+
+  merged.knownSeedKeys = [...nextKnown];
+  if (changed || firstRun) {
+    // Persist so the same entries are not offered again next load.
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+    } catch {
+      /* storage unavailable — the merge still applies for this session */
+    }
+  }
+  return merged;
+}
+
+/**
  * The .env-configured admin is authoritative: its stored copy is replaced on
  * every read, so rotating VITE_ADMIN_PASSWORD takes effect as soon as the new
  * build loads. Without this, a browser would keep authenticating against the
@@ -64,7 +138,7 @@ export function getStoredEventData(): FullEventData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultData;
-    return applyEnvAdmins(sanitizeFullEventData(JSON.parse(raw), defaultData));
+    return applyEnvAdmins(mergeNewSeedEntries(sanitizeFullEventData(JSON.parse(raw), defaultData)));
   } catch (err) {
     console.error('Failed to load event data from storage', err);
     return defaultData;

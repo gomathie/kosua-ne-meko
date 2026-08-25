@@ -89,7 +89,7 @@ export const INITIAL_ADMIN_USERS: AdminUser[] = [];
  * is a closed set — code must treat unknown categories as valid.
  */
 export const INITIAL_CATEGORIES: EventCategories = {
-  vendors: ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment'],
+  vendors: ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment', 'lifestyle'],
   schedule: ['food', 'competition', 'music', 'community', 'entertainment'],
   gallery: ['food', 'vibes', 'stage', 'community'],
 };

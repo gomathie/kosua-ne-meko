@@ -426,9 +426,15 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
   const list = <T,>(value: unknown, sanitizer: (item: T) => T, fallbackList: T[]): T[] =>
     Array.isArray(value) ? value.filter(isRecord).map((item) => sanitizer(item as T)) : fallbackList;
 
+  // Bookkeeping for seed reconciliation (see mergeNewSeedEntries). Dropping
+  // this would make every load look like a first run, so nothing would merge.
+  const knownSeedKeys = Array.isArray(parsed.knownSeedKeys)
+    ? parsed.knownSeedKeys.filter((k): k is string => typeof k === 'string').slice(0, 2000)
+    : undefined;
   const storedCategories = isRecord(parsed.categories) ? parsed.categories : {};
 
   return {
+    knownSeedKeys,
     categories: {
       vendors: sanitizeCategoryList(storedCategories.vendors, fallback.categories.vendors),
       schedule: sanitizeCategoryList(storedCategories.schedule, fallback.categories.schedule),

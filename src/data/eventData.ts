@@ -108,20 +108,9 @@ export const INITIAL_COLLABORATORS: Collaborator[] = [
 ];
 
 export const INITIAL_SPONSORS: Sponsor[] = [
-  {
-    id: 'spon-1',
-    name: 'Ekow Sam Farms',
-    tier: 'Headline',
-    logoUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://ekowsamfarms.com',
-  },
-  {
-    id: 'spon-2',
-    name: 'Pebble Stream',
-    tier: 'Headline',
-    logoUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=400&q=80',
-    websiteUrl: 'https://trypebble.com',
-  },
+  // Ekow Sam Farms is the host and Pebble is the collaborator, not sponsors —
+  // both are credited in their own sections. Listing them here overstated the
+  // sponsor roster and misrepresented who is backing the event.
   {
     id: 'spon-3',
     name: 'Accra Craft Brewery',

@@ -468,8 +468,45 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
-  const handleSaveEventDetails = (e: React.FormEvent) => {
-    e.preventDefault();
+  /**
+   * True when the form differs from what is stored. Compared on sanitized
+   * values so trailing whitespace alone does not look like a change.
+   */
+  const hasUnsavedEventChanges =
+    isAuthenticated &&
+    JSON.stringify(sanitizeEventDetails(formData)) !== JSON.stringify(sanitizeEventDetails(eventDetails));
+
+  /** Tab changes are the easiest way to lose form edits, so they ask first. */
+  const switchTab = (tab: typeof activeTab) => {
+    if (
+      hasUnsavedEventChanges &&
+      !confirm('You have unsaved changes to the event details. Leave this tab without saving?')
+    ) {
+      return;
+    }
+    setActiveTab(tab);
+  };
+
+  // A browser-level guard for closing or reloading the tab. Only armed while
+  // there is something to lose, so it never nags on a clean form.
+  useEffect(() => {
+    if (!hasUnsavedEventChanges) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [hasUnsavedEventChanges]);
+
+  const handleDiscardEventChanges = () => {
+    if (confirm('Discard your unsaved changes to the event details?')) {
+      setFormData(eventDetails);
+    }
+  };
+
+  const handleSaveEventDetails = (e?: React.FormEvent) => {
+    e?.preventDefault();
     const clean = sanitizeEventDetails(formData);
     if (!clean.title || !clean.shortTitle || !clean.dateString || !clean.locationName || !clean.city) {
       alert('Title, short title, date, venue and city are all required.');
@@ -847,7 +884,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-800 pb-4">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button
-                  onClick={() => setActiveTab('event')}
+                  onClick={() => switchTab('event')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'event' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -856,7 +893,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('eventsList')}
+                  onClick={() => switchTab('eventsList')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'eventsList' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -865,7 +902,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('admins')}
+                  onClick={() => switchTab('admins')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'admins' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -874,7 +911,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('vendors')}
+                  onClick={() => switchTab('vendors')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'vendors' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -883,7 +920,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('partners')}
+                  onClick={() => switchTab('partners')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'partners' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -892,7 +929,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('schedule')}
+                  onClick={() => switchTab('schedule')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'schedule' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -901,7 +938,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('gallery')}
+                  onClick={() => switchTab('gallery')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'gallery' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -910,7 +947,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('faqs')}
+                  onClick={() => switchTab('faqs')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'faqs' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
                     }`}
                 >
@@ -2265,6 +2302,37 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
               </div>
             )}
 
+            {/*
+              Unsaved-changes bar. The event form keeps edits in local state
+              until Save, so without this you could type, switch tab, and lose
+              the lot with nothing to warn you. It only appears when something
+              actually differs from what is stored.
+            */}
+            {hasUnsavedEventChanges && (
+              <div className="sticky bottom-0 z-30 -mx-4 sm:-mx-6 lg:-mx-10 px-4 sm:px-6 lg:px-10 py-3 bg-amber-500/95 backdrop-blur border-t-2 border-amber-300 shadow-2xl flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-black uppercase text-stone-900 flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  You have unsaved changes
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDiscardEventChanges}
+                    className="px-3 py-2 rounded-xl bg-stone-900/10 hover:bg-stone-900/20 text-stone-900 text-xs font-extrabold"
+                  >
+                    Discard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveEventDetails}
+                    className="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-black uppercase flex items-center gap-1.5 shadow"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save changes
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

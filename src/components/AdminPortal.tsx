@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
+import { HelpCircle, X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
 import { EventDetails, Vendor, VendorGroup, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind, FAQItem } from '../types';
 import {
   LIMITS,
@@ -765,6 +765,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 >
                   <Camera className="w-4 h-4" />
                   <span>Gallery Photos ({gallery.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('faqs')}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all flex items-center gap-2 ${activeTab === 'faqs' ? 'bg-orange-600 text-white' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                    }`}
+                >
+                  <HelpCircle className="w-4 h-4 text-sky-400" />
+                  <span>FAQs ({faqs.length})</span>
                 </button>
 
                 <button
@@ -1904,6 +1913,104 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             )}
 
             {/* TAB 6: RSVPs from D1 */}
+            {activeTab === 'faqs' && (
+              <div className="space-y-6">
+                <form onSubmit={handleCreateFaq} className="bg-stone-800 p-5 rounded-2xl border border-stone-700 space-y-3">
+                  <h4 className="text-xs font-black uppercase text-sky-400 tracking-wider">ADD A FAQ</h4>
+                  <div>
+                    <label className="text-[11px] font-bold text-stone-300 block mb-1">Question *</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={LIMITS.title}
+                      placeholder="e.g. Is there parking at the venue?"
+                      value={newFaq.question}
+                      onChange={(e) => setNewFaq({ ...newFaq, question: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-bold text-stone-300 block mb-1">Answer *</label>
+                    <textarea
+                      required
+                      rows={3}
+                      maxLength={LIMITS.description * 2}
+                      placeholder="Yes — dedicated secure parking is available."
+                      value={newFaq.answer}
+                      onChange={(e) => setNewFaq({ ...newFaq, answer: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white"
+                    />
+                    <p className="text-[10px] text-stone-500 mt-1">
+                      Tip: the tokens <span className="font-mono text-sky-300">{'{venue}'}</span>,{' '}
+                      <span className="font-mono text-sky-300">{'{city}'}</span> and{' '}
+                      <span className="font-mono text-sky-300">{'{date}'}</span> are replaced with the
+                      live event details, so answers stay correct when the event moves.
+                    </p>
+                  </div>
+                  <div className="flex justify-end">
+                    <button type="submit" className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-black text-xs uppercase flex items-center gap-1">
+                      <Plus className="w-4 h-4" /> Add FAQ
+                    </button>
+                  </div>
+                </form>
+
+                <div className="space-y-2">
+                  <h4 className="text-xs font-black uppercase text-stone-400 tracking-wider">PUBLISHED FAQS ({faqs.length})</h4>
+                  {faqs.map((faq, idx) => (
+                    <div key={idx} className="p-3 bg-stone-800 rounded-xl border border-stone-700">
+                      {editingFaqIndex === idx && editingFaq ? (
+                        <div className="space-y-2 p-2 bg-stone-900 rounded-lg border border-sky-500/40">
+                          <input
+                            type="text"
+                            maxLength={LIMITS.title}
+                            value={editingFaq.question}
+                            onChange={(e) => setEditingFaq({ ...editingFaq, question: e.target.value })}
+                            className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-white rounded font-bold"
+                          />
+                          <textarea
+                            rows={3}
+                            maxLength={LIMITS.description * 2}
+                            value={editingFaq.answer}
+                            onChange={(e) => setEditingFaq({ ...editingFaq, answer: e.target.value })}
+                            className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => { setEditingFaqIndex(null); setEditingFaq(null); }} className="px-2 py-1 bg-stone-700 text-[10px] text-stone-300 rounded">Cancel</button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const clean = sanitizeFaqItem(editingFaq);
+                                if (!clean.question || !clean.answer) { alert('A FAQ needs both a question and an answer.'); return; }
+                                onUpdateFaq(idx, clean);
+                                setEditingFaqIndex(null);
+                                setEditingFaq(null);
+                              }}
+                              className="px-3 py-1 bg-sky-600 text-[10px] text-white font-bold rounded"
+                            >Save</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-white block">{faq.question}</span>
+                            <span className="text-[11px] text-stone-400 line-clamp-2">{faq.answer}</span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button onClick={() => { setEditingFaqIndex(idx); setEditingFaq(faq); }} className="p-1.5 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded" title="Edit">
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => { if (confirm('Delete this FAQ? ' + faq.question)) onDeleteFaq(idx); }} className="p-1.5 bg-red-900/40 hover:bg-red-800 text-red-300 rounded" title="Delete">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {activeTab === 'rsvps' && (
               <div className="space-y-4">
                 {!sessionToken ? (

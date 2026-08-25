@@ -310,6 +310,15 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
+    id: 'v-wevegotit',
+    name: 'We’ve Got It',
+    group: 'other',
+    category: 'lifestyle',
+    description: 'Your go-to spot for beauty and wellness supplements, sports and fitness products, and premium lifestyle items.',
+    specialty: 'Wellness & Fitness Supplements',
+    imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+  },
+  {
     id: 'v-quench',
     name: 'Quench Juices GH',
     group: 'food-drinks',

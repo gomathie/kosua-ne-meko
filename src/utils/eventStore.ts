@@ -52,6 +52,16 @@ const defaultData: FullEventData = {
  * that is recorded but absent from the list was deleted on purpose and stays
  * deleted. Admin-created entries are untouched either way.
  */
+/**
+ * Bumped when the record itself must be rebuilt rather than trusted.
+ *
+ * An earlier build wrote a complete record while merging nothing, so every
+ * browser that loaded it believes it has already been offered the entire
+ * seed and will never receive those entries. Raising this forces those
+ * browsers to re-derive the record from what they actually hold.
+ */
+const SEED_RECORD_VERSION = 2;
+
 type SeedSource = { kind: string; items: readonly unknown[]; keyOf: (item: never) => string };
 
 const byId = (item: { id: string }) => item.id;
@@ -78,10 +88,13 @@ const LIST_FOR: Record<string, keyof FullEventData> = {
 };
 
 function mergeNewSeedEntries(data: FullEventData): FullEventData {
-  const firstRun = data.knownSeedKeys === undefined;
-  const known = new Set(data.knownSeedKeys ?? []);
+  const noRecord = data.knownSeedKeys === undefined;
+  const staleRecord = data.seedRecordVersion !== SEED_RECORD_VERSION;
+  // Either case means the record cannot be trusted and must be rebuilt.
+  const rebuild = noRecord || staleRecord;
+  const known = new Set(rebuild ? [] : data.knownSeedKeys ?? []);
 
-  if (firstRun) {
+  if (rebuild) {
     // A blob written before this record existed. Deriving the record from what
     // the browser actually holds — rather than from the whole seed — is what
     // lets genuinely new entries still arrive. The cost is that a seed entry
@@ -114,7 +127,8 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
   }
 
   merged.knownSeedKeys = [...nextKnown];
-  if (changed || firstRun) {
+  merged.seedRecordVersion = SEED_RECORD_VERSION;
+  if (changed || rebuild) {
     // Persist so the same entries are not offered again next load.
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));

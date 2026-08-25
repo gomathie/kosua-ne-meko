@@ -308,8 +308,8 @@ export const VENDORS: Vendor[] = [
     name: 'Hitrace Solutions',
     group: 'other',
     category: 'corporate',
-    description: 'Cutting-edge technology solutions that optimize business processes for maximum efficiency and growth.',
-    specialty: 'Process Optimization & Tech Solutions',
+    description: 'Telematics and IoT for fleets: GPS vehicle tracking, fuel monitoring and connected-device solutions that put you in control of your operations.',
+    specialty: 'Process Optimization & IoT Solutions',
     imageUrl: '/logos/hitrace-telematics.jpg',
   },
   {

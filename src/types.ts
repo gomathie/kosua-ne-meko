@@ -156,6 +156,8 @@ export interface FullEventData {
    * but missing from the lists was deleted on purpose and stays deleted.
    */
   knownSeedKeys?: string[];
+  /** Version of the record above; a mismatch forces it to be rebuilt. */
+  seedRecordVersion?: number;
   categories: EventCategories;
   faqs: FAQItem[];
   eventDetails: EventDetails;

@@ -438,6 +438,7 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
 
   return {
     knownSeedKeys,
+    seedRecordVersion: typeof parsed.seedRecordVersion === 'number' ? parsed.seedRecordVersion : undefined,
     categories: {
       vendors: sanitizeCategoryList(storedCategories.vendors, fallback.categories.vendors),
       schedule: sanitizeCategoryList(storedCategories.schedule, fallback.categories.schedule),

@@ -310,6 +310,15 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
+    id: 'v-quench',
+    name: 'Quench Juices GH',
+    group: 'food-drinks',
+    category: 'drinks',
+    description: 'Refreshing natural fruit juices, smoothies, and healthy blends made from fresh local ingredients.',
+    specialty: 'Fresh Natural Juices',
+    imageUrl: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=800&q=80',
+  },
+  {
     id: 'v0',
     name: 'Nellma Foods',
     group: 'food-drinks',

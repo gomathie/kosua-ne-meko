@@ -310,6 +310,24 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
+    id: 'v-hitrace',
+    name: 'Hitrace Solutions',
+    group: 'other',
+    category: 'corporate',
+    description: 'Corporate sponsor stall offering business solutions and services.',
+    specialty: 'Business Solutions',
+    imageUrl: '/logos/hitrace-solutions.png',
+  },
+  {
+    id: 'v-industrialcoatings',
+    name: 'Industrial Coatings Africa',
+    group: 'other',
+    category: 'corporate',
+    description: 'Corporate sponsor stall showcasing premium industrial coatings and painting solutions.',
+    specialty: 'Industrial Coatings',
+    imageUrl: '/logos/industrial-coatings-africa.png',
+  },
+  {
     id: 'v-wevegotit',
     name: 'We’ve Got It',
     group: 'other',

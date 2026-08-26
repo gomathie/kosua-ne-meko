@@ -359,16 +359,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/kelewele-dish.webp',
     badge: 'New Arrival',
   },
-  {
-    id: 'v7',
-    name: 'Ekow Sam Eggs & Meko Hub',
-    group: 'food-drinks',
-    category: 'eggs-pepper',
-    description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
-    specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
-    imageUrl: '/logos/kosua-ne-meko-dish.webp',
-    badge: 'Festival Favorite',
-  },
+
   {
     id: 'v8',
     name: 'Ekow Sam Organic Poultry Market',

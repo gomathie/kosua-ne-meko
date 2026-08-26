@@ -304,6 +304,16 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
+    id: 'v-telonceri',
+    name: 'Telonceri Foods',
+    group: 'food-drinks',
+    category: 'drinks',
+    description:
+      'Fresh fruit drinks and pastries. Juices include Pineapple & Mint, Coconut Milk, Chocolate, Tropical, Pinebeet, Pineapple Carrot and Pineorange, alongside spring rolls and banana bread.',
+    specialty: 'Fruit Drinks, Spring Rolls & Banana Bread',
+    imageUrl: '/logos/telonceri-foods.webp',
+  },
+  {
     id: 'v-hitrace',
     name: 'Hitrace Solutions',
     group: 'other',

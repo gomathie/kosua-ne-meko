@@ -417,6 +417,16 @@ export const VENDORS: Vendor[] = [
     imageUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=800&q=80',
     badge: 'Collaboration Partner',
   },
+  {
+    id: 'v-savorydelight',
+    name: 'RD Aquagrow Enterprise - Savory Delight',
+    group: 'food-drinks',
+    category: 'farm-fresh',
+    description: 'Freshly smoked catfish and smoked tilapia prepared with unmatched quality, strict hygienic controls, and a unique smoking process that locks in flavour.',
+    specialty: 'Smoked Catfish & Tilapia',
+    imageUrl: '/logos/savory-delight.webp',
+    badge: 'New Vendor',
+  },
 ];
 
 export const FAQS: FAQItem[] = [

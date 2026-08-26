@@ -438,6 +438,11 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
 
   return {
     knownSeedKeys,
+    // Tombstones for deliberately deleted seed entries. Losing these would
+    // let the merge treat the deletion as an entry that had never arrived.
+    deletedSeedKeys: Array.isArray(parsed.deletedSeedKeys)
+      ? parsed.deletedSeedKeys.filter((k): k is string => typeof k === 'string').slice(0, 2000)
+      : undefined,
     seedRecordVersion: typeof parsed.seedRecordVersion === 'number' ? parsed.seedRecordVersion : undefined,
     categories: {
       vendors: sanitizeCategoryList(storedCategories.vendors, fallback.categories.vendors),

@@ -87,6 +87,31 @@ const LIST_FOR: Record<string, keyof FullEventData> = {
   activity: 'schedule',
 };
 
+/** The keys the seed owns, per kind. Used to tell seed items from admin ones. */
+const SEED_KEYS_BY_KIND: Record<string, Set<string>> = Object.fromEntries(
+  SEED_SOURCES.map(({ kind, items, keyOf }) => [
+    kind,
+    new Set(items.map((i) => (keyOf as (x: unknown) => string)(i))),
+  ]),
+);
+
+/**
+ * Records that an administrator deleted a seed-defined entry.
+ *
+ * Without this, deletion is only ever expressed as absence from a list, and
+ * absence is ambiguous: it reads the same as an entry the browser has never
+ * been offered. Any rebuild of the record resolves that ambiguity by
+ * re-seeding, which is what brought deleted vendors back.
+ *
+ * Admin-created entries need no tombstone — the seed cannot recreate them.
+ */
+function withTombstone(data: FullEventData, kind: string, key: string): string[] {
+  const existing = data.deletedSeedKeys ?? [];
+  if (!SEED_KEYS_BY_KIND[kind]?.has(key)) return existing;
+  const full = kind + ':' + key;
+  return existing.includes(full) ? existing : [...existing, full];
+}
+
 function mergeNewSeedEntries(data: FullEventData): FullEventData {
   const noRecord = data.knownSeedKeys === undefined;
   const staleRecord = data.seedRecordVersion !== SEED_RECORD_VERSION;
@@ -110,6 +135,10 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
     }
   }
 
+  // Deliberate deletions outrank the record entirely: they are honoured on a
+  // rebuild too, which is exactly the case that used to resurrect them.
+  const tombstoned = new Set(data.deletedSeedKeys ?? []);
+
   const merged: FullEventData = { ...data };
   const nextKnown = new Set(known);
   let changed = false;
@@ -119,7 +148,7 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
     for (const item of items) {
       const key = kind + ':' + (keyOf as (i: unknown) => string)(item);
       nextKnown.add(key);
-      if (known.has(key)) continue;
+      if (tombstoned.has(key) || known.has(key)) continue;
 
       (merged[listName] as unknown[]) = [...((merged[listName] ?? []) as unknown[]), item];
       changed = true;
@@ -214,6 +243,10 @@ export function restoreMissingSeedItems(): void {
 
     delete parsed.knownSeedKeys;
     delete parsed.seedRecordVersion;
+    // Clearing the tombstones is the whole point of this action: it is the
+    // one place a deliberate deletion is meant to be undone, and the admin
+    // confirms that before it runs.
+    delete parsed.deletedSeedKeys;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
     window.dispatchEvent(new Event(EVENT_CHANGE_NOTIFICATION));
   } catch (err) {
@@ -380,6 +413,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       eventsList: updatedList,
+      deletedSeedKeys: withTombstone(data, "event", id),
     };
     saveStoredEventData(updated);
   };
@@ -482,6 +516,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       vendors: data.vendors.filter((v) => v.id !== id),
+      deletedSeedKeys: withTombstone(data, "vendor", id),
     };
     saveStoredEventData(updated);
   };
@@ -495,9 +530,13 @@ export function useEventData(): {
   };
 
   const deleteScheduleItem = (index: number) => {
+    const removed = data.schedule[index];
     const updated: FullEventData = {
       ...data,
       schedule: data.schedule.filter((_, i) => i !== index),
+      deletedSeedKeys: removed
+        ? withTombstone(data, "activity", removed.time + "|" + removed.title)
+        : data.deletedSeedKeys,
     };
     saveStoredEventData(updated);
   };
@@ -518,6 +557,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       collaborators: data.collaborators.filter((c) => c.id !== id),
+      deletedSeedKeys: withTombstone(data, "collaborator", id),
     };
     saveStoredEventData(updated);
   };
@@ -538,6 +578,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       sponsors: data.sponsors.filter((s) => s.id !== id),
+      deletedSeedKeys: withTombstone(data, "sponsor", id),
     };
     saveStoredEventData(updated);
   };
@@ -558,6 +599,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       gallery: data.gallery.filter((g) => g.id !== id),
+      deletedSeedKeys: withTombstone(data, "gallery", id),
     };
     saveStoredEventData(updated);
   };
@@ -604,7 +646,12 @@ export function useEventData(): {
   };
 
   const deleteFaq = (index: number) => {
-    saveStoredEventData({ ...data, faqs: data.faqs.filter((_, i) => i !== index) });
+    const removed = data.faqs[index];
+    saveStoredEventData({
+      ...data,
+      faqs: data.faqs.filter((_, i) => i !== index),
+      deletedSeedKeys: removed ? withTombstone(data, "faq", removed.question) : data.deletedSeedKeys,
+    });
   };
 
   const restoreMissing = () => {

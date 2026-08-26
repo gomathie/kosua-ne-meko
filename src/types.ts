@@ -156,6 +156,12 @@ export interface FullEventData {
    * but missing from the lists was deleted on purpose and stays deleted.
    */
   knownSeedKeys?: string[];
+  /**
+   * Seed entries an administrator deleted on purpose. Absence from a list
+   * cannot express this on its own — it reads identically to 'never seen' —
+   * so a deliberate deletion is recorded here and never re-seeded.
+   */
+  deletedSeedKeys?: string[];
   /** Version of the record above; a mismatch forces it to be rebuilt. */
   seedRecordVersion?: number;
   categories: EventCategories;

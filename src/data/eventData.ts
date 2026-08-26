@@ -359,15 +359,15 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/kelewele-dish.webp',
     badge: 'New Arrival',
   },
-
   {
-    id: 'v8',
-    name: 'Ekow Sam Organic Poultry Market',
+    id: 'v7',
+    name: 'Ekow Sam Eggs & Meko Hub',
     group: 'food-drinks',
-    category: 'farm-fresh',
-    description: 'Take home fresh crate farm eggs, local spice blends, organic peppers, and artisan earthenware asanka bowls.',
-    specialty: 'Farm Fresh Egg Crates & Asanka Kits',
-    imageUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80',
+    category: 'eggs-pepper',
+    description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
+    specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
+    imageUrl: '/logos/kosua-ne-meko-dish.webp',
+    badge: 'Festival Favorite',
   },
   {
     id: 'v9',

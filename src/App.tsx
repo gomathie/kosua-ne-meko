@@ -223,6 +223,7 @@ export default function App() {
         <div className="flex items-center gap-2">
           {tickets.length > 0 && (
             <button
+              id="btn-mobile-my-tickets"
               onClick={() => setIsMyTicketsOpen(true)}
               className="p-2.5 rounded-xl bg-stone-800 text-emerald-400 hover:bg-stone-700 transition-colors border border-stone-700 flex items-center gap-1.5"
               aria-label="View My Tickets"
@@ -233,6 +234,7 @@ export default function App() {
           )}
 
           <button
+            id="btn-mobile-get-ticket"
             onClick={() => setIsTicketModalOpen(true)}
             className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs uppercase tracking-wider shadow-lg shadow-orange-600/30 flex items-center gap-2 transition-transform active:scale-95"
           >
@@ -261,5 +263,3 @@ export default function App() {
     </div>
   );
 }
-
-

@@ -42,6 +42,7 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {collaborators.map((c) => (
                 <a
+                  id={`link-collaborator-${c.id}`}
                   key={c.id}
                   href={sanitizeUrl(c.url, '#')}
                   target="_blank"
@@ -94,6 +95,7 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
                 <div className="flex flex-wrap items-center justify-center gap-6">
                   {headlineSponsors.map((s) => (
                     <a
+                      id={`link-sponsor-headline-${s.id}`}
                       key={s.id}
                       href={sanitizeUrl(s.websiteUrl, '#')}
                       target="_blank"
@@ -118,6 +120,7 @@ export const SponsorsSection: React.FC<SponsorsSectionProps> = ({ collaborators,
                 <div className="flex flex-wrap items-center justify-center gap-4">
                   {[...goldSponsors, ...otherSponsors].map((s) => (
                     <a
+                      id={`link-sponsor-supporting-${s.id}`}
                       key={s.id}
                       href={sanitizeUrl(s.websiteUrl, '#')}
                       target="_blank"

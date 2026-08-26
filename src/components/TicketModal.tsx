@@ -204,6 +204,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
             </div>
           </div>
           <button
+            id="btn-ticket-modal-close"
             onClick={onClose}
             className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors"
           >
@@ -225,6 +226,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   const isSelected = selectedPass.id === pass.id;
                   return (
                     <div
+                      id={`btn-ticket-pass-${pass.id}`}
                       key={pass.id}
                       onClick={() => setSelectedPass(pass)}
                       className={`p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between relative ${
@@ -268,6 +270,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   <div className="relative">
                     <User className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
                     <input
+                      id="input-ticket-name"
                       type="text"
                       required
                       maxLength={LIMITS.name}
@@ -290,6 +293,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   <div className="relative">
                     <Mail className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
                     <input
+                      id="input-ticket-email"
                       type="email"
                       maxLength={LIMITS.email}
                       autoComplete="email"
@@ -311,6 +315,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   <div className="relative">
                     <Phone className="w-4 h-4 text-stone-400 absolute left-3 top-3" />
                     <input
+                      id="input-ticket-phone"
                       type="tel"
                       required
                       maxLength={LIMITS.phone}
@@ -340,6 +345,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   </label>
                   {isFamilyPass ? (
                     <input
+                      id="input-ticket-quantity"
                       type="number"
                       required
                       min={1}
@@ -351,6 +357,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                     />
                   ) : (
                     <select
+                      id="select-ticket-quantity"
                       value={quantity}
                       onChange={(e) => setQuantity(sanitizeInt(e.target.value, 1, MAX_PARTY_SIZE, 1))}
                       className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
@@ -370,6 +377,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                   Preferred Meko Spice Level
                 </label>
                 <select
+                  id="select-ticket-meko"
                   value={mekoPreference}
                   onChange={(e) => setMekoPreference(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-stone-300 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
@@ -412,6 +420,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
               </div>
 
               <button
+                id="btn-ticket-modal-submit"
                 type="submit"
                 disabled={isBookingClosed || (needsTurnstile && !turnstileToken)}
                 className={`px-8 py-3.5 rounded-xl font-black text-sm shadow-lg transition-all flex items-center gap-2 ${
@@ -534,6 +543,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
 
             <div className="flex flex-col sm:flex-row gap-3">
               <button
+                id="btn-ticket-download"
                 onClick={() => downloadTicketImage(bookedTicket, ev)}
                 className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-sm shadow-lg shadow-orange-600/30 transition-all flex items-center justify-center gap-2 active:scale-95"
               >
@@ -541,6 +551,7 @@ export const TicketModal: React.FC<TicketModalProps> = ({ isOpen, onClose, onTic
                 DOWNLOAD TICKET
               </button>
               <button
+                id="btn-ticket-modal-reset"
                 onClick={handleReset}
                 className="flex-1 py-3.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-800 font-extrabold text-sm transition-colors"
               >

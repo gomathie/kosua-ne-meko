@@ -56,12 +56,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-6">
             <button
+              id="nav-link-highlights"
               onClick={() => scrollToSection('highlights')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
               Highlights
             </button>
             <button
+              id="nav-link-pepper-meter"
               onClick={() => scrollToSection('pepper-meter')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
             >
@@ -69,24 +71,28 @@ export const Navbar: React.FC<NavbarProps> = ({
               Meko Scale
             </button>
             <button
+              id="nav-link-schedule"
               onClick={() => scrollToSection('schedule')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
               Schedule
             </button>
             <button
+              id="nav-link-vendors"
               onClick={() => scrollToSection('vendors')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
               Vendors
             </button>
             <button
+              id="nav-link-sponsors"
               onClick={() => scrollToSection('sponsors')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
               Partners
             </button>
             <button
+              id="nav-link-gallery"
               onClick={() => scrollToSection('gallery')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
             >
@@ -94,6 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Gallery
             </button>
             <button
+              id="nav-link-location"
               onClick={() => scrollToSection('location')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
             >
@@ -101,6 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Map
             </button>
             <button
+              id="nav-link-faq"
               onClick={() => scrollToSection('faq')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
             >
@@ -112,6 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="hidden md:flex items-center gap-2.5">
             {ticketCount > 0 && (
               <button
+                id="btn-nav-my-passes"
                 onClick={onOpenMyTickets}
                 className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs transition-all border border-stone-200"
               >
@@ -124,6 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             <button
+              id="btn-nav-get-ticket"
               onClick={onOpenTickets}
               className="relative inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-extrabold text-xs sm:text-sm text-white bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-md shadow-orange-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
@@ -136,6 +146,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex md:hidden items-center gap-2">
             {ticketCount > 0 && (
               <button
+                id="btn-mobile-nav-my-passes"
                 onClick={onOpenMyTickets}
                 className="p-2 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs flex items-center gap-1 border border-emerald-200"
               >
@@ -145,6 +156,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             <button
+              id="btn-mobile-menu-toggle"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 transition-colors"
               aria-label="Toggle Menu"
@@ -159,6 +171,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-stone-200 px-4 pt-3 pb-6 space-y-3 animate-in slide-in-from-top duration-200">
           <button
+            id="mobile-nav-link-highlights"
             onClick={() => scrollToSection('highlights')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -166,6 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Event Highlights</span>
           </button>
           <button
+            id="mobile-nav-link-pepper-meter"
             onClick={() => scrollToSection('pepper-meter')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -173,6 +187,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Meko Spice Meter</span>
           </button>
           <button
+            id="mobile-nav-link-schedule"
             onClick={() => scrollToSection('schedule')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -180,6 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Full Schedule</span>
           </button>
           <button
+            id="mobile-nav-link-vendors"
             onClick={() => scrollToSection('vendors')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -187,6 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Food & Drinks Lineup</span>
           </button>
           <button
+            id="mobile-nav-link-sponsors"
             onClick={() => scrollToSection('sponsors')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -194,6 +211,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Partners & Sponsors</span>
           </button>
           <button
+            id="mobile-nav-link-gallery"
             onClick={() => scrollToSection('gallery')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -201,6 +219,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Photo Gallery</span>
           </button>
           <button
+            id="mobile-nav-link-location"
             onClick={() => scrollToSection('location')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -208,6 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span>Location & Map ({eventDetails.city})</span>
           </button>
           <button
+            id="mobile-nav-link-faq"
             onClick={() => scrollToSection('faq')}
             className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
           >
@@ -217,6 +237,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <div className="pt-2 border-t border-stone-100 space-y-2">
             <button
+              id="btn-mobile-nav-rsvp"
               onClick={() => {
                 setMobileMenuOpen(false);
                 onOpenTickets();

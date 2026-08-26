@@ -57,6 +57,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({ eventDetails, faqs }) =>
                 className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden transition-all"
               >
                 <button
+                  id={`btn-faq-toggle-${index}`}
                   onClick={() => toggleFaq(index)}
                   className="w-full p-5 text-left flex items-center justify-between gap-4 font-extrabold text-stone-900 text-base sm:text-lg hover:text-orange-600 transition-colors"
                 >

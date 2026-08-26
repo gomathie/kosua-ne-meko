@@ -59,6 +59,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
                   {eventDetails.fullAddress}
                 </div>
                 <button
+                  id="btn-location-copy-address"
                   onClick={handleCopyAddress}
                   className="p-2 rounded-xl bg-stone-700 hover:bg-stone-600 text-white transition-colors"
                   title="Copy Address"
@@ -102,6 +103,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
             </div>
 
             <a
+              id="link-location-google-maps"
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -145,6 +147,7 @@ export const LocationMap: React.FC<LocationMapProps> = ({ eventDetails = DEFAULT
                 </span>
               </div>
               <a
+                id="link-location-get-directions"
                 href={googleMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"

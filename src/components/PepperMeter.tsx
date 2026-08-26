@@ -62,6 +62,7 @@ export const PepperMeter: React.FC = () => {
           <div className="pt-4 flex justify-center">
             <div className="bg-stone-800 p-1.5 rounded-2xl border border-stone-700 inline-flex gap-2">
               <button
+                id="btn-pepper-tab-explorer"
                 onClick={() => setActiveTab('explorer')}
                 className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
                   activeTab === 'explorer'
@@ -73,6 +74,7 @@ export const PepperMeter: React.FC = () => {
                 <span>Spice Explorer</span>
               </button>
               <button
+                id="btn-pepper-tab-quiz"
                 onClick={() => setActiveTab('quiz')}
                 className={`px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
                   activeTab === 'quiz'
@@ -96,6 +98,7 @@ export const PepperMeter: React.FC = () => {
                 const isSelected = selectedLevel.id === level.id;
                 return (
                   <button
+                    id={`btn-pepper-level-${level.id}`}
                     key={level.id}
                     onClick={() => setSelectedLevel(level)}
                     className={`w-full text-left p-4 sm:p-5 rounded-2xl border transition-all flex items-center justify-between group ${
@@ -175,7 +178,7 @@ export const PepperMeter: React.FC = () => {
 
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-stone-400">
                   <span>Available at all Meko Stations on event day</span>
-                  <a href="#schedule" className="text-orange-400 font-extrabold hover:underline flex items-center gap-1">
+                  <a id="link-pepper-schedule" href="#schedule" className="text-orange-400 font-extrabold hover:underline flex items-center gap-1">
                     <span>Watch Meko Championship Schedule</span> &rarr;
                   </a>
                 </div>
@@ -202,6 +205,7 @@ export const PepperMeter: React.FC = () => {
                   { label: 'Drowned in extra hot pepper!', val: 3 },
                 ].map((opt) => (
                   <button
+                    id={`btn-pepper-q1-${opt.val}`}
                     key={opt.val}
                     onClick={() => setQ1(opt.val)}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all ${
@@ -228,6 +232,7 @@ export const PepperMeter: React.FC = () => {
                   { label: 'Ask for MORE pepper!', val: 3 },
                 ].map((opt) => (
                   <button
+                    id={`btn-pepper-q2-${opt.val}`}
                     key={opt.val}
                     onClick={() => setQ2(opt.val)}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all ${
@@ -243,6 +248,7 @@ export const PepperMeter: React.FC = () => {
             </div>
 
             <button
+              id="btn-pepper-calculate-persona"
               onClick={calculatePersona}
               disabled={q1 === null || q2 === null}
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-sm disabled:opacity-50 transition-all shadow-md"

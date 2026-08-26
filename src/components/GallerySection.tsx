@@ -45,6 +45,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
                 .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((cat) => (
               <button
+                id={`btn-gallery-filter-${cat.id}`}
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all ${
@@ -101,6 +102,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200" onClick={() => setActiveImage(null)}>
             <div className="relative max-w-4xl w-full bg-stone-900 rounded-3xl overflow-hidden border border-stone-800 shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <button
+                id="btn-gallery-lightbox-close"
                 onClick={() => setActiveImage(null)}
                 className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-stone-800/80 hover:bg-stone-700 text-white transition-colors"
               >

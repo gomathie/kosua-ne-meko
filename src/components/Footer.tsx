@@ -46,12 +46,12 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
               EVENT NAVIGATION
             </h4>
             <ul className="space-y-2">
-              <li><a href="#highlights" className="hover:text-orange-400 transition-colors">Event Highlights</a></li>
-              <li><a href="#pepper-meter" className="hover:text-orange-400 transition-colors">Meko Spice Scale</a></li>
-              <li><a href="#schedule" className="hover:text-orange-400 transition-colors">Saturday Timeline</a></li>
-              <li><a href="#vendors" className="hover:text-orange-400 transition-colors">Food & Drink Stalls</a></li>
-              <li><a href="#location" className="hover:text-orange-400 transition-colors">Dzorwulu Location Map</a></li>
-              <li><a href="#faq" className="hover:text-orange-400 transition-colors">Frequently Asked Questions</a></li>
+              <li><a id="footer-link-highlights" href="#highlights" className="hover:text-orange-400 transition-colors">Event Highlights</a></li>
+              <li><a id="footer-link-pepper-meter" href="#pepper-meter" className="hover:text-orange-400 transition-colors">Meko Spice Scale</a></li>
+              <li><a id="footer-link-schedule" href="#schedule" className="hover:text-orange-400 transition-colors">Saturday Timeline</a></li>
+              <li><a id="footer-link-vendors" href="#vendors" className="hover:text-orange-400 transition-colors">Food & Drink Stalls</a></li>
+              <li><a id="footer-link-location" href="#location" className="hover:text-orange-400 transition-colors">Dzorwulu Location Map</a></li>
+              <li><a id="footer-link-faq" href="#faq" className="hover:text-orange-400 transition-colors">Frequently Asked Questions</a></li>
             </ul>
           </div>
 
@@ -68,10 +68,11 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
               <span className="text-orange-400 font-extrabold block text-[10px] uppercase">COLLABORATION PARTNER</span>
               <h5 className="font-black text-white text-sm font-display">PEBBLE</h5>
               <p className="text-stone-400">Your Home of Authentic Local Content</p>
-              <a href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">trypebble.com →</a>
+              <a id="footer-link-pebble" href="https://trypebble.com" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">trypebble.com →</a>
             </div>
 
             <button
+              id="btn-footer-back-to-top"
               onClick={scrollToTop}
               className="w-fit self-end px-4 py-2 rounded-xl bg-stone-800 hover:bg-orange-600 text-white text-xs font-bold transition-colors flex items-center gap-2"
             >
@@ -88,6 +89,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
           <div className="flex items-center gap-4">
             {onOpenAdmin && (
               <button
+                id="btn-footer-portal"
                 onClick={onOpenAdmin}
                 className="text-stone-400 hover:text-orange-400 flex items-center gap-1 font-bold transition-colors"
               >
@@ -98,7 +100,7 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
             <p className="flex items-center gap-1">
               <span>Made with</span>
               <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
-              <span>v2.0</span> by <a href="https://www.linkedin.com/in/mathias-lago/" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">Smooth</a>
+              <span>v2.0</span> by <a id="footer-link-maker" href="https://www.linkedin.com/in/mathias-lago/" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 font-bold transition-colors">Smooth</a>
             </p>
           </div>
         </div>

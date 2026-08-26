@@ -66,6 +66,7 @@ export const UpcomingEventsSection: React.FC<UpcomingEventsSectionProps> = ({ ev
 
               <div className="mt-6 pt-4 border-t border-stone-800/80">
                 <button
+                  id={`btn-upcoming-event-rsvp-${event.id}`}
                   onClick={event.allowPrebooking ? onOpenTickets : undefined}
                   disabled={!event.allowPrebooking}
                   className={`w-full py-3 rounded-2xl font-extrabold text-xs uppercase transition-all flex items-center justify-center gap-2 ${

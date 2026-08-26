@@ -101,6 +101,7 @@ export const OrganizerSection: React.FC<OrganizerSectionProps> = ({ eventDetails
                   </div>
                 </div>
                 <a
+                  id="link-organizer-pebble-icon"
                   href={ev.collaboratorUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -129,6 +130,7 @@ export const OrganizerSection: React.FC<OrganizerSectionProps> = ({ eventDetails
               </div>
 
               <a
+                id="link-organizer-pebble-cta"
                 href={ev.collaboratorUrl}
                 target="_blank"
                 rel="noopener noreferrer"

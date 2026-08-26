@@ -91,7 +91,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
 
             {/* Collaboration Badge */}
             {eventDetails.collaborator && (
-              <a href={sanitizeUrl(eventDetails.collaboratorUrl, '#')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
+              <a id="hero-collaborator-link" href={sanitizeUrl(eventDetails.collaboratorUrl, '#')} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-stone-900/85 backdrop-blur border border-stone-700 shadow-sm text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider hover:bg-stone-800 transition-colors">
                 <Sparkles className="w-3.5 h-3.5 text-orange-400" />
                 <span className="text-stone-300">In collaboration with</span>
                 <span className="text-orange-400 font-black">{eventDetails.collaborator.toUpperCase()}</span>
@@ -148,6 +148,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
               {/* Call to Actions */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                 <button
+                  id="btn-hero-rsvp"
                   onClick={onOpenTickets}
                   className={`w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-base sm:text-lg shadow-xl transition-all flex items-center justify-center gap-3 group ${
                     eventDetails.isBookingOpen === false
@@ -161,6 +162,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
                 </button>
 
                 <a
+                  id="link-hero-location"
                   href="#location"
                   className="w-full sm:w-auto px-6 py-3.5 sm:py-4 rounded-2xl bg-white/90 hover:bg-white text-emerald-900 font-extrabold text-sm sm:text-base border border-emerald-700/20 shadow-md transition-all flex items-center justify-center gap-2"
                 >
@@ -175,6 +177,7 @@ export const Hero: React.FC<HeroProps> = ({ eventDetails, onOpenTickets }) => {
             <div className="lg:col-span-5 flex flex-col items-center justify-center relative order-1 lg:order-none">
 
               <button
+                id="btn-hero-flyer-rsvp"
                 type="button"
                 onClick={onOpenTickets}
                 aria-label="Get your free ticket"

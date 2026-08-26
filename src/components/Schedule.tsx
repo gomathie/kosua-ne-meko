@@ -66,6 +66,7 @@ export const Schedule: React.FC<ScheduleProps> = ({ schedule, dateString, locati
                 .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((tab) => (
               <button
+                id={`btn-schedule-filter-${tab.id}`}
                 key={tab.id}
                 onClick={() => setFilter(tab.id)}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all ${

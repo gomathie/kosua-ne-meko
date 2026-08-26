@@ -51,6 +51,7 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) =>
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
             <input
+              id="input-vendor-search"
               type="text"
               placeholder="Search dishes or stalls..."
               value={searchTerm}
@@ -69,6 +70,7 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) =>
                 .map((c) => ({ id: c, label: formatCategoryLabel(c) })),
             ].map((cat) => (
               <button
+                id={`btn-vendor-filter-${cat.id}`}
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${

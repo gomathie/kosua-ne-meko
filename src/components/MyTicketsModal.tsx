@@ -42,6 +42,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
             </div>
           </div>
           <button
+            id="btn-mytickets-modal-close-top"
             onClick={onClose}
             className="p-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors"
           >
@@ -114,6 +115,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
                   </div>
 
                   <button
+                    id={`btn-mytickets-download-${t.id}`}
                     onClick={() => downloadTicketImage(t, eventDetails)}
                     className="mt-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-black text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
@@ -125,6 +127,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
 
               <div className="pt-2 flex justify-end">
                 <button
+                  id="btn-mytickets-clear-passes"
                   onClick={onClearTickets}
                   className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center gap-1"
                 >
@@ -138,6 +141,7 @@ export const MyTicketsModal: React.FC<MyTicketsModalProps> = ({
 
         <div className="p-4 bg-stone-50 border-t border-stone-200 text-center">
           <button
+            id="btn-mytickets-modal-close-bottom"
             onClick={onClose}
             className="px-6 py-2.5 rounded-xl bg-stone-900 text-white font-extrabold text-xs hover:bg-stone-800 transition-colors"
           >

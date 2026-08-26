@@ -304,7 +304,7 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
 
 export const VENDORS: Vendor[] = [
   {
-    id: 'v-telonceri',
+    id: 'v1',
     name: 'Telonceri Foods',
     group: 'food-drinks',
     category: 'drinks',
@@ -314,7 +314,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/telonceri-foods.webp',
   },
   {
-    id: 'v-hitrace',
+    id: 'v2',
     name: 'Hitrace Solutions',
     group: 'other',
     category: 'corporate',
@@ -323,7 +323,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/hitrace-telematics.webp',
   },
   {
-    id: 'v-industrialcoatings',
+    id: 'v3',
     name: 'Industrial Coatings Africa',
     group: 'other',
     category: 'corporate',
@@ -332,7 +332,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/industrial-oil-gas.webp',
   },
   {
-    id: 'v-wevegotit',
+    id: 'v4',
     name: 'We’ve Got It',
     group: 'other',
     category: 'lifestyle',
@@ -341,7 +341,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
   },
   {
-    id: 'v-quench',
+    id: 'v5',
     name: 'Quench Juices GH',
     group: 'food-drinks',
     category: 'drinks',
@@ -350,7 +350,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=800&q=80',
   },
   {
-    id: 'v0',
+    id: 'v6',
     name: 'Nellma Foods',
     group: 'food-drinks',
     category: 'farm-fresh',
@@ -360,7 +360,7 @@ export const VENDORS: Vendor[] = [
     badge: 'New Arrival',
   },
   {
-    id: 'v1',
+    id: 'v7',
     name: 'Ekow Sam Eggs & Meko Hub',
     group: 'food-drinks',
     category: 'eggs-pepper',
@@ -370,36 +370,7 @@ export const VENDORS: Vendor[] = [
     badge: 'Festival Favorite',
   },
   {
-    id: 'v2',
-    name: 'Auntie Muni Street Bites',
-    group: 'food-drinks',
-    category: 'street-food',
-    description: 'Famous Accra street eats including spicy waakye, kelewele, hot fried yam with turkey tail and fresh pepper.',
-    specialty: 'Kelewele & Spicy Egg Kebabs',
-    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
-    badge: 'Local Legend',
-  },
-  {
-    id: 'v3',
-    name: 'Akwaaba Palm Wine & Juice Bar',
-    group: 'food-drinks',
-    category: 'drinks',
-    description: 'Freshly tapped natural palm wine, chilled hibiscus (sobolo), ginger brew, and coconut water served in shell calabashes.',
-    specialty: 'Iced Sobolo & Ginger Punch',
-    imageUrl: 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=800&q=80',
-    badge: 'Crowd Favorite',
-  },
-  {
-    id: 'v4',
-    name: 'Dzorwulu Suya & Tilapia Grill',
-    group: 'food-drinks',
-    category: 'street-food',
-    description: 'Charcoal grilled spicy tilapia fish, suya steak skewers, and grilled boiled eggs wrapped in smoked banana leaf.',
-    specialty: 'Grilled Pepper Eggs & Beef Suya',
-    imageUrl: 'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?auto=format&fit=crop&w=800&q=80',
-  },
-  {
-    id: 'v5',
+    id: 'v8',
     name: 'Ekow Sam Organic Poultry Market',
     group: 'food-drinks',
     category: 'farm-fresh',
@@ -408,7 +379,7 @@ export const VENDORS: Vendor[] = [
     imageUrl: 'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80',
   },
   {
-    id: 'v6',
+    id: 'v9',
     name: 'Pebble Entertainment Lounge',
     group: 'other',
     category: 'entertainment',
@@ -418,7 +389,7 @@ export const VENDORS: Vendor[] = [
     badge: 'Collaboration Partner',
   },
   {
-    id: 'v-savorydelight',
+    id: 'v10',
     name: 'RD Aquagrow Enterprise - Savory Delight',
     group: 'food-drinks',
     category: 'farm-fresh',

@@ -109,12 +109,21 @@ export const Vendors: React.FC<VendorsProps> = ({ vendors, categories = [] }) =>
             >
               {/* Image Banner */}
               <div className="relative h-48 overflow-hidden bg-stone-800">
-                <img
-                  src={sanitizeImageUrl(vendor.imageUrl)}
-                  alt={vendor.name}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {sanitizeImageUrl(vendor.imageUrl) ? (
+                  <img
+                    src={sanitizeImageUrl(vendor.imageUrl)}
+                    alt={vendor.name}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  /* No photo yet: a branded panel rather than a broken image icon. */
+                  <div className="w-full h-full bg-gradient-to-br from-stone-800 via-stone-900 to-orange-950 flex items-center justify-center">
+                    <span className="text-2xl font-black font-display text-orange-500/70 uppercase tracking-wide px-4 text-center">
+                      {vendor.name}
+                    </span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent" />
                 
                 {vendor.badge && (

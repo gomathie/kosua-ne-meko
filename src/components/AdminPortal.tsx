@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, EyeOff, HelpCircle, X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
+import { Image as ImageIcon, Eye, EyeOff, HelpCircle, X, Lock, KeyRound, Save, Plus, Trash2, Edit2, RotateCcw, Calendar, MapPin, Building2, Store, Users, Award, Clock, Camera, UserPlus, CheckCircle, Sparkles, Ticket, Download, RefreshCw } from 'lucide-react';
 import { EventDetails, Vendor, VendorGroup, ScheduleItem, Collaborator, Sponsor, GalleryItem, EventItem, AdminUser, EventCategories, CategoryKind, FAQItem } from '../types';
 import {
   LIMITS,
@@ -320,7 +320,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     category: 'street-food' as Vendor['category'],
     description: '',
     specialty: '',
-    imageUrl: FALLBACK_VENDOR_IMAGE,
+    imageUrl: '',
     badge: '',
   });
 
@@ -634,9 +634,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     setNewFaq({ question: '', answer: '' });
   };
 
+  /** Per-vendor drafts for the inline 'add a photo' inputs. */
+  const [photoDrafts, setPhotoDrafts] = useState<Record<string, string>>({});
+
+  const savePhotoLink = (vendor: Vendor) => {
+    const link = (photoDrafts[vendor.id] ?? '').trim();
+    if (!link) return;
+    // sanitizeImageUrl returns '' for anything it will not render, so an
+    // unusable link is rejected here rather than saved and shown as a break.
+    if (!sanitizeImageUrl(link)) {
+      alert('That is not a usable image link. Use an https:// address or a path like /logos/photo.jpg');
+      return;
+    }
+    onUpdateVendor(sanitizeVendor({ ...vendor, imageUrl: link }, ''));
+    setPhotoDrafts({ ...photoDrafts, [vendor.id]: '' });
+  };
+
   const handleCreateVendor = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = sanitizeVendorInput(newVendor, FALLBACK_VENDOR_IMAGE);
+    const clean = sanitizeVendorInput(newVendor, '');
     if (!clean.name || !clean.description) {
       alert('A vendor needs a name and a description.');
       return;
@@ -648,7 +664,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       category: 'street-food',
       description: '',
       specialty: '',
-      imageUrl: FALLBACK_VENDOR_IMAGE,
+      imageUrl: '',
       badge: '',
     });
   };
@@ -1530,7 +1546,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </div>
                   </div>
 
-                  <div>
+                    <div>
+                      <label className="text-[11px] font-bold text-stone-300 block mb-1">
+                        Photo URL <span className="font-normal text-stone-500">(optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={LIMITS.url}
+                        placeholder="https://... or /logos/file.jpg — leave blank to add later"
+                        value={newVendor.imageUrl}
+                        onChange={(e) => setNewVendor({ ...newVendor, imageUrl: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white font-mono"
+                      />
+                    </div>                  <div>
                     <label className="text-[11px] font-bold text-stone-300 block mb-1">Description *</label>
                     <input
                       type="text"
@@ -1626,7 +1654,16 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         ) : (
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 overflow-hidden">
-                              {v.imageUrl && <img src={sanitizeImageUrl(v.imageUrl)} alt={v.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />}
+                              {v.imageUrl ? (
+                                <img src={sanitizeImageUrl(v.imageUrl)} alt={v.name} className="w-9 h-9 rounded-lg object-cover shrink-0" />
+                              ) : (
+                                <div
+                                  className="w-9 h-9 rounded-lg shrink-0 bg-stone-900 border border-dashed border-stone-600 flex items-center justify-center text-stone-500"
+                                  title="No photo yet"
+                                >
+                                  <ImageIcon className="w-4 h-4" />
+                                </div>
+                              )}
                               <div className="overflow-hidden">
                                 <span className="text-xs font-extrabold text-white block truncate">{v.name}</span>
                                 <span className="text-[10px] text-amber-400 font-semibold truncate block">{v.specialty}</span>
@@ -1648,6 +1685,37 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
+                          </div>
+                        )}
+                        {/*
+                          A stall with no photo gets its own input right here, so
+                          it can be fixed without opening the edit form. Vendors
+                          added through the portal start with no photo rather
+                          than a stock stand-in, which is what makes this visible.
+                        */}
+                        {!v.imageUrl && editingVendor?.id !== v.id && (
+                          <div className="mt-2 flex gap-1.5">
+                            <input
+                              type="text"
+                              maxLength={LIMITS.url}
+                              placeholder="Paste an image link for this stall"
+                              value={photoDrafts[v.id] ?? ''}
+                              onChange={(e) => setPhotoDrafts({ ...photoDrafts, [v.id]: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  savePhotoLink(v);
+                                }
+                              }}
+                              className="flex-1 px-2 py-1 rounded-lg bg-stone-900 border border-stone-700 text-[11px] text-white font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => savePhotoLink(v)}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase"
+                            >
+                              Add
+                            </button>
                           </div>
                         )}
                       </div>

@@ -381,7 +381,7 @@ export const VENDORS: Vendor[] = [
   },
   {
     id: 'v10',
-    name: 'RD Aquagrow Enterprise - Savory Delight',
+    name: 'Savory Delight',
     group: 'food-drinks',
     category: 'farm-fresh',
     description: 'Freshly smoked catfish and smoked tilapia prepared with unmatched quality, strict hygienic controls, and a unique smoking process that locks in flavour.',

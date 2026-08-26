@@ -19,7 +19,7 @@ export const EventHighlights: React.FC = () => {
     {
       icon: <Music className="w-8 h-8 text-emerald-600" />,
       title: 'Live Afrobeats & DJ Sets',
-      description: 'Accra’s hottest DJs, brass band street processions, and sunset acoustic sessions at Dzorwulu.',
+      description: 'Featuring official DJ Vigos, brass band street processions, and sunset acoustic sessions at Dzorwulu.',
       bgColor: 'bg-emerald-50 border-emerald-200',
     },
     {

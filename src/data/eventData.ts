@@ -181,7 +181,7 @@ export const TICKET_PASSES: TicketPass[] = [
     description: 'Free general entry to Hangout 2.0 — enjoy all stages, live music, cultural activities, and the full Accra street food atmosphere.',
     perks: [
       'Entry to full event area & all stages',
-      'Live Afrobeats & DJ performances',
+      'Live Afrobeats & DJ Vigos performances',
       'Entry to Ludo & Oware Tournament',
       'Access to Meko Pepper Eating Challenge (sign-up)',
       'Pebble Outdoor Cinema screenings',
@@ -296,7 +296,7 @@ export const SCHEDULE_ITEMS: ScheduleItem[] = [
   {
     time: '7:30 PM onwards',
     title: 'Music, dance and free hangout',
-    description: '',
+    description: 'Featuring the official event DJ, DJ Vigos.',
     location: '',
     category: 'music',
   },

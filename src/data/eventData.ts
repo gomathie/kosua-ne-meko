@@ -366,7 +366,7 @@ export const VENDORS: Vendor[] = [
     category: 'eggs-pepper',
     description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',
     specialty: 'Specialty Deviled Kosua & Fresh Pepper Flight',
-    imageUrl: '/logos/kosua-ne-meko-dish.webp',
+    imageUrl: '/logos/ekow-sam-eggs.webp',
     badge: 'Festival Favorite',
   },
   {
@@ -388,6 +388,16 @@ export const VENDORS: Vendor[] = [
     specialty: 'Smoked Catfish & Tilapia',
     imageUrl: '/logos/savory-delight.webp',
     badge: 'New Vendor',
+  },
+  {
+    id: 'v11',
+    name: 'R & M Vibes',
+    group: 'food-drinks',
+    category: 'street-food',
+    description: 'Delicious fried yam, kelewele, sweet potatoes with a variety of proteins including chicken wings, tsofi, gizzard, sausage, and pork.',
+    specialty: 'Fried Yam & Assorted Proteins',
+    imageUrl: '/logos/r-and-m-vibes.webp',
+    badge: 'New Arrival',
   },
 ];
 

@@ -361,7 +361,7 @@ export const VENDORS: Vendor[] = [
   },
   {
     id: 'v7',
-    name: 'Ekow Sam Eggs & Meko Hub',
+    name: 'Ekow Sam Eggs - Kosua ne Meko',
     group: 'food-drinks',
     category: 'eggs-pepper',
     description: 'Organically raised farm eggs served with signature stone-ground meko salsa in traditional clay bowls.',

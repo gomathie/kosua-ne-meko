@@ -42,3 +42,15 @@ This document serves as a record of all tasks requested and completed during our
 9. **Create Agent Reminder Document**
    - *Task:* Add `agent-reminder.md` and document all asked questions and tasks.
    - *Resolution:* Created this file.
+
+10. **Add "Bite Mogul" Vendor**
+    - *Task:* Add a new vendor called "Bite Mogul" selling Delicious Jollof Rice.
+    - *Resolution:* Added them as `v12` in `eventData.ts`.
+
+11. **Add "Waakye On The Go" Vendor**
+    - *Task:* Add a new vendor called "Waakye On The Go" selling Classic Waakye.
+    - *Resolution:* Added them as `v13` in `eventData.ts`.
+
+12. **Convert Uploaded Logos**
+    - *Task:* Convert the uploaded logos for Bite Mogul and Waakye On The Go to WebP format.
+    - *Resolution:* Located the user-uploaded images in the local artifact storage (`.user_uploaded`), created `scripts/convert-logos.mjs` to convert them to WebP via `sharp`, saved them to `public/logos/`, and updated the extensions in `eventData.ts`.

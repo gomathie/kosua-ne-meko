@@ -399,6 +399,26 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/r-and-m-vibes.webp',
     badge: 'New Arrival',
   },
+  {
+    id: 'v12',
+    name: 'Bite Mogul',
+    group: 'food-drinks',
+    category: 'street-food',
+    description: 'Serving delicious, authentic Jollof Rice.',
+    specialty: 'Delicious Jollof Rice',
+    imageUrl: '/logos/bite-mogul.webp',
+    badge: 'New Arrival',
+  },
+  {
+    id: 'v13',
+    name: 'Waakye On The Go',
+    group: 'food-drinks',
+    category: 'street-food',
+    description: 'Serving hot, classic, and authentic Ghanaian Waakye.',
+    specialty: 'Classic Waakye',
+    imageUrl: '/logos/waakye-on-the-go.webp',
+    badge: 'New Arrival',
+  },
 ];
 
 export const FAQS: FAQItem[] = [

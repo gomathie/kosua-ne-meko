@@ -36,6 +36,8 @@ export const OrganizerSection: React.FC<OrganizerSectionProps> = ({ eventDetails
                 src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=1000&q=80"
                 alt="Ekow Sam Farms Free-Range Chickens"
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/20 to-transparent" />

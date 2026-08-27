@@ -438,6 +438,12 @@ export function sanitizeFullEventData(parsed: unknown, fallback: FullEventData):
 
   return {
     knownSeedKeys,
+    // Carried through untouched: losing it would make every seed entry look
+    // unchanged and stop updates from ever reaching this browser.
+    seedFingerprints:
+      isRecord(parsed.seedFingerprints) && Object.keys(parsed.seedFingerprints).length <= 2000
+        ? (parsed.seedFingerprints as Record<string, string>)
+        : undefined,
     // Tombstones for deliberately deleted seed entries. Losing these would
     // let the merge treat the deletion as an entry that had never arrived.
     deletedSeedKeys: Array.isArray(parsed.deletedSeedKeys)

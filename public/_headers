@@ -32,3 +32,20 @@
 # Hashed build assets are immutable, so they can be cached hard.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# The flyer and stall photos change rarely and are not content-hashed, so cache
+# them for a day and let a revalidation pick up a replacement.
+/logos/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+/hero-flyer.*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+# robots.txt Disallow stops a crawler fetching /adm, but a URL that is merely
+# linked can still be indexed without being fetched. This header is what
+# actually keeps the portal out of an index, for any crawler that does reach it.
+/adm
+  X-Robots-Tag: noindex, nofollow
+/adm/*
+  X-Robots-Tag: noindex, nofollow
+/api/*
+  X-Robots-Tag: noindex, nofollow

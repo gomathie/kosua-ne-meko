@@ -162,6 +162,12 @@ export interface FullEventData {
    * so a deliberate deletion is recorded here and never re-seeded.
    */
   deletedSeedKeys?: string[];
+  /**
+   * Fingerprint of each seed entry as this browser last received it, so a
+   * later change in the seed can be detected and applied. An entry the
+   * administrator has edited is marked instead, and never auto-refreshed.
+   */
+  seedFingerprints?: Record<string, string>;
   /** Version of the record above; a mismatch forces it to be rebuilt. */
   seedRecordVersion?: number;
   categories: EventCategories;

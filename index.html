@@ -11,13 +11,31 @@
     <meta name="keywords" content="Kosua Ne Meko, Kosua Ne Meko Hangout, Accra events, Ghana street food, Ekow Sam Farms, TryPebble, North Dzorwulu, street food festival Accra, boiled egg meko" />
     <meta name="author" content="Ekow Sam Farms & Pebble" />
     <meta name="theme-color" content="#ea580c" />
+    <!-- Geographic hints for local search. -->
+    <meta name="geo.region" content="GH-AA" />
+    <meta name="geo.placename" content="North Dzorwulu, Accra" />
+    <meta name="geo.position" content="5.612;-0.198" />
+    <meta name="ICBM" content="5.612, -0.198" />
+
+    <!-- Turnstile is fetched on first paint; resolving it early removes a
+         round trip from the RSVP form's first render. -->
+    <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin />
+    <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+    <!-- The flyer is the LCP element, so start it before the bundle parses. -->
+    <link rel="preload" as="image" href="/hero-flyer.webp" type="image/webp" fetchpriority="high" />
     <!-- Canonical + crawler directives. Without a canonical, /adm and any
          soft-404 URL can be indexed as a duplicate of the home page. -->
     <link rel="canonical" href="https://kosuanemeko.com/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
-    <!-- Favicon -->
+    <!-- Favicon. The emoji reads better than a wordmark at 16px; the PNGs
+         below are for home screens and app switchers, where it is drawn large. -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥚</text></svg>" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Kosua Ne Meko" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:url" content="https://kosuanemeko.com/" />
@@ -25,6 +43,8 @@
     <meta property="og:title" content="Kosua Ne Meko Hangout 2.0 | Accra's Premier Street Food Festival" />
     <meta property="og:description" content="Join us on Sat 5th Sept 2026 at Cencor Venue, North Dzorwulu! Ticket RSVP, pepper meter, live Afrobeats, games & African outdoor cinema." />
     <meta property="og:image" content="https://kosuanemeko.com/hero-flyer.jpg" />
+    <meta property="og:image:secure_url" content="https://kosuanemeko.com/hero-flyer.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1024" />
     <meta property="og:image:height" content="1280" />
     <meta property="og:image:alt" content="Kosua Ne Meko Hangout 2.0 flyer: Saturday 5th September, 2:00 PM at Cencor Venue, North Dzorwulu, Accra." />
@@ -33,61 +53,21 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://kosuanemeko.com/" />
+    <!-- Shown under the card as "Event · Accra, Ghana". -->
+    <meta name="twitter:label1" content="When" />
+    <meta name="twitter:data1" content="Sat 5 Sept 2026, 10:00 AM" />
+    <meta name="twitter:label2" content="Where" />
+    <meta name="twitter:data2" content="Cencor Venue, North Dzorwulu, Accra" />
     <meta name="twitter:title" content="Kosua Ne Meko Hangout 2.0 | Accra's Premier Street Food Festival" />
     <meta name="twitter:description" content="Join us on Sat 5th Sept 2026 at Cencor Venue, North Dzorwulu! Ticket RSVP, pepper meter, live Afrobeats, games & African outdoor cinema." />
     <meta name="twitter:image:alt" content="Kosua Ne Meko Hangout 2.0 flyer: Saturday 5th September, 2:00 PM at Cencor Venue, North Dzorwulu, Accra." />
     <meta name="twitter:image" content="https://kosuanemeko.com/hero-flyer.jpg" />
 
-    <!-- Event structured data: drives Google rich results (date, venue, free
-         entry). Mirrors EVENT_DETAILS in src/data/eventData.ts — if the event
-         date or venue changes there, update this too. -->
-    <script type="application/ld+json">
-    {
-          "@context": "https://schema.org",
-          "@type": "Festival",
-          "name": "Kosua Ne Meko Hangout 2.0",
-          "description": "Accra's premier street food and cultural festival: farm-fresh boiled eggs with stone-ground meko pepper salsa, live Afrobeats, board game tournaments and African outdoor cinema.",
-          "startDate": "2026-09-05T10:00:00+00:00",
-          "endDate": "2026-09-05T22:00:00+00:00",
-          "eventStatus": "https://schema.org/EventScheduled",
-          "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-          "url": "https://kosuanemeko.com/",
-          "image": [
-                "https://kosuanemeko.com/hero-flyer.jpg"
-          ],
-          "location": {
-                "@type": "Place",
-                "name": "Cencor Venue, North Dzorwulu",
-                "address": {
-                      "@type": "PostalAddress",
-                      "streetAddress": "Cencor Venue, North Dzorwulu",
-                      "addressLocality": "Accra",
-                      "addressRegion": "Greater Accra",
-                      "addressCountry": "GH"
-                },
-                "geo": {
-                      "@type": "GeoCoordinates",
-                      "latitude": 5.612,
-                      "longitude": -0.198
-                }
-          },
-          "organizer": {
-                "@type": "Organization",
-                "name": "Ekow Sam Farms",
-                "url": "https://ekowsamfarms.com"
-          },
-          "offers": {
-                "@type": "Offer",
-                "name": "Free RSVP Pass",
-                "price": "0",
-                "priceCurrency": "GHS",
-                "availability": "https://schema.org/InStock",
-                "url": "https://kosuanemeko.com/",
-                "validFrom": "2026-01-01T00:00:00+00:00"
-          },
-          "isAccessibleForFree": true
-    }
-    </script>
+    <!-- Structured data: Event, FAQ, Organization and WebSite, generated
+         from src/data/eventData.ts by scripts/seo.ts so it can never drift
+         from what the page actually says. -->
+    <!--seo:jsonld-->
   </head>
   <body>
     <div id="root"></div>

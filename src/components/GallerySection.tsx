@@ -72,6 +72,8 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
                 src={sanitizeImageUrl(item.imageUrl)}
                 alt={item.title}
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />

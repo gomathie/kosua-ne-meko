@@ -112,6 +112,37 @@ function withTombstone(data: FullEventData, kind: string, key: string): string[]
   return existing.includes(full) ? existing : [...existing, full];
 }
 
+/** Marks a seed entry the administrator has edited; never auto-refreshed. */
+const ADMIN_EDITED = 'admin-edited';
+
+/** Small stable hash, enough to notice a seed entry changed. */
+function fingerprint(value: unknown): string {
+  const json = JSON.stringify(value);
+  let h = 5381;
+  for (let i = 0; i < json.length; i++) h = ((h << 5) + h + json.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(36);
+}
+
+/**
+ * Flags a seed entry as administrator-owned, so later seed changes leave it
+ * alone. Without this, editing a built-in stall in the portal would be undone
+ * the next time that stall changed in the seed.
+ */
+function withSeedEdit(data: FullEventData, kind: string, key: string): Record<string, string> {
+  const prints = { ...(data.seedFingerprints ?? {}) };
+  if (SEED_KEYS_BY_KIND[kind]?.has(key)) prints[kind + ':' + key] = ADMIN_EDITED;
+  return prints;
+}
+
+/** withSeedEdit for several entries of one kind at once. */
+function withSeedEdits(data: FullEventData, kind: string, keys: string[]): Record<string, string> {
+  const prints = { ...(data.seedFingerprints ?? {}) };
+  for (const key of keys) {
+    if (SEED_KEYS_BY_KIND[kind]?.has(key)) prints[kind + ':' + key] = ADMIN_EDITED;
+  }
+  return prints;
+}
+
 function mergeNewSeedEntries(data: FullEventData): FullEventData {
   const noRecord = data.knownSeedKeys === undefined;
   const staleRecord = data.seedRecordVersion !== SEED_RECORD_VERSION;
@@ -143,19 +174,48 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
   const nextKnown = new Set(known);
   let changed = false;
 
+  const prints: Record<string, string> = { ...(data.seedFingerprints ?? {}) };
+
   for (const { kind, items, keyOf } of SEED_SOURCES) {
     const listName = LIST_FOR[kind];
+    const getKey = keyOf as (i: unknown) => string;
     for (const item of items) {
-      const key = kind + ':' + (keyOf as (i: unknown) => string)(item);
+      const key = kind + ':' + getKey(item);
       nextKnown.add(key);
-      if (tombstoned.has(key) || known.has(key)) continue;
+      if (tombstoned.has(key)) continue;
 
-      (merged[listName] as unknown[]) = [...((merged[listName] ?? []) as unknown[]), item];
+      const list = (merged[listName] ?? []) as unknown[];
+      const index = list.findIndex((entry) => getKey(entry) === getKey(item));
+      const seedPrint = fingerprint(item);
+
+      if (index === -1) {
+        // Not held yet. Only offer it if this browser has never been offered
+        // it — otherwise it was deleted, and the tombstone check above or the
+        // record already settled that.
+        if (known.has(key)) continue;
+        (merged[listName] as unknown[]) = [...list, item];
+        prints[key] = seedPrint;
+        changed = true;
+        continue;
+      }
+
+      // Already held. Refresh it when the seed has changed, unless the admin
+      // has edited this entry — that is what a stale image was: the seed moved
+      // on and nothing ever updated the copy this browser was holding.
+      const recorded = prints[key];
+      if (recorded === ADMIN_EDITED) continue;
+      if (recorded === seedPrint) continue;
+
+      const next = [...list];
+      next[index] = item;
+      (merged[listName] as unknown[]) = next;
+      prints[key] = seedPrint;
       changed = true;
     }
   }
 
   merged.knownSeedKeys = [...nextKnown];
+  merged.seedFingerprints = prints;
   merged.seedRecordVersion = SEED_RECORD_VERSION;
   if (changed || rebuild) {
     // Persist so the same entries are not offered again next load.
@@ -336,6 +396,13 @@ export function useEventData(): {
       ...data,
       eventDetails: updatedDetails,
       eventsList: updatedList,
+      // The active event was rewritten from these details, so it belongs to
+      // the admin now and must not be refreshed from the seed.
+      seedFingerprints: withSeedEdits(
+        data,
+        'event',
+        updatedList.filter((e) => e.status === 'active').map((e) => e.id),
+      ),
     };
     saveStoredEventData(updated);
   };
@@ -404,6 +471,8 @@ export function useEventData(): {
       ...data,
       eventDetails: updatedDetails,
       eventsList: updatedList,
+      // Every status just changed, so none of these are the seed's any more.
+      seedFingerprints: withSeedEdits(data, 'event', updatedList.map((e) => e.id)),
     };
     saveStoredEventData(updated);
   };
@@ -455,6 +524,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       vendors: data.vendors.map((v) => (v.id === vendor.id ? vendor : v)),
+      seedFingerprints: withSeedEdit(data, 'vendor', vendor.id),
     };
     saveStoredEventData(updated);
   };
@@ -482,16 +552,21 @@ export function useEventData(): {
       ...data,
       eventsList: updatedList,
       eventDetails: updatedDetails,
+      seedFingerprints: withSeedEdit(data, 'event', eventItem.id),
     };
     saveStoredEventData(updated);
   };
 
   const updateScheduleItem = (index: number, item: ScheduleItem) => {
+    const previous = data.schedule[index];
     const updatedSchedule = [...data.schedule];
     updatedSchedule[index] = item;
     const updated: FullEventData = {
       ...data,
       schedule: updatedSchedule,
+      seedFingerprints: previous
+        ? withSeedEdit(data, 'activity', previous.time + '|' + previous.title)
+        : data.seedFingerprints,
     };
     saveStoredEventData(updated);
   };
@@ -500,6 +575,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       collaborators: data.collaborators.map((c) => (c.id === collaborator.id ? collaborator : c)),
+      seedFingerprints: withSeedEdit(data, 'collaborator', collaborator.id),
     };
     saveStoredEventData(updated);
   };
@@ -508,6 +584,7 @@ export function useEventData(): {
     const updated: FullEventData = {
       ...data,
       sponsors: data.sponsors.map((s) => (s.id === sponsor.id ? sponsor : s)),
+      seedFingerprints: withSeedEdit(data, 'sponsor', sponsor.id),
     };
     saveStoredEventData(updated);
   };
@@ -640,9 +717,14 @@ export function useEventData(): {
   };
 
   const updateFaq = (index: number, faq: FAQItem) => {
+    const previous = data.faqs[index];
     const faqs = [...data.faqs];
     faqs[index] = faq;
-    saveStoredEventData({ ...data, faqs });
+    saveStoredEventData({
+      ...data,
+      faqs,
+      seedFingerprints: previous ? withSeedEdit(data, 'faq', previous.question) : data.seedFingerprints,
+    });
   };
 
   const deleteFaq = (index: number) => {

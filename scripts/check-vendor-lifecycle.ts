@@ -40,6 +40,7 @@ const check = (label: string, actual: unknown, expected: unknown) => {
 
 // --- Static guard: every delete path records a tombstone -------------------
 const src = readFileSync(new URL('../src/utils/eventStore.ts', import.meta.url), 'utf8');
+const END_OF_FN = String.fromCharCode(10) + '  };';
 for (const fn of ['deleteVendor', 'deleteSponsor', 'deleteCollaborator', 'deleteGalleryItem',
                   'deleteEventItem', 'deleteScheduleItem', 'deleteFaq']) {
   const start = src.indexOf(`const ${fn} = `);
@@ -84,6 +85,64 @@ check('Restore Missing undoes the deletion', ids().includes(victim.id), true);
 
 resetEventDataToDefault();
 check('Reset Defaults returns to the seed', ids().length, VENDORS.length);
+
+
+// --- Seed refresh ----------------------------------------------------------
+// A change to a seed entry (an image, typically) has to reach browsers that
+// already hold that entry — the merge used to only ever append, so it could
+// not. Edits made in the portal must survive that refresh.
+
+const imageOf = (id: string) => getStoredEventData().vendors.find((v) => v.id === id)?.imageUrl;
+
+// Every update path marks the entry admin-owned, or the next seed change undoes it.
+for (const fn of ['updateVendor', 'updateSponsor', 'updateCollaborator', 'updateEventItem',
+                  'updateScheduleItem', 'updateFaq', 'setActiveEvent', 'updateEventDetails']) {
+  const start = src.indexOf(`const ${fn} = `);
+  const body = src.slice(start, src.indexOf(END_OF_FN, start));
+  check(`${fn} marks the entry admin-owned`, /withSeedEdit/.test(body), true);
+}
+
+store.clear();
+saveStoredEventData(getStoredEventData());
+const refreshed = VENDORS[1];
+const original = refreshed.imageUrl;
+
+// Stand in for a deploy that changed the image in eventData.ts.
+(refreshed as { imageUrl: string }).imageUrl = '/logos/updated-by-the-seed.webp';
+check('changed seed image reaches an existing browser', imageOf(refreshed.id), '/logos/updated-by-the-seed.webp');
+check('refresh introduces no duplicates', ids().length, new Set(ids()).size);
+
+// An entry the admin edited is theirs; a later seed change must not overwrite it.
+const owned = getStoredEventData();
+saveStoredEventData({
+  ...owned,
+  vendors: owned.vendors.map((v) => (v.id === refreshed.id ? { ...v, imageUrl: '/logos/admin-choice.webp' } : v)),
+  seedFingerprints: { ...(owned.seedFingerprints ?? {}), ['vendor:' + refreshed.id]: 'admin-edited' },
+});
+(refreshed as { imageUrl: string }).imageUrl = '/logos/seed-moved-again.webp';
+check('admin-edited image survives a later seed change', imageOf(refreshed.id), '/logos/admin-choice.webp');
+
+// A deleted entry stays deleted even though its seed content changed.
+const gone = getStoredEventData();
+saveStoredEventData({
+  ...gone,
+  vendors: gone.vendors.filter((v) => v.id !== VENDORS[3].id),
+  deletedSeedKeys: [...(gone.deletedSeedKeys ?? []), 'vendor:' + VENDORS[3].id],
+});
+(VENDORS[3] as { imageUrl: string }).imageUrl = '/logos/changed-while-deleted.webp';
+check('a changed seed entry is not resurrected by the refresh', ids().includes(VENDORS[3].id), false);
+
+// A blob written before fingerprints existed picks up the current seed once.
+const preFingerprint = raw();
+delete preFingerprint.seedFingerprints;
+preFingerprint.vendors = preFingerprint.vendors.map((v: any) =>
+  v.id === refreshed.id ? { ...v, imageUrl: '/logos/stale.webp' } : v);
+localStorage.setItem(KEY, JSON.stringify(preFingerprint));
+check('a pre-fingerprint blob is brought up to date', imageOf(refreshed.id), '/logos/seed-moved-again.webp');
+
+getStoredEventData();
+check('still no duplicates after the refresh', ids().length, new Set(ids()).size);
+(refreshed as { imageUrl: string }).imageUrl = original;
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

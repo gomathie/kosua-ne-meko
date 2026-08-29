@@ -21,10 +21,10 @@ The web app serves as the official festival hub: allowing festival-goers to expl
 
 ### 📅 Event Schedule & Timeline
 - Real-time countdown timer to festival kickoff.
-- Categorized schedule of events including live cooking demos, egg-eating contests, DJ lineups, and cultural showcases.
+- Categorized schedule of events including live cooking demos, egg-eating contests, DJ lineups (featuring **DJ Vigos**), and cultural showcases.
 
 ### 🏪 Vendor & Sponsor Directory
-- Showcase of participating food stalls, beverage bars, and local artisans.
+- Showcase of participating food stalls, beverage bars, and local artisans (featuring vendors like **Savory Delight**, **R & M Vibes**, **Bite Mogul**, and **Waakye On The Go**).
 - Profiles for primary organizers (**Ekow Sam Farms**) and partners (**Pebble**).
 
 ### 📍 Venue Location & Directions

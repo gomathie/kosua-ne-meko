@@ -419,6 +419,16 @@ export const VENDORS: Vendor[] = [
     imageUrl: '/logos/waakye-on-the-go.webp',
     badge: 'New Arrival',
   },
+  {
+    id: 'v14',
+    name: 'Baysas',
+    group: 'other',
+    category: 'lifestyle',
+    description: 'Snow cone and woodcrafts',
+    specialty: 'Snow Cone & Woodcrafts',
+    imageUrl: '/logos/baysas.webp',
+    badge: 'New Vendor',
+  },
 ];
 
 export const FAQS: FAQItem[] = [

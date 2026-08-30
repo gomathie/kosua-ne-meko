@@ -328,7 +328,7 @@ export const VENDORS: Vendor[] = [
     group: 'other',
     category: 'corporate',
     description: 'Supplying high-performance industrial maintenance, protective coatings, NoFiren Swamp Rider and coatings to protect infrastructure against severe environmental stressors.',
-    specialty: 'Swanp Rdier NoFire & Surface Protection',
+    specialty: 'Swamp Rider NoFire & Surface Protection',
     imageUrl: '/logos/industrial-oil-gas.webp',
   },
   {

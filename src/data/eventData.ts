@@ -319,7 +319,7 @@ export const VENDORS: Vendor[] = [
     group: 'other',
     category: 'corporate',
     description: 'Telematics and IoT for fleets: GPS vehicle tracking, fuel monitoring and connected-device solutions that put you in control of your operations.',
-    specialty: 'Process Optimization & IoT Solutions',
+    specialty: 'Digital & IoT Solutions',
     imageUrl: '/logos/hitrace-telematics.webp',
   },
   {
@@ -421,7 +421,7 @@ export const VENDORS: Vendor[] = [
   },
   {
     id: 'v14',
-    name: 'Baysas',
+    name: 'Baysas Ventures',
     group: 'other',
     category: 'lifestyle',
     description: 'Snow cone and woodcrafts',

@@ -12,14 +12,24 @@ interface GallerySectionProps {
 
 // PAGE_SIZE is now determined dynamically inside the component
 export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categories = [] }) => {
+  // Shuffle once on mount so visitors see a fresh order each visit
+  const shuffledGallery = React.useMemo(() => {
+    const arr = [...gallery];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [gallery]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const getPageSize = () => typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : 18;
   const [visibleCount, setVisibleCount] = useState<number>(getPageSize());
 
   const filteredGallery = selectedCategory === 'all'
-    ? gallery
-    : gallery.filter((g) => g.category === selectedCategory);
+    ? shuffledGallery
+    : shuffledGallery.filter((g) => g.category === selectedCategory);
 
   // Reset pagination when category changes
   const handleCategoryChange = (catId: string) => {

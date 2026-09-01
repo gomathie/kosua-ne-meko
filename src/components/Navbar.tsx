@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Egg, MapPin, Calendar, Ticket, Menu, X, Flame, UserCheck, Lock, Camera } from 'lucide-react';
+import { Egg, MapPin, Calendar, Ticket, Menu, X, UserCheck, Lock, Camera } from 'lucide-react';
 import { EventDetails } from '../types';
+import knmLogo from '../assets/logo-knm.webp';
 
 interface NavbarProps {
   eventDetails: EventDetails;
@@ -32,13 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="relative w-12 h-12 bg-gradient-to-br from-amber-500 via-orange-600 to-red-600 rounded-2xl flex items-center justify-center shadow-md shadow-orange-500/20 border-2 border-white transform hover:scale-105 transition-transform">
-              <Egg className="w-7 h-7 text-white fill-amber-100" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 border border-white text-[9px] font-black text-white items-center justify-center">★</span>
-              </span>
-            </div>
+            <img src={knmLogo} alt="Kosua Ne Meko logo" className="w-12 h-12 rounded-2xl shadow-md shadow-orange-500/20 border-2 border-white transform hover:scale-105 transition-transform object-contain" />
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-900 font-display">

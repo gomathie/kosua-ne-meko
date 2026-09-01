@@ -63,14 +63,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               Highlights
             </button>
             <button
-              id="nav-link-pepper-meter"
-              onClick={() => scrollToSection('pepper-meter')}
-              className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors flex items-center gap-1"
-            >
-              <Flame className="w-4 h-4 text-orange-600" />
-              Meko Scale
-            </button>
-            <button
               id="nav-link-schedule"
               onClick={() => scrollToSection('schedule')}
               className="text-stone-700 hover:text-orange-600 font-semibold text-sm transition-colors"
@@ -177,14 +169,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <Egg className="w-5 h-5 text-amber-500" />
             <span>Event Highlights</span>
-          </button>
-          <button
-            id="mobile-nav-link-pepper-meter"
-            onClick={() => scrollToSection('pepper-meter')}
-            className="w-full text-left px-3 py-2.5 rounded-lg text-stone-800 font-semibold hover:bg-stone-100 flex items-center gap-3"
-          >
-            <Flame className="w-5 h-5 text-orange-600" />
-            <span>Meko Spice Meter</span>
           </button>
           <button
             id="mobile-nav-link-schedule"

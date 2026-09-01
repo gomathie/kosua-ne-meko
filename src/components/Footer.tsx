@@ -47,7 +47,6 @@ export const Footer: React.FC<FooterProps> = ({ eventDetails, onOpenAdmin }) => 
             </h4>
             <ul className="space-y-2">
               <li><a id="footer-link-highlights" href="#highlights" className="hover:text-orange-400 transition-colors">Event Highlights</a></li>
-              <li><a id="footer-link-pepper-meter" href="#pepper-meter" className="hover:text-orange-400 transition-colors">Meko Spice Scale</a></li>
               <li><a id="footer-link-schedule" href="#schedule" className="hover:text-orange-400 transition-colors">Saturday Timeline</a></li>
               <li><a id="footer-link-vendors" href="#vendors" className="hover:text-orange-400 transition-colors">Food & Drink Stalls</a></li>
               <li><a id="footer-link-location" href="#location" className="hover:text-orange-400 transition-colors">Dzorwulu Location Map</a></li>

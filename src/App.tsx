@@ -3,7 +3,6 @@ import { Ticket, UserCheck, Flame, Calendar } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { EventHighlights } from './components/EventHighlights';
-import { PepperMeter } from './components/PepperMeter';
 import { Schedule } from './components/Schedule';
 import { Vendors } from './components/Vendors';
 import { GallerySection } from './components/GallerySection';
@@ -194,7 +193,6 @@ export default function App() {
       <main className="pb-20 md:pb-0">
         <Hero eventDetails={data.eventDetails} onOpenTickets={() => setIsTicketModalOpen(true)} />
         <EventHighlights />
-        <PepperMeter />
         <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} categories={data.categories.schedule} />
         <Vendors vendors={data.vendors} categories={data.categories.vendors} />
         <GallerySection gallery={data.gallery} categories={data.categories.gallery} />

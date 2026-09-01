@@ -192,7 +192,7 @@ export default function App() {
       {/* Main Sections */}
       <main className="pb-20 md:pb-0">
         <Hero eventDetails={data.eventDetails} onOpenTickets={() => setIsTicketModalOpen(true)} />
-        <EventHighlights />
+        <EventHighlights eventDetails={data.eventDetails} />
         <Schedule schedule={data.schedule} dateString={data.eventDetails.dateString} locationName={data.eventDetails.locationName} categories={data.categories.schedule} />
         <Vendors vendors={data.vendors} categories={data.categories.vendors} />
         <GallerySection gallery={data.gallery} categories={data.categories.gallery} />

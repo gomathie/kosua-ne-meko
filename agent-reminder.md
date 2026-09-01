@@ -54,3 +54,11 @@ This document serves as a record of all tasks requested and completed during our
 12. **Convert Uploaded Logos**
     - *Task:* Convert the uploaded logos for Bite Mogul and Waakye On The Go to WebP format.
     - *Resolution:* Located the user-uploaded images in the local artifact storage (`.user_uploaded`), created `scripts/convert-logos.mjs` to convert them to WebP via `sharp`, saved them to `public/logos/`, and updated the extensions in `eventData.ts`.
+
+13. **Update Photo Gallery & Process Images**
+    - *Task:* Create gallery folders ("Takoradi edition" and "First edition"), convert uploaded photos to WebP format, and update the event photo gallery section while removing old placeholder content.
+    - *Resolution:* Created folders `public/gallery/takoradi-edition` and `public/gallery/first-edition`. Batch converted 79 images to WebP. Overhauled `GallerySection.tsx` and updated `eventData.ts` to include the new real images while pruning the `gal-1` through `gal-6` placeholders.
+
+14. **Update Event Highlights and Remove Meko Scale**
+    - *Task:* Update event highlights and agent reminder. Remove "Meko Scale" from nav or menu.
+    - *Resolution:* Made `EventHighlights.tsx` dynamic by passing `EVENT_DETAILS` to render the correct city and event title. Removed "Meko Scale" (PepperMeter) from `Navbar.tsx` (desktop and mobile) and `Footer.tsx`, and removed the `<PepperMeter />` component from `App.tsx`. Updated `agent-reminder.md` with these changes.

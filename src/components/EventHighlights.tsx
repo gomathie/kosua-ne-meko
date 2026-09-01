@@ -1,8 +1,9 @@
 import React from 'react';
 import { Egg, Flame, Music, Gamepad2, Users, ShoppingBag } from 'lucide-react';
 import chiliPepperSnSvg from '../assets/peppers/chili-pepper-sn.svg';
+import { EventDetails } from '../types';
 
-export const EventHighlights: React.FC = () => {
+export const EventHighlights: React.FC<{ eventDetails: EventDetails }> = ({ eventDetails }) => {
   const highlights = [
     {
       icon: <Egg className="w-8 h-8 text-amber-500" />,
@@ -49,13 +50,13 @@ export const EventHighlights: React.FC = () => {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
           <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-            WHY YOU CAN'T MISS HANGOUT 2.0
+            WHY YOU CAN'T MISS {eventDetails.shortTitle.toUpperCase()}
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-display text-stone-900 tracking-tight uppercase">
-            ACCRA’S ULTIMATE <span className="text-orange-600">EGG & PEPPER</span> FESTIVAL
+            {eventDetails.city.split(',')[0].toUpperCase()}’S ULTIMATE <span className="text-orange-600">EGG & PEPPER</span> FESTIVAL
           </h2>
           <p className="text-stone-600 text-sm sm:text-base">
-            Hangout 2.0 brings together foodies, families, gamers, and music lovers to celebrate the timeless street food combo of Kosua ne Meko.
+            {eventDetails.shortTitle} brings together foodies, families, gamers, and music lovers to celebrate the timeless street food combo of Kosua ne Meko.
           </p>
         </div>
 

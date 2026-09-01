@@ -174,6 +174,15 @@ function mergeNewSeedEntries(data: FullEventData): FullEventData {
   const nextKnown = new Set(known);
   let changed = false;
 
+  // Prune legacy placeholder gallery items (gal-1 to gal-6)
+  if (merged.gallery) {
+    const cleanedGallery = merged.gallery.filter((g) => !/^gal-[1-6]$/.test(g.id));
+    if (cleanedGallery.length !== merged.gallery.length) {
+      merged.gallery = cleanedGallery;
+      changed = true;
+    }
+  }
+
   const prints: Record<string, string> = { ...(data.seedFingerprints ?? {}) };
 
   for (const { kind, items, keyOf } of SEED_SOURCES) {

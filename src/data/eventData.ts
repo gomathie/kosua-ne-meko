@@ -130,48 +130,6 @@ export const INITIAL_SPONSORS: Sponsor[] = [
 
 export const INITIAL_GALLERY: GalleryItem[] = [
   {
-    id: 'gal-1',
-    title: 'Fresh Farm Boiled Eggs & Meko',
-    imageUrl: 'https://images.unsplash.com/photo-1582169505937-b9992bd01ed9?auto=format&fit=crop&w=800&q=80',
-    category: 'food',
-    caption: 'Organic farm-fresh eggs served with hand-crushed scotch bonnet salsa.',
-  },
-  {
-    id: 'gal-2',
-    title: 'Outdoor Pebble Cinema Lounge',
-    imageUrl: 'https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=800&q=80',
-    category: 'stage',
-    caption: 'Curated African short film screening under the stars at Hangout 1.0.',
-  },
-  {
-    id: 'gal-3',
-    title: 'Dzorwulu Street Food Market',
-    imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
-    category: 'food',
-    caption: 'Hot kelewele, fried yam, and grilled tilapia at Auntie Muni stall.',
-  },
-  {
-    id: 'gal-4',
-    title: 'Live Afrobeats & Brass Band',
-    imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
-    category: 'stage',
-    caption: 'Sunset Afrobeats performance and traditional dancers on the main stage.',
-  },
-  {
-    id: 'gal-5',
-    title: 'Ludo & Oware Championship',
-    imageUrl: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=800&q=80',
-    category: 'community',
-    caption: 'Competitive board game finals at the games tent.',
-  },
-  {
-    id: 'gal-6',
-    title: 'Accra Street Vibes & Crowd',
-    imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80',
-    category: 'vibes',
-    caption: 'Foodies and culture lovers enjoying the afternoon atmosphere.',
-  },
-  {
     id: "fe-01",
     title: "First Edition Moments #1",
     imageUrl: "/gallery/first-edition/05327b0e-62c8-4b8b-aa28-0ea9cc5f94cb.webp",

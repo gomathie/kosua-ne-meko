@@ -62,3 +62,7 @@ This document serves as a record of all tasks requested and completed during our
 14. **Update Event Highlights and Remove Meko Scale**
     - *Task:* Update event highlights and agent reminder. Remove "Meko Scale" from nav or menu.
     - *Resolution:* Made `EventHighlights.tsx` dynamic by passing `EVENT_DETAILS` to render the correct city and event title. Removed "Meko Scale" (PepperMeter) from `Navbar.tsx` (desktop and mobile) and `Footer.tsx`, and removed the `<PepperMeter />` component from `App.tsx`. Updated `agent-reminder.md` with these changes.
+
+15. **Change Favicon and Implement Mobile Gallery Pagination**
+    - *Task:* Change the favicon to a befitting Kosua Ne Meko related image. On mobile, the gallery should show about 6-8 photos with an option to view more.
+    - *Resolution:* Generated a custom favicon (a sliced boiled egg topped with red chili pepper salsa) using `generate_image`, saved it as `favicon.jpg`, and updated `index.html` to reference it instead of the inline egg emoji. Updated `GallerySection.tsx` to dynamically set the initial `visibleCount` to 6 on mobile screens (< 768px) and 18 on desktop screens. The "Load More" button adds more photos based on this dynamic page size.

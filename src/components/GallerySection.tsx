@@ -10,12 +10,12 @@ interface GallerySectionProps {
   categories?: string[];
 }
 
-const PAGE_SIZE = 18;
-
+// PAGE_SIZE is now determined dynamically inside the component
 export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categories = [] }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
-  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
+  const getPageSize = () => typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : 18;
+  const [visibleCount, setVisibleCount] = useState<number>(getPageSize());
 
   const filteredGallery = selectedCategory === 'all'
     ? gallery
@@ -24,7 +24,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
   // Reset pagination when category changes
   const handleCategoryChange = (catId: string) => {
     setSelectedCategory(catId);
-    setVisibleCount(PAGE_SIZE);
+    setVisibleCount(getPageSize());
   };
 
   const visibleItems = filteredGallery.slice(0, visibleCount);
@@ -166,7 +166,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
             </p>
             <button
               id="btn-gallery-load-more"
-              onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+              onClick={() => setVisibleCount((prev) => prev + getPageSize())}
               className="px-6 py-3 bg-stone-800 hover:bg-stone-700 text-white font-bold text-sm rounded-xl border border-stone-700 hover:border-orange-500/50 transition-all shadow-lg hover:shadow-orange-500/10 inline-flex items-center gap-2"
             >
               <Sparkles className="w-4 h-4 text-orange-400" />

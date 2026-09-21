@@ -10,51 +10,72 @@ interface GallerySectionProps {
   categories?: string[];
 }
 
+/** Friendly display names for edition tabs. */
+const EDITION_LABELS: Record<string, string> = {
+  'all': 'All Editions',
+  '2026-edition': '2026 Edition — Cencor Venue',
+  'first-edition': 'First Edition',
+  'takoradi-edition': 'Takoradi Edition',
+};
+
 // PAGE_SIZE is now determined dynamically inside the component
 export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categories = [] }) => {
-  // Shuffle once on mount so visitors see a fresh order each visit
-  const shuffledGallery = React.useMemo(() => {
-    const arr = [...gallery];
+  // Derive edition-level categories from the data itself
+  const editionCategories = React.useMemo(() => {
+    const cats = new Set(gallery.map((g) => g.category));
+    // Order: put categories that appear in the `categories` prop first (preserves admin ordering),
+    // then any that only exist in the data.
+    const ordered = categories.filter((c) => cats.has(c));
+    cats.forEach((c) => { if (!ordered.includes(c)) ordered.push(c); });
+    return ordered;
+  }, [gallery, categories]);
+
+  const [activeEdition, setActiveEdition] = useState<string>(() =>
+    editionCategories.length > 0 ? editionCategories[0] : 'all'
+  );
+
+  // Gallery items for the currently selected edition
+  const editionGallery = React.useMemo(() => {
+    const items = activeEdition === 'all'
+      ? gallery
+      : gallery.filter((g) => g.category === activeEdition);
+    // Shuffle once per edition switch so visitors see a fresh order
+    const arr = [...items];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
-  }, [gallery]);
+  }, [gallery, activeEdition]);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
   const getPageSize = () => typeof window !== 'undefined' && window.innerWidth < 768 ? 6 : 18;
   const [visibleCount, setVisibleCount] = useState<number>(getPageSize());
 
-  const filteredGallery = selectedCategory === 'all'
-    ? shuffledGallery
-    : shuffledGallery.filter((g) => g.category === selectedCategory);
-
-  // Reset pagination when category changes
-  const handleCategoryChange = (catId: string) => {
-    setSelectedCategory(catId);
+  // Reset pagination when edition changes
+  const handleEditionChange = (edition: string) => {
+    setActiveEdition(edition);
     setVisibleCount(getPageSize());
   };
 
-  const visibleItems = filteredGallery.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredGallery.length;
+  const visibleItems = editionGallery.slice(0, visibleCount);
+  const hasMore = visibleCount < editionGallery.length;
 
-  const activeImage = activeImageIndex !== null && filteredGallery[activeImageIndex] 
-    ? filteredGallery[activeImageIndex] 
+  const activeImage = activeImageIndex !== null && editionGallery[activeImageIndex] 
+    ? editionGallery[activeImageIndex] 
     : null;
 
   const handlePrev = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (activeImageIndex === null) return;
-    setActiveImageIndex((prev) => (prev !== null ? (prev - 1 + filteredGallery.length) % filteredGallery.length : null));
-  }, [activeImageIndex, filteredGallery.length]);
+    setActiveImageIndex((prev) => (prev !== null ? (prev - 1 + editionGallery.length) % editionGallery.length : null));
+  }, [activeImageIndex, editionGallery.length]);
 
   const handleNext = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (activeImageIndex === null) return;
-    setActiveImageIndex((prev) => (prev !== null ? (prev + 1) % filteredGallery.length : null));
-  }, [activeImageIndex, filteredGallery.length]);
+    setActiveImageIndex((prev) => (prev !== null ? (prev + 1) % editionGallery.length : null));
+  }, [activeImageIndex, editionGallery.length]);
 
   const handleClose = useCallback(() => {
     setActiveImageIndex(null);
@@ -95,37 +116,50 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
             Highlights and memorable moments from Kosua Ne Meko street food culture, music stage, games, and editions.
           </p>
 
-          {/* Category Filter Tabs */}
-          <div className="pt-4 flex flex-wrap justify-center gap-2">
-            {[
-              { id: 'all', label: 'All Photos', count: gallery.length },
-              // Only offer filters that actually match photos in the gallery.
-              ...categories
-                .filter((c) => gallery.some((item) => item.category === c))
-                .map((c) => ({
-                  id: c,
-                  label: formatCategoryLabel(c),
-                  count: gallery.filter((item) => item.category === c).length,
-                })),
-            ].map((cat) => (
-              <button
-                id={`btn-gallery-filter-${cat.id}`}
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-extrabold transition-all flex items-center gap-1.5 ${
-                  selectedCategory === cat.id
-                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/30 scale-105'
-                    : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                }`}
-              >
-                <span>{cat.label}</span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${
-                  selectedCategory === cat.id ? 'bg-orange-800/80 text-orange-100' : 'bg-stone-900 text-stone-400'
-                }`}>
-                  {cat.count}
-                </span>
-              </button>
-            ))}
+          {/* Edition Tabs */}
+          <div className="pt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
+            {/* "All" tab */}
+            <button
+              id="btn-gallery-tab-all"
+              onClick={() => handleEditionChange('all')}
+              className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
+                activeEdition === 'all'
+                  ? 'bg-orange-600 text-white border-orange-500 shadow-lg shadow-orange-600/30 scale-105'
+                  : 'bg-stone-800/80 text-stone-300 border-stone-700 hover:bg-stone-700 hover:border-stone-600'
+              }`}
+            >
+              <span>All Editions</span>
+              <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-md ${
+                activeEdition === 'all' ? 'bg-orange-800/80 text-orange-100' : 'bg-stone-900 text-stone-400'
+              }`}>
+                {gallery.length}
+              </span>
+            </button>
+
+            {/* Per-edition tabs */}
+            {editionCategories.map((cat) => {
+              const count = gallery.filter((g) => g.category === cat).length;
+              const label = EDITION_LABELS[cat] || formatCategoryLabel(cat);
+              return (
+                <button
+                  id={`btn-gallery-tab-${cat}`}
+                  key={cat}
+                  onClick={() => handleEditionChange(cat)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-extrabold transition-all border ${
+                    activeEdition === cat
+                      ? 'bg-orange-600 text-white border-orange-500 shadow-lg shadow-orange-600/30 scale-105'
+                      : 'bg-stone-800/80 text-stone-300 border-stone-700 hover:bg-stone-700 hover:border-stone-600'
+                  }`}
+                >
+                  <span>{label}</span>
+                  <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-md ${
+                    activeEdition === cat ? 'bg-orange-800/80 text-orange-100' : 'bg-stone-900 text-stone-400'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -172,7 +206,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
         {hasMore && (
           <div className="mt-10 text-center space-y-3">
             <p className="text-xs text-stone-400 font-medium">
-              Showing {visibleItems.length} of {filteredGallery.length} photos
+              Showing {visibleItems.length} of {editionGallery.length} photos
             </p>
             <button
               id="btn-gallery-load-more"
@@ -200,7 +234,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
               </button>
 
               {/* Prev / Next Buttons */}
-              {filteredGallery.length > 1 && (
+              {editionGallery.length > 1 && (
                 <>
                   <button
                     id="btn-gallery-lightbox-prev"
@@ -232,7 +266,7 @@ export const GallerySection: React.FC<GallerySectionProps> = ({ gallery, categor
                 
                 {/* Photo Counter Badge */}
                 <div className="absolute top-4 left-4 z-10 px-3 py-1 rounded-full bg-black/60 backdrop-blur text-xs font-bold text-stone-200 border border-white/10">
-                  {activeImageIndex + 1} / {filteredGallery.length}
+                  {activeImageIndex + 1} / {editionGallery.length}
                 </div>
               </div>
 

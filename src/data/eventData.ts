@@ -91,7 +91,7 @@ export const INITIAL_ADMIN_USERS: AdminUser[] = [];
 export const INITIAL_CATEGORIES: EventCategories = {
   vendors: ['eggs-pepper', 'drinks', 'street-food', 'farm-fresh', 'entertainment', 'lifestyle'],
   schedule: ['food', 'competition', 'music', 'community', 'entertainment'],
-  gallery: ['first-edition', 'takoradi-edition'],
+  gallery: ['2026-edition', 'first-edition', 'takoradi-edition'],
 };
 
 export const INITIAL_COLLABORATORS: Collaborator[] = [

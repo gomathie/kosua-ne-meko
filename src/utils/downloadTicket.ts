@@ -238,7 +238,7 @@ export async function downloadTicketImage(ticket: UserTicket, eventDetails?: Eve
 
   // --- Trigger download ---
   const link = document.createElement('a');
-  link.download = `KosuaNeMeko-Pass-${ticket.customerName.replace(/\s+/g, '-')}.png`;
+  link.download = `KosuaNeMeko-Pass-${ticket.customerName.replace(/\s+/g, '-')}.webp`;
   link.href = canvas.toDataURL('image/png');
   link.click();
 }

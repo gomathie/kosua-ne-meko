@@ -643,7 +643,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     // sanitizeImageUrl returns '' for anything it will not render, so an
     // unusable link is rejected here rather than saved and shown as a break.
     if (!sanitizeImageUrl(link)) {
-      alert('That is not a usable image link. Use an https:// address or a path like /logos/photo.jpg');
+      alert('That is not a usable image link. Use an https:// address or a path like /logos/photo.webp');
       return;
     }
     onUpdateVendor(sanitizeVendor({ ...vendor, imageUrl: link }, ''));
@@ -1553,7 +1553,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <input
                         type="text"
                         maxLength={LIMITS.url}
-                        placeholder="https://... or /logos/file.jpg — leave blank to add later"
+                        placeholder="https://... or /logos/file.webp — leave blank to add later"
                         value={newVendor.imageUrl}
                         onChange={(e) => setNewVendor({ ...newVendor, imageUrl: e.target.value })}
                         className="w-full px-3 py-2 rounded-xl bg-stone-900 border border-stone-700 text-xs text-white font-mono"
@@ -1629,7 +1629,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               value={editingVendor.imageUrl}
                               onChange={(e) => setEditingVendor({ ...editingVendor, imageUrl: e.target.value })}
                               className="w-full px-2 py-1 bg-stone-800 border border-stone-700 text-xs text-stone-300 rounded font-mono"
-                              placeholder="Image URL (https://... or /logos/file.jpg)"
+                              placeholder="Image URL (https://... or /logos/file.webp)"
                             />
                             <div className="flex justify-end gap-2 pt-1">
                               <button

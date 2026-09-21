@@ -116,14 +116,14 @@ export const INITIAL_SPONSORS: Sponsor[] = [
     name: 'Industrial Coatings Africa',
     tier: 'Silver',
     // Real mark, self-hosted from public/logos rather than a stock photo.
-    logoUrl: '/logos/industrial-coatings-africa.png',
+    logoUrl: '/logos/industrial-coatings-africa.webp',
     websiteUrl: 'https://industrialcoatingsafrica.com',
   },
   {
     id: 'spon-6',
     name: 'Hitrace Solutions',
     tier: 'Silver',
-    logoUrl: '/logos/hitrace-solutions.png',
+    logoUrl: '/logos/hitrace-solutions.webp',
     websiteUrl: 'https://hitracesolutions.com',
   },
 ];

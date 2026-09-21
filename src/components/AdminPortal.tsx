@@ -291,8 +291,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // New Event Form State
   const [newEvent, setNewEvent] = useState<Omit<EventItem, 'id'>>({
-    title: 'KOSUA NE MEKO HANGOUT 3.0',
-    shortTitle: 'Kosua Ne Meko 3.0',
+    title: 'KOSUA NE MEKO HANGOUT ',
+    shortTitle: 'Kosua Ne Meko ',
     tagline: 'Ghana’s Biggest Street Food & Music Carnival',
     dateString: 'SAT. 12TH DEC. 2026',
     targetDateISO: '2026-12-12T10:00:00',
@@ -1044,7 +1044,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       maxLength={LIMITS.title}
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      placeholder="e.g. KOSUA NE MEKO HANGOUT 3.0"
+                      placeholder="e.g. KOSUA NE MEKO HANGOUT "
                       className="w-full px-3 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -1057,7 +1057,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       maxLength={LIMITS.title}
                       value={formData.shortTitle}
                       onChange={(e) => setFormData({ ...formData, shortTitle: e.target.value })}
-                      placeholder="e.g. Kosua Ne Meko 3.0"
+                      placeholder="e.g. Kosua Ne Meko "
                       className="w-full px-3 py-2.5 rounded-xl bg-stone-800 border border-stone-700 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                   </div>
@@ -1206,7 +1206,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="KOSUA NE MEKO HANGOUT 3.0"
+                        placeholder="KOSUA NE MEKO HANGOUT "
                         maxLength={LIMITS.title}
                         value={newEvent.title}
                         onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
@@ -1219,7 +1219,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <input
                         type="text"
                         required
-                        placeholder="Kosua Ne Meko 3.0"
+                        placeholder="Kosua Ne Meko "
                         maxLength={LIMITS.title}
                         value={newEvent.shortTitle}
                         onChange={(e) => setNewEvent({ ...newEvent, shortTitle: e.target.value })}
